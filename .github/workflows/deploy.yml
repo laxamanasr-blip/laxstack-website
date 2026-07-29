@@ -1,33 +1,21 @@
-name: Deploy Website
+name: Debug OIDC
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  deploy:
+  debug:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::784038766514:role/Github-website-Deploy
-          aws-region: ap-southeast-2
-
-      - name: Deploy Website to S3
+      - name: Dump GitHub Context
         run: |
-          aws s3 sync . s3://laxstack.com \
-            --delete \
-            --exclude ".git/*" \
-            --exclude ".github/*" \
-            --exclude "README.md" \
-            --exclude ".gitignore"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Ref: $GITHUB_REF"
+
+      - name: Print OIDC Claims
+        uses: github/actions-oidc-debugger@v1
