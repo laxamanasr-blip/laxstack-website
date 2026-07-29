@@ -359,6 +359,21 @@ header > *{position:relative;z-index:1}
   h1{font-size:clamp(1.7rem,7vw,2.4rem)}
 }
 </style>
+
+<style id="v2-extra">
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:24px}
+.score{background:#12161a;border:1px solid #333c46;border-radius:10px;padding:18px;text-align:center}
+.score .num{font:700 2rem 'IBM Plex Mono',monospace;color:#ff9900}
+.timeline{border-left:3px solid #29b6d8;margin:24px 0;padding-left:24px}
+.step{margin-bottom:28px;position:relative}
+.step:before{content:'';position:absolute;left:-33px;top:6px;width:12px;height:12px;border-radius:50%;background:#4ade80}
+.codebox{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:.82rem;overflow:auto;color:#d2e3ff}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:30px 0}
+.node{padding:10px 14px;border-radius:8px;border:1px solid #333c46;background:#12161a;font-family:'IBM Plex Mono',monospace}
+.arrow{color:#ff9900;font-weight:bold}
+.callout{border-left:4px solid #ff9900;background:#15191e;padding:18px;margin:20px 0;border-radius:4px}
+</style>
+
 </head>
 <body>
 
@@ -381,11 +396,9 @@ header > *{position:relative;z-index:1}
   <div class="hero-bg" aria-hidden="true"></div>
   <span class="project-label">PROJECT 002</span>
   <div class="crumb"><span class="prompt">&gt;</span> cat laxstack-portfolio.md</div>
-  <h1>This website, <span style="color:var(--amber)">deployed by itself.</span></h1>
+  <h1>Production-grade AWS Portfolio <span style="color:var(--amber)">with Secure Serverless CI/CD.</span></h1>
   <p class="hero-sub">
-    The site you're reading right now runs entirely on AWS-managed services &mdash; Route 53, CloudFront, WAF, and S3
-    &mdash; with zero manual deployments. Every push to <code>main</code> is built, shipped, and cache-busted by a
-    GitHub Actions pipeline that never touches a long-lived AWS key.
+    Designed to demonstrate production-ready cloud engineering practices including Amazon S3, CloudFront, Route 53, AWS WAF, ACM, GitHub Actions, GitHub OIDC federation, cross-account IAM role assumption, and automated deployments using temporary STS credentials. Every deployment is performed without storing long-lived AWS access keys.
   </p>
 
   <div class="badge-row">
@@ -401,6 +414,73 @@ header > *{position:relative;z-index:1}
     <a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
   </div>
 </header>
+
+
+<section id="story">
+<div class="section-tag">cat project-story.md</div>
+<h2 class="section-title">Engineering Story</h2>
+<div class="timeline">
+<div class="step"><h3>1. Manual Deployments</h3><p>The project started as a traditional static website uploaded manually to Amazon S3. Every update required manual synchronization and CloudFront cache invalidation.</p></div>
+<div class="step"><h3>2. Secure Automation</h3><p>I replaced manual deployments with GitHub Actions authenticated through GitHub OIDC and AWS STS, eliminating long-lived credentials completely.</p></div>
+<div class="step"><h3>3. Enterprise Security</h3><p>The final design separates deployment and production AWS accounts using cross-account IAM roles, mirroring enterprise landing zone patterns.</p></div>
+</div>
+</section>
+
+<section id="requestflow">
+<div class="section-tag">show request-flow</div>
+<h2 class="section-title">Request Lifecycle</h2>
+<div class="flow">
+<div class="node">Browser</div><div class="arrow">➜</div>
+<div class="node">Route53</div><div class="arrow">➜</div>
+<div class="node">CloudFront</div><div class="arrow">➜</div>
+<div class="node">AWS WAF</div><div class="arrow">➜</div>
+<div class="node">Origin Access Control</div><div class="arrow">➜</div>
+<div class="node">Amazon S3</div>
+</div>
+<div class="callout"><strong>Why this matters:</strong> Visitors never communicate directly with the S3 bucket. Every request is protected by CloudFront, HTTPS, AWS WAF, and Origin Access Control before reaching the origin.</div>
+</section>
+
+<section id="pipelineflow">
+<div class="section-tag">show deployment-flow</div>
+<h2 class="section-title">CI/CD Authentication Flow</h2>
+<div class="flow">
+<div class="node">GitHub</div><div class="arrow">➜</div>
+<div class="node">OIDC JWT</div><div class="arrow">➜</div>
+<div class="node">AWS STS</div><div class="arrow">➜</div>
+<div class="node">Deploy Role</div><div class="arrow">➜</div>
+<div class="node">S3 Sync</div><div class="arrow">➜</div>
+<div class="node">CloudFront Invalidation</div>
+</div>
+<div class="codebox">
+Trust Policy Highlights
+
+GitHub Repository
+      │
+      └── OIDC JWT
+             │
+             ▼
+AWS STS issues temporary credentials
+             │
+             ▼
+Assume Deployment Role
+             │
+             ▼
+Deploy Website
+</div>
+</section>
+
+<section id="scorecard">
+<div class="section-tag">show scorecard</div>
+<h2 class="section-title">Architecture Scorecard</h2>
+<div class="score-grid">
+<div class="score"><div class="num">0</div>Stored AWS Keys</div>
+<div class="score"><div class="num">2</div>AWS Accounts</div>
+<div class="score"><div class="num">100%</div>Serverless</div>
+<div class="score"><div class="num">TLS</div>HTTPS Everywhere</div>
+<div class="score"><div class="num">WAF</div>Managed Protection</div>
+<div class="score"><div class="num">OIDC</div>Federated Identity</div>
+</div>
+</section>
 
 <section id="overview">
   <div class="section-tag">cat overview.md</div>
@@ -632,6 +712,39 @@ header > *{position:relative;z-index:1}
     <span class="chip">HTTPS via ACM</span>
     <span class="chip">Zero stored AWS keys</span>
   </div>
+</section>
+
+
+<section id="decisions">
+  <div class="section-tag">cat engineering-decisions.md</div>
+  <h2 class="section-title">Engineering Decisions</h2>
+  <div class="grid">
+    <div class="module"><h3>Why Serverless?</h3><p>I intentionally avoided EC2 to eliminate operating system maintenance, patching, backups, and unnecessary operational overhead. Static hosting provides high durability with minimal cost.</p></div>
+    <div class="module"><h3>Why CloudFront?</h3><p>CloudFront provides global edge caching, TLS termination, Origin Access Control, and seamless integration with AWS WAF, improving both performance and security.</p></div>
+    <div class="module"><h3>Why GitHub OIDC?</h3><p>Instead of storing AWS access keys inside GitHub Secrets, GitHub exchanges a signed OIDC token for short-lived AWS STS credentials. No permanent AWS credentials exist in the repository.</p></div>
+    <div class="module"><h3>Why Two AWS Accounts?</h3><p>The deployment pipeline and production infrastructure reside in separate AWS accounts. Cross-account IAM role assumption mirrors enterprise environments while enforcing least-privilege access.</p></div>
+  </div>
+</section>
+
+<section id="challenges">
+<div class="section-tag">cat troubleshooting.log</div>
+<h2 class="section-title">Engineering Challenges</h2>
+<div class="config">
+<div class="cfg-line"><div><span class="stage">OIDC Federation</span></div><div class="desc">Resolved GitHub OIDC subject-claim mismatches by decoding JWT claims and updating IAM trust policies.</div></div>
+<div class="cfg-line"><div><span class="stage">Cross-Account IAM</span></div><div class="desc">Designed least-privilege IAM roles allowing deployment and CloudFront invalidation across separate AWS accounts.</div></div>
+<div class="cfg-line"><div><span class="stage">Origin Security</span></div><div class="desc">Configured Origin Access Control and bucket policies so Amazon S3 is never directly exposed to the Internet.</div></div>
+</div>
+</section>
+
+<section id="metrics">
+<div class="section-tag">show metrics</div>
+<h2 class="section-title">Project Metrics</h2>
+<div class="grid">
+<div class="module"><h3>Deployment</h3><p>~90 second manual workflow execution from GitHub to production.</p></div>
+<div class="module"><h3>Security</h3><p>Zero long-lived AWS credentials, least-privilege IAM, HTTPS via ACM, AWS WAF, and temporary STS credentials.</p></div>
+<div class="module"><h3>Cost</h3><p>Designed to operate almost entirely within the AWS Free Tier. Primary recurring cost is the Route 53 hosted zone.</p></div>
+<div class="module"><h3>Future Improvements</h3><p>Terraform, GitHub Environments, automated security scanning, Lighthouse testing, CloudFront Functions, and CloudWatch monitoring.</p></div>
+</div>
 </section>
 
 <section id="screenshots">
