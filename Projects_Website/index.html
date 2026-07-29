@@ -487,29 +487,32 @@ Deploy Website
 </section>
 
 
+
 <section id="hero-preview">
 <div class="section-tag">preview architecture</div>
 <h2 class="section-title">Architecture at a Glance</h2>
-<p class="section-sub">This is the complete request path used by the production website. The detailed implementation and security controls are explained throughout the rest of this case study.</p>
+<p class="section-sub"><strong style="color:var(--text)">Design Objective:</strong> I wanted this portfolio to resemble a production AWS deployment rather than a simple static website. The architecture emphasizes serverless infrastructure, least-privilege IAM, secure cross-account deployments, and zero long-lived AWS credentials while remaining inexpensive to operate.</p>
+
 <div style="background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:30px;margin-top:24px">
-<div style="display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:.95rem">
-<span class="badge">🌍 Browser</span>
-<span style="color:var(--amber)">➜</span>
-<span class="badge">Route 53</span>
-<span style="color:var(--amber)">➜</span>
-<span class="badge">CloudFront</span>
-<span style="color:var(--amber)">➜</span>
-<span class="badge">AWS WAF</span>
-<span style="color:var(--amber)">➜</span>
-<span class="badge">Origin Access Control</span>
-<span style="color:var(--amber)">➜</span>
-<span class="badge">Amazon S3</span>
+
+<a href="/Projects_Website/Images/Architecture.png" class="lightbox-trigger">
+<img src="/Projects_Website/Images/Architecture.png"
+alt="Production AWS Architecture"
+style="display:block;width:100%;max-width:1050px;margin:0 auto;border-radius:10px;border:1px solid var(--line);box-shadow:0 12px 30px rgba(0,0,0,.45)">
+</a>
+
+<div class="cap" style="font-family:var(--mono);font-size:.74rem;color:var(--muted-dim);padding:12px 0 4px;text-align:center">
+Production Architecture — Click to enlarge
 </div>
-<div style="margin-top:22px;padding:18px;border-left:4px solid var(--amber);background:rgba(255,153,0,.06);color:var(--muted)">
-<strong style="color:var(--text)">Key design principle:</strong> The S3 bucket is never publicly accessible. All traffic traverses CloudFront, is inspected by AWS WAF, and reaches the origin only through Origin Access Control.
+
+<div style="margin-top:24px;padding:20px;border-left:4px solid var(--amber);background:rgba(255,153,0,.06);color:var(--muted);border-radius:4px">
+<strong style="color:var(--text)">Security by design:</strong>
+The Amazon S3 origin bucket is never publicly accessible. DNS resolution is handled by Route 53, content is delivered through CloudFront, requests are inspected by AWS WAF, and Origin Access Control is the only path to the S3 origin. GitHub Actions authenticates through GitHub OIDC and AWS STS using temporary credentials, eliminating stored AWS access keys.
 </div>
+
 </div>
 </section>
+
 
 <section id="overview">
   <div class="section-tag">cat overview.md</div>
@@ -658,7 +661,7 @@ Deploy Website
     </div>
     <div class="cfg-line">
       <div><span class="bang">!</span> <span class="stage">02-trigger</span></div>
-      <div class="desc">GitHub Actions workflow is run manually via "Run workflow."</div>
+      <div class="desc">A push to the main branch automatically triggers the GitHub Actions deployment workflow.</div>
     </div>
     <div class="cfg-line">
       <div><span class="bang">!</span> <span class="stage">03-oidc-auth</span></div>
@@ -776,24 +779,36 @@ Deploy Website
 </div>
 </section>
 
-<section id="screenshots">
-  <div class="section-tag">ls -la Images/</div>
-  <h2 class="section-title">From the Console</h2>
-  <p class="section-sub">Live configuration pulled directly from both AWS accounts and the GitHub side of the pipeline.</p>
 
-  <div class="grid">
-    <div class="shot"><a href="/Projects_Website/Images/S3-Bucket.png" class="lightbox-trigger"><img src="/Projects_Website/Images/S3-Bucket.png" alt="Amazon S3 origin bucket configuration"></a><div class="cap">Amazon S3 &mdash; origin bucket</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/Bucket-Policy-OAC.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Bucket-Policy-OAC.png" alt="S3 bucket policy restricting access to CloudFront via Origin Access Control"></a><div class="cap">S3 bucket policy &mdash; Origin Access Control</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/CloudFront-Distribution.png" class="lightbox-trigger"><img src="/Projects_Website/Images/CloudFront-Distribution.png" alt="CloudFront distribution settings"></a><div class="cap">CloudFront &mdash; distribution</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/Route53-Records.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Route53-Records.png" alt="Route 53 DNS records"></a><div class="cap">Route 53 &mdash; DNS records</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/ACM.png" class="lightbox-trigger"><img src="/Projects_Website/Images/ACM.png" alt="AWS Certificate Manager issued certificate"></a><div class="cap">ACM &mdash; issued certificate</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/WAF.png" class="lightbox-trigger"><img src="/Projects_Website/Images/WAF.png" alt="AWS WAF managed rule groups"></a><div class="cap">AWS WAF &mdash; rule groups</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/IAM-IDP.png" class="lightbox-trigger"><img src="/Projects_Website/Images/IAM-IDP.png" alt="IAM identity provider for GitHub OIDC"></a><div class="cap">IAM &mdash; GitHub OIDC identity provider</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/IAM-Role-Github-Cross-Account.png" class="lightbox-trigger"><img src="/Projects_Website/Images/IAM-Role-Github-Cross-Account.png" alt="Cross-account IAM role trust policy"></a><div class="cap">IAM &mdash; cross-account trust policy</div></div>
-    <div class="shot"><a href="/Projects_Website/Images/Git-Commands.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Git-Commands.png" alt="Git commands used to trigger deployment"></a><div class="cap">Git &mdash; deployment trigger</div></div>
-<div class="shot"><a href="/Projects_Website/Images/Github-Deployments.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Github-Deployments.png" alt="GitHub deployment history"></a><div class="cap">GitHub Actions &mdash; deployment history</div></div>
-  </div>
+<section id="screenshots">
+<div class="section-tag">ls -la Images/</div>
+<h2 class="section-title">Implementation Evidence</h2>
+<p class="section-sub">Evidence collected from AWS and GitHub demonstrating how the architecture, security controls, and deployment pipeline were implemented.</p>
+
+<h3 style="font-family:var(--mono);color:var(--amber);margin:40px 0 18px">Infrastructure</h3>
+<div class="grid">
+<div class="shot"><a href="/Projects_Website/Images/Architecture.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Architecture.png"></a><div class="cap">Production architecture</div></div>
+<div class="shot"><a href="/Projects_Website/Images/S3-Bucket.png" class="lightbox-trigger"><img src="/Projects_Website/Images/S3-Bucket.png"></a><div class="cap">Amazon S3 origin bucket</div></div>
+<div class="shot"><a href="/Projects_Website/Images/CloudFront-Distribution.png" class="lightbox-trigger"><img src="/Projects_Website/Images/CloudFront-Distribution.png"></a><div class="cap">CloudFront distribution</div></div>
+<div class="shot"><a href="/Projects_Website/Images/Route53-Records.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Route53-Records.png"></a><div class="cap">Route 53 DNS</div></div>
+<div class="shot"><a href="/Projects_Website/Images/ACM.png" class="lightbox-trigger"><img src="/Projects_Website/Images/ACM.png"></a><div class="cap">ACM certificate</div></div>
+<div class="shot"><a href="/Projects_Website/Images/WAF.png" class="lightbox-trigger"><img src="/Projects_Website/Images/WAF.png"></a><div class="cap">AWS WAF</div></div>
+</div>
+
+<h3 style="font-family:var(--mono);color:var(--amber);margin:46px 0 18px">Identity &amp; Security</h3>
+<div class="grid">
+<div class="shot"><a href="/Projects_Website/Images/IAM-IDP.png" class="lightbox-trigger"><img src="/Projects_Website/Images/IAM-IDP.png"></a><div class="cap">GitHub OIDC Provider</div></div>
+<div class="shot"><a href="/Projects_Website/Images/IAM-Role-Github-Cross-Account.png" class="lightbox-trigger"><img src="/Projects_Website/Images/IAM-Role-Github-Cross-Account.png"></a><div class="cap">Cross-account IAM role</div></div>
+<div class="shot"><a href="/Projects_Website/Images/Bucket-Policy-OAC.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Bucket-Policy-OAC.png"></a><div class="cap">Bucket policy (OAC)</div></div>
+</div>
+
+<h3 style="font-family:var(--mono);color:var(--amber);margin:46px 0 18px">CI/CD Pipeline</h3>
+<div class="grid">
+<div class="shot"><a href="/Projects_Website/Images/Git-Commands.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Git-Commands.png"></a><div class="cap">Developer push</div></div>
+<div class="shot"><a href="/Projects_Website/Images/Github-Deployments.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Github-Deployments.png"></a><div class="cap">GitHub Actions deployment history</div></div>
+</div>
 </section>
+
 
 <section id="roadmap">
   <div class="section-tag">git diff --stat</div>
