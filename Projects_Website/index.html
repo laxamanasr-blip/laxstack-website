@@ -95,7 +95,7 @@ nav .links .repo-btn{
 nav .links .repo-btn:hover{border-color:var(--amber);color:var(--amber)}
 
 /* ---------- Breadcrumb / Hero ---------- */
-header{padding:56px 8% 50px;position:relative;z-index:1;min-height:90vh;overflow:hidden}
+header{padding:56px 6% 50px;position:relative;z-index:1;min-height:72vh;overflow:hidden}
 .hero-bg{
   position:absolute;inset:0;
   background:
@@ -119,9 +119,9 @@ h1{
   font-family:var(--mono);font-weight:700;
   font-size:clamp(2rem,4.2vw,3.1rem);
   line-height:1.2;margin-bottom:16px;letter-spacing:-.01em;
-  max-width:900px;
+  max-width:1100px;
 }
-.hero-sub{font-size:1.05rem;color:var(--muted);max-width:760px;margin-bottom:26px}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:920px;margin-bottom:26px}
 
 .badge-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px}
 .badge{
@@ -148,7 +148,7 @@ h1{
 .btn .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 
 /* ---------- Sections ---------- */
-section{padding:64px 8%;position:relative;z-index:1;border-top:1px solid transparent}
+section{padding:64px 6%;position:relative;z-index:1;border-top:1px solid transparent}
 section::before{
   content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
   background:linear-gradient(90deg,transparent,var(--line-strong) 20%,var(--amber) 50%,var(--blue) 80%,transparent);
@@ -374,6 +374,9 @@ header > *{position:relative;z-index:1}
 .callout{border-left:4px solid #ff9900;background:#15191e;padding:18px;margin:20px 0;border-radius:4px}
 </style>
 
+
+
+
 </head>
 <body>
 
@@ -413,6 +416,7 @@ header > *{position:relative;z-index:1}
     <a class="btn secondary" target="_blank" href="https://github.com/laxamanasr-blip"><span class="dot"></span>View Repository</a>
     <a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
   </div>
+
 </header>
 
 
@@ -479,6 +483,31 @@ Deploy Website
 <div class="score"><div class="num">TLS</div>HTTPS Everywhere</div>
 <div class="score"><div class="num">WAF</div>Managed Protection</div>
 <div class="score"><div class="num">OIDC</div>Federated Identity</div>
+</div>
+</section>
+
+
+<section id="hero-preview">
+<div class="section-tag">preview architecture</div>
+<h2 class="section-title">Architecture at a Glance</h2>
+<p class="section-sub">This is the complete request path used by the production website. The detailed implementation and security controls are explained throughout the rest of this case study.</p>
+<div style="background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:30px;margin-top:24px">
+<div style="display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:.95rem">
+<span class="badge">🌍 Browser</span>
+<span style="color:var(--amber)">➜</span>
+<span class="badge">Route 53</span>
+<span style="color:var(--amber)">➜</span>
+<span class="badge">CloudFront</span>
+<span style="color:var(--amber)">➜</span>
+<span class="badge">AWS WAF</span>
+<span style="color:var(--amber)">➜</span>
+<span class="badge">Origin Access Control</span>
+<span style="color:var(--amber)">➜</span>
+<span class="badge">Amazon S3</span>
+</div>
+<div style="margin-top:22px;padding:18px;border-left:4px solid var(--amber);background:rgba(255,153,0,.06);color:var(--muted)">
+<strong style="color:var(--text)">Key design principle:</strong> The S3 bucket is never publicly accessible. All traffic traverses CloudFront, is inspected by AWS WAF, and reaches the origin only through Origin Access Control.
+</div>
 </div>
 </section>
 
@@ -762,6 +791,7 @@ Deploy Website
     <div class="shot"><a href="/Projects_Website/Images/IAM-IDP.png" class="lightbox-trigger"><img src="/Projects_Website/Images/IAM-IDP.png" alt="IAM identity provider for GitHub OIDC"></a><div class="cap">IAM &mdash; GitHub OIDC identity provider</div></div>
     <div class="shot"><a href="/Projects_Website/Images/IAM-Role-Github-Cross-Account.png" class="lightbox-trigger"><img src="/Projects_Website/Images/IAM-Role-Github-Cross-Account.png" alt="Cross-account IAM role trust policy"></a><div class="cap">IAM &mdash; cross-account trust policy</div></div>
     <div class="shot"><a href="/Projects_Website/Images/Git-Commands.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Git-Commands.png" alt="Git commands used to trigger deployment"></a><div class="cap">Git &mdash; deployment trigger</div></div>
+<div class="shot"><a href="/Projects_Website/Images/Github-Deployments.png" class="lightbox-trigger"><img src="/Projects_Website/Images/Github-Deployments.png" alt="GitHub deployment history"></a><div class="cap">GitHub Actions &mdash; deployment history</div></div>
   </div>
 </section>
 
