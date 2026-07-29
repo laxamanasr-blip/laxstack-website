@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5HG3GBNTC1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5HG3GBNTC1');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sid Laxamana | Cloud Infrastructure Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d10;
+  --panel:#12161a;
+  --panel-2:#161b20;
+  --line:#262d34;
+  --line-soft:#1c2228;
+  --text:#e6ecf1;
+  --muted:#8b96a3;
+  --muted-dim:#5d6773;
+  --amber:#ffb020;
+  --amber-dim:#8a611c;
+  --green:#4ade80;
+  --green-dim:#1f4a34;
+  --red:#ff6b6b;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:36px 36px;
+  pointer-events:none;
+  z-index:0;
+}
+a{color:inherit}
+::selection{background:var(--amber);color:#0a0d10}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+/* ---------- LED helper ---------- */
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px 1px rgba(74,222,128,.7);
+  display:inline-block;
+  animation:blink 2.4s ease-in-out infinite;
+}
+.led.amber{background:var(--amber);box-shadow:0 0 6px 1px rgba(255,176,32,.7)}
+@keyframes blink{
+  0%,60%{opacity:1}
+  62%,68%{opacity:.25}
+  70%,100%{opacity:1}
+}
+@media (prefers-reduced-motion: reduce){
+  .led{animation:none}
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important}
+}
+
+/* ---------- Nav ---------- */
+nav{
+  position:sticky;top:0;z-index:99;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 8%;
+  background:rgba(10,13,16,.9);
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font-family:var(--mono);font-weight:600;font-size:1.05rem;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+}
+.logo .path{color:var(--muted-dim)}
+.logo .user{color:var(--amber)}
+nav .links{display:flex;gap:26px;font-family:var(--mono);font-size:.82rem}
+nav .links a{
+  color:var(--muted);text-decoration:none;letter-spacing:.02em;
+  position:relative;padding-bottom:4px;
+}
+nav .links a::before{content:"if";color:var(--muted-dim);margin-right:4px;font-size:.75em}
+nav .links a::after{
+  content:"";position:absolute;left:0;bottom:0;height:1px;width:0;
+  background:var(--amber);transition:width .25s ease;
+}
+nav .links a:hover{color:var(--text)}
+nav .links a:hover::after{width:100%}
+
+/* ---------- Hero ---------- */
+header{padding:70px 8% 40px;position:relative;z-index:1}
+.hero{display:grid;grid-template-columns:1.15fr .95fr;gap:56px;align-items:center}
+.term-line{
+  font-family:var(--mono);font-size:.82rem;color:var(--green);
+  background:var(--panel);border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:3px;margin-bottom:26px;
+}
+.term-line .prompt{color:var(--muted-dim)}
+.typed{
+  display:inline-block;overflow:hidden;white-space:nowrap;
+  border-right:2px solid var(--green);
+  animation:typing 2.6s steps(34,end) 1 forwards, caret .8s step-end infinite;
+  width:0;
+}
+@keyframes typing{ to{ width: 34ch; } }
+@keyframes caret{ 50%{ border-color:transparent } }
+
+h1{
+  font-family:var(--mono);font-weight:700;
+  font-size:clamp(2.1rem,4vw,3.1rem);
+  line-height:1.25;margin-bottom:22px;letter-spacing:-.01em;
+}
+h1 .hl{color:var(--amber)}
+.lead{font-size:1.03rem;color:var(--muted);max-width:600px;margin-bottom:32px}
+.btn-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 20px;border-radius:3px;
+  font-family:var(--mono);font-size:.85rem;font-weight:600;
+  text-decoration:none;transition:.2s ease;border:1px solid transparent;
+}
+.btn.primary{background:var(--amber);color:#161200}
+.btn.primary:hover{background:#ffc350;transform:translateY(-2px)}
+.btn.secondary{border-color:var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-2px)}
+.btn .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* signature: hop-path diagram */
+.hoppanel{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:18px 18px 10px;
+}
+.hoppanel .hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding-bottom:10px;border-bottom:1px solid var(--line-soft);margin-bottom:6px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.hoppanel svg{width:100%;height:auto;display:block}
+.hop-caption{
+  font-family:var(--mono);font-size:.7rem;color:var(--muted-dim);
+  text-align:center;padding:10px 0 4px;letter-spacing:.03em;
+}
+
+/* ---------- Snapshot strip ---------- */
+.snapshot{
+  margin-top:52px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:4px;
+  overflow:hidden;
+}
+.snap-cell{background:var(--panel);padding:18px 20px}
+.snap-cell .k{font-family:var(--mono);color:var(--amber);font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:8px}
+.snap-cell .v{font-family:var(--mono);color:var(--muted-dim);font-size:.7rem;letter-spacing:.03em;text-transform:uppercase;margin-top:4px}
+a.snap-cell{text-decoration:none;display:block;transition:background .2s ease}
+a.snap-cell:hover{background:var(--panel-2)}
+a.snap-cell:hover .k{color:#ffc350}
+
+/* ---------- Certifications ---------- */
+.cert-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:22px;transition:.25s ease;position:relative;
+  display:flex;flex-direction:column;align-items:flex-start;
+}
+.cert-card:hover{border-color:var(--amber-dim);transform:translateY(-4px)}
+.cert-card img{
+  width:64px;height:64px;object-fit:contain;margin-bottom:16px;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.35));
+}
+.cert-card h3{font-size:1rem;font-weight:600;margin-bottom:6px;line-height:1.4}
+.cert-card .issuer{
+  font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  letter-spacing:.03em;text-transform:uppercase;margin-bottom:16px;
+}
+.cert-card .verify{
+  margin-top:auto;font-family:var(--mono);font-size:.78rem;color:var(--amber);
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+}
+.cert-card .verify:hover{text-decoration:underline}
+
+/* ---------- Sections ---------- */
+section{padding:76px 8%;position:relative;z-index:1}
+.section-tag{
+  font-family:var(--mono);color:var(--muted-dim);font-size:.78rem;
+  letter-spacing:.04em;margin-bottom:10px;
+}
+.section-tag::before{content:"$ ";color:var(--green)}
+.section-title{
+  font-family:var(--mono);font-size:1.7rem;font-weight:700;margin-bottom:14px;
+}
+.section-sub{color:var(--muted);max-width:720px;margin-bottom:38px;font-size:.98rem}
+
+/* ---------- Project / interface cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.iface{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:22px;transition:.25s ease;position:relative;
+}
+.iface:hover{border-color:var(--amber-dim);transform:translateY(-4px)}
+.iface .row1{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:.72rem;margin-bottom:14px;
+}
+.iface .row1 .ifname{color:var(--muted-dim)}
+.iface .row1 .status{
+  display:flex;align-items:center;gap:6px;color:var(--green);
+  border:1px solid var(--green-dim);padding:3px 8px;border-radius:20px;
+}
+.iface h3{font-size:1.08rem;margin-bottom:10px;font-weight:600}
+.iface p{color:var(--muted);font-size:.92rem;margin-bottom:16px}
+.tech{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-family:var(--mono);font-size:.72rem;color:var(--muted);
+  border:1px solid var(--line-soft);padding:5px 10px;border-radius:20px;
+  background:var(--panel-2);
+}
+
+/* ---------- Homelab / rack ---------- */
+.rack{
+  display:grid;grid-template-columns:34px 1fr;gap:0;
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  overflow:hidden;margin-bottom:36px;
+}
+.ru-ruler{
+  background:var(--panel-2);border-right:1px solid var(--line);
+  font-family:var(--mono);font-size:.62rem;color:var(--muted-dim);
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:14px 6px;text-align:right;
+}
+.rack img{padding:14px;width:100%;display:block;border-radius:0;border:none}
+.rack-cap{
+  font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding:0 14px 16px;grid-column:1 / -1;letter-spacing:.02em;
+}
+.module{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:22px;
+}
+.module h3{
+  font-family:var(--mono);font-size:.95rem;color:var(--amber);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.module ul{list-style:none}
+.module li{
+  font-size:.9rem;color:var(--muted);padding:6px 0;
+  border-top:1px solid var(--line-soft);
+}
+.module li:first-child{border-top:none}
+
+/* ---------- Stack (SFP chips) ---------- */
+.sfp-grid{display:flex;flex-wrap:wrap;gap:10px}
+.sfp{
+  font-family:var(--mono);font-size:.8rem;color:var(--text);
+  border:1px solid var(--line);background:var(--panel);
+  padding:9px 14px 9px 30px;border-radius:3px;position:relative;
+}
+.sfp::before{
+  content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 5px rgba(74,222,128,.7);
+}
+
+/* ---------- Timeline (config history) ---------- */
+.config{
+  font-family:var(--mono);font-size:.88rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:8px 0;
+}
+.cfg-line{
+  display:grid;grid-template-columns:150px 1fr;gap:18px;
+  padding:16px 24px;border-top:1px solid var(--line-soft);
+}
+.cfg-line:first-child{border-top:none}
+.cfg-line .bang{color:var(--muted-dim)}
+.cfg-line .stage{color:var(--amber);font-weight:600}
+.cfg-line .desc{color:var(--muted);font-family:var(--sans);font-size:.92rem}
+
+/* ---------- Learning / pending ---------- */
+.pending{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:16px 18px;display:flex;align-items:center;gap:12px;
+  font-family:var(--mono);font-size:.88rem;
+}
+.pending .tag{
+  font-size:.65rem;color:var(--amber);border:1px solid var(--amber-dim);
+  padding:3px 8px;border-radius:20px;letter-spacing:.03em;flex-shrink:0;
+}
+
+/* ---------- Contact ---------- */
+.mgmt{
+  font-family:var(--mono);font-size:.95rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:28px 30px;max-width:600px;
+}
+.mgmt .line{padding:5px 0;color:var(--muted)}
+.mgmt .line .rem{color:var(--muted-dim)}
+.mgmt .line .val{color:var(--text)}
+.mgmt a{text-decoration:none;color:var(--amber)}
+.mgmt a:hover{text-decoration:underline}
+
+footer{
+  text-align:center;padding:40px;color:var(--muted-dim);
+  border-top:1px solid var(--line);font-family:var(--mono);font-size:.78rem;
+  position:relative;z-index:1;
+}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  nav{flex-direction:column;gap:12px;padding:16px 6%}
+  nav .links{flex-wrap:wrap;justify-content:center;gap:16px}
+  .snapshot{grid-template-columns:repeat(2,1fr)}
+  section{padding:56px 6%}
+  .rack{grid-template-columns:24px 1fr}
+  .cfg-line{grid-template-columns:1fr;gap:4px}
+}
+
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr}
+  .snapshot{grid-template-columns:1fr}
+  nav .links{gap:10px;font-size:.74rem}
+  h1{font-size:clamp(1.7rem,7vw,2.4rem)}
+  .term-line,.section-tag,h1{overflow-wrap:break-word;word-break:break-word}
+}
+
+.iface-link{display:block;text-decoration:none;color:inherit}
+.iface-link:hover .iface{border-color:var(--amber);box-shadow:0 8px 24px rgba(255,176,32,.12)}
+.iface::after{
+content:"View Project →";
+display:block;
+margin-top:18px;
+font-family:var(--mono);
+font-size:.78rem;
+color:var(--amber);
+}
+
+
+/* ---------- Homelab Hero Link ---------- */
+.lab-link{
+display:block;
+text-decoration:none;
+color:inherit;
+margin-bottom:36px;
+}
+.lab-card{
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:4px;
+padding:28px;
+transition:.25s ease;
+position:relative;
+overflow:hidden;
+}
+.lab-card:hover{
+border-color:var(--amber);
+transform:translateY(-4px);
+box-shadow:0 10px 28px rgba(255,176,32,.12);
+}
+.lab-card::after{
+content:"Open Project →";
+display:block;
+margin-top:20px;
+font-family:var(--mono);
+font-size:.78rem;
+color:var(--amber);
+}
+.lab-card .section-sub{margin-bottom:0;}
+
+</style>
+
+<style>
+/* ============ FLAGSHIP VISUAL PASS (main landing page) ============ */
+
+@property --angle{
+  syntax:'<angle>';
+  inherits:false;
+  initial-value:0deg;
+}
+
+/* scroll progress bar */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;z-index:300;
+  background:linear-gradient(90deg,var(--amber),var(--green));
+  box-shadow:0 0 10px rgba(255,176,32,.5);
+  transition:width .1s linear;
+}
+
+/* drifting aurora, behind the existing grid overlay */
+.aurora{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.aurora span{position:absolute;border-radius:50%;filter:blur(90px);opacity:.14;will-change:transform}
+.aurora span:nth-child(1){width:600px;height:600px;background:var(--amber);top:-180px;left:-140px;animation:drift1 30s ease-in-out infinite}
+.aurora span:nth-child(2){width:520px;height:520px;background:var(--green);top:12%;right:-180px;animation:drift2 36s ease-in-out infinite}
+.aurora span:nth-child(3){width:440px;height:440px;background:#38bdf8;bottom:-160px;left:38%;animation:drift3 33s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(80px,100px)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-90px,80px)}}
+@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(70px,-80px)}}
+
+/* nav weight on scroll + active scrollspy link */
+nav{transition:box-shadow .3s ease,background .3s ease}
+nav.scrolled{box-shadow:0 10px 30px rgba(0,0,0,.4)}
+nav .links a.active{color:var(--amber)}
+nav .links a.active::after{width:100%}
+
+/* ping ring on the nav status LED */
+.logo{position:relative}
+.logo .led{position:relative}
+.logo .led::after{
+  content:"";position:absolute;inset:-4px;border-radius:50%;
+  border:1.5px solid var(--green);opacity:.8;
+  animation:ping 2.4s cubic-bezier(0,.5,.5,1) infinite;
+}
+@keyframes ping{0%{transform:scale(.7);opacity:.8}75%,100%{transform:scale(2.2);opacity:0}}
+
+/* hero entrance */
+.term-line,h1,.lead,.btn-row{animation:heroIn .8s cubic-bezier(.2,.7,.2,1) both}
+h1{animation-delay:.06s}
+.lead{animation-delay:.14s}
+.btn-row{animation-delay:.22s}
+@keyframes heroIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* cycling typewriter caret (JS drives the text, this just keeps the caret blinking) */
+.typed{width:auto;animation:caret .8s step-end infinite}
+
+/* rotating gradient border around the signature hop diagram */
+.hoppanel{position:relative;z-index:0}
+.hoppanel::before{
+  content:"";position:absolute;inset:-1.5px;border-radius:6px;z-index:-1;
+  background:conic-gradient(from var(--angle),transparent 0 65%,var(--amber) 82%,var(--green) 100%);
+  animation:spin 5s linear infinite;
+}
+@keyframes spin{to{--angle:360deg}}
+@media (prefers-reduced-motion: reduce){ .hoppanel::before{animation:none} }
+
+/* magnetic tilt on project + lab cards */
+.iface,.lab-card{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;transform-style:preserve-3d;will-change:transform}
+
+/* header mouse-spotlight */
+header{position:relative}
+header::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(380px circle at var(--mx,50%) var(--my,10%),rgba(255,176,32,.10),transparent 70%);
+}
+header .hero,header .snapshot{position:relative;z-index:1}
+
+/* button shimmer sweep */
+.btn{position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;left:-120%;top:0;width:70%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transition:.6s}
+.btn:hover::after{left:140%}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+
+/* glowing gradient section dividers */
+section{border-top:1px solid transparent}
+section::before{
+  content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-soft) 20%,var(--amber) 50%,var(--green) 80%,transparent);
+  opacity:.5;
+}
+
+/* back to top */
+.to-top{
+  position:fixed;right:26px;bottom:26px;z-index:250;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .3s ease,transform .3s ease,border-color .2s,box-shadow .2s;
+}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.to-top:hover{border-color:var(--amber);box-shadow:0 8px 20px rgba(255,176,32,.25)}
+.to-top svg{width:18px;height:18px}
+
+@media (prefers-reduced-motion: reduce){
+  .aurora span,.logo .led::after,.term-line,h1,.lead,.btn-row,.hoppanel::before{animation:none !important}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav>
+  <div class="logo"><span class="user">sid</span><span class="path">@laxstack:~$</span> <span class="led"></span></div>
+  <div class="links">
+    <a href="#projects">projects</a>
+    <a href="#homelab">homelab</a>
+    <a href="#stack">stack</a>
+    <a href="#certifications">certs</a>
+    <a href="#timeline">journey</a>
+    <a href="#contact">contact</a>
+  </div>
+</nav>
+
+<header>
+  <div class="hero">
+    <div>
+      <div class="term-line"><span class="prompt">&gt;</span><span class="typed"><span id="typedText">show role &mdash; network to cloud</span></span></div>
+      <h1>Designing <span class="hl">resilient hybrid&nbsp;cloud</span> infrastructure for modern enterprises.</h1>
+      <p class="lead">
+        I'm <strong>Sid Laxamana</strong>, an Enterprise Network Engineer specializing in hybrid cloud infrastructure. My background spans enterprise routing, SD-WAN, security, and cloud connectivity, with hands-on experience designing production-inspired AWS environments. Every project is documented from architecture through implementation to demonstrate practical engineering rather than isolated lab exercises.
+      </p>
+      <div class="btn-row">
+        <a class="btn primary" target="_blank" href="https://github.com/laxamanasr-blip"><span class="dot"></span>GitHub</a>
+        <a class="btn secondary" target="_blank" href="https://www.linkedin.com/in/sidney-leigh-laxamana-270904241/"><span class="dot"></span>LinkedIn</a>
+      </div>
+    </div>
+
+    <div class="hoppanel">
+      <div class="hdr"><span>traceroute &mdash; this page</span><span class="led amber"></span></div>
+      <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of how this page was delivered: from your browser through Route 53 DNS resolution, CloudFront with WAF, to Amazon S3 static hosting, rendering this page">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path id="hoppath" d="M30,230 L110,195 L190,150 L270,100 L365,35" fill="none" stroke="#2a3138" stroke-width="2" stroke-dasharray="4 5"/>
+        <circle r="4.5" fill="#ffb020" filter="url(#glow)">
+          <animateMotion dur="4.5s" repeatCount="indefinite" path="M30,230 L110,195 L190,150 L270,100 L365,35"/>
+        </circle>
+
+        <g font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8b96a3">
+          <circle cx="30" cy="230" r="6" fill="#4ade80" filter="url(#glow)"/>
+          <text x="30" y="250" text-anchor="middle">YOU</text>
+
+          <circle cx="110" cy="195" r="6" fill="#4ade80" filter="url(#glow)"/>
+          <text x="110" y="180" text-anchor="middle">ROUTE 53</text>
+
+          <circle cx="190" cy="150" r="6" fill="#4ade80" filter="url(#glow)"/>
+          <text x="190" y="170" text-anchor="middle">CLOUDFRONT</text>
+          <text x="190" y="181" text-anchor="middle" font-size="8" fill="#5d6773">+ WAF &middot; ACM TLS</text>
+
+          <circle cx="270" cy="100" r="6" fill="#4ade80" filter="url(#glow)"/>
+          <text x="270" y="85" text-anchor="middle">AMAZON S3</text>
+
+          <circle cx="365" cy="35" r="6" fill="#ffb020" filter="url(#glow)"/>
+          <text x="365" y="22" text-anchor="middle">THIS PAGE</text>
+        </g>
+      </svg>
+      <div class="hop-caption">4 hops &middot; edge cached &middot; waf + acm tls active</div>
+    </div>
+  </div>
+
+  <div class="snapshot">
+    <a class="snap-cell" href="https://www.credly.com/badges/61a834ca-1d80-4294-9bc0-4c0bf19f446d" target="_blank" rel="noopener" title="Verify CCNP Enterprise on Credly"><div class="k"><span class="led"></span>CCNP</div><div class="v">Enterprise</div></a>
+    <a class="snap-cell" href="https://www.credly.com/badges/3c29f190-6175-4260-9041-068c060215ca" target="_blank" rel="noopener" title="Verify FortiGate Administrator on Credly"><div class="k"><span class="led"></span>NSE4</div><div class="v">Fortinet</div></a>
+    <div class="snap-cell"><div class="k"><span class="led"></span>24/7</div><div class="v">Hybrid Homelab</div></div>
+    <div class="snap-cell"><div class="k"><span class="led amber"></span>AWS</div><div class="v">Hands-on Labs</div></div>
+  </div>
+</header>
+
+<section id="projects">
+  <div class="section-tag">show interfaces</div>
+  <h2 class="section-title">Featured Projects</h2>
+  <p class="section-sub">
+    A selection of projects inspired by real enterprise environments. Each focuses on solving operational challenges through sound architecture, security, automation, and thorough documentation.
+  </p>
+
+  <div class="grid"><a class="iface-link" href="/Projects_TransitVPC/index.html" title="Open Hybrid Cloud Transit VPC project">
+
+    <div class="iface">
+      <div class="row1"><span class="ifname">eth0/1</span><span class="status"><span class="led"></span>up</span></div>
+      <h3>Hybrid Cloud Transit VPC</h3>
+      <p>Designed a production-inspired hybrid cloud architecture connecting on-premises infrastructure to AWS using Transit Gateway, FortiGate NVAs, IPSec VPNs, and dynamic BGP routing while focusing on segmentation, resiliency, and secure traffic inspection.</p>
+      <div class="tech"><span class="chip">Transit Gateway</span><span class="chip">FortiGate</span><span class="chip">BGP</span><span class="chip">VPN</span></div>
+    </div>
+</a>
+
+    <div class="iface">
+      <div class="row1"><span class="ifname">eth0/2</span><span class="status"><span class="led"></span>up</span></div>
+      <h3>Enterprise SD-WAN</h3>
+      <p>Supported enterprise VMware SD-WAN deployments across multiple production sites, performing migrations, routing optimization, cloud integration, and troubleshooting to maintain business-critical connectivity.</p>
+      <div class="tech"><span class="chip">VeloCloud</span><span class="chip">BGP</span><span class="chip">Routing</span></div>
+    </div>
+
+    <div class="iface">
+      <div class="row1"><span class="ifname">eth0/3</span><span class="status"><span class="led"></span>up</span></div>
+      <h3>Enterprise Security Monitoring</h3>
+      <p>Built a centralized observability platform using Wazuh, Grafana, NetBox, and Linux agents to improve infrastructure visibility, security monitoring, and operational awareness.</p>
+      <div class="tech"><span class="chip">Wazuh</span><span class="chip">Grafana</span><span class="chip">Linux</span></div>
+    </div>
+
+    <div class="iface">
+      <div class="row1"><span class="ifname">eth0/4</span><span class="status"><span class="led"></span>up</span></div>
+      <h3>Portfolio on AWS</h3>
+      <p>Deployed on AWS-native services end to end &mdash; Amazon S3 for static hosting, Route 53 for DNS, CloudFront as the CDN edge, AWS WAF for protection, and ACM-issued TLS. Terraform and automated CI/CD deployments are next.</p>
+      <div class="tech"><span class="chip">S3</span><span class="chip">Route 53</span><span class="chip">CloudFront</span><span class="chip">WAF</span><span class="chip">ACM</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="homelab">
+<a class="lab-link" href="/Projects_HomeServer/HomeServer.html">
+<div class="lab-card">
+<div class="section-tag">show running-config | section homelab</div>
+<h2 class="section-title">Enterprise Hybrid Cloud Homelab</h2>
+<p class="section-sub">
+My homelab is a continuously evolving enterprise test environment where I prototype networking, cloud, identity, security, monitoring, and automation solutions before documenting implementation details and design decisions.
+</p>
+</div>
+</a>
+
+
+  <div class="rack">
+    <div class="ru-ruler"><span>12U</span><span>08U</span><span>04U</span><span>01U</span></div>
+    <img src="Images/topology.png" alt="Hybrid Cloud Homelab topology diagram">
+    <div class="rack-cap">fig. 1 &mdash; current homelab topology, rack-mounted for reference only</div>
+  </div>
+
+  <div class="grid">
+    <div class="module">
+      <h3><span class="led"></span>Infrastructure</h3>
+      <ul>
+        <li>Proxmox VE</li>
+        <li>Windows Server (AD, DNS, CA)</li>
+        <li>Ubuntu Linux</li>
+        <li>OPNsense Firewall</li>
+        <li>Enterprise VLAN Design</li>
+      </ul>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Security &amp; Monitoring</h3>
+      <ul>
+        <li>Wazuh SIEM</li>
+        <li>Suricata IDS</li>
+        <li>Zenarmor</li>
+        <li>Grafana</li>
+        <li>NetBox IPAM</li>
+      </ul>
+    </div>
+    <div class="module">
+      <h3><span class="led amber"></span>AWS Integration</h3>
+      <ul>
+        <li>VPC</li>
+        <li>Transit Gateway</li>
+        <li>FortiGate NVA</li>
+        <li>Application Load Balancer</li>
+        <li>Route 53</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="section-tag">show inventory</div>
+  <h2 class="section-title">Technology Stack</h2>
+  <div class="sfp-grid">
+    <span class="sfp">AWS</span><span class="sfp">EC2</span><span class="sfp">S3</span><span class="sfp">IAM</span>
+    <span class="sfp">ALB</span><span class="sfp">Transit Gateway</span><span class="sfp">CloudFormation</span>
+    <span class="sfp">Linux</span><span class="sfp">Proxmox</span><span class="sfp">FortiGate</span>
+    <span class="sfp">Cisco</span><span class="sfp">Meraki</span><span class="sfp">Aruba</span>
+    <span class="sfp">VMware SD-WAN</span><span class="sfp">OPNsense</span><span class="sfp">Python</span>
+    <span class="sfp">GitHub</span><span class="sfp">Bash</span><span class="sfp">PowerShell</span>
+  </div>
+</section>
+
+<section id="certifications">
+  <div class="section-tag">cat certifications.md</div>
+  <h2 class="section-title">Certifications</h2>
+  <p class="section-sub">Verified credentials &mdash; each badge links out to its live Credly verification page.</p>
+  <div class="grid">
+    <a class="cert-card" href="https://www.credly.com/badges/61a834ca-1d80-4294-9bc0-4c0bf19f446d" target="_blank" rel="noopener">
+      <img src="https://images.credly.com/images/07f70c56-f067-458e-bbe5-736f055f0cce/linkedin_thumb_CCNP_Enterprise_large.png" alt="CCNP Enterprise badge" loading="lazy">
+      <h3>CCNP Enterprise</h3>
+      <div class="issuer">Cisco</div>
+      <span class="verify">Verify on Credly &rarr;</span>
+    </a>
+    <a class="cert-card" href="https://www.credly.com/badges/31d4a4ec-ffcf-49df-9501-fbdd335831e7" target="_blank" rel="noopener">
+      <img src="https://images.credly.com/images/e544ac8f-cd4e-4262-9de1-1174680b3bb4/linkedin_thumb_blob" alt="Cisco Certified Specialist Enterprise Core badge" loading="lazy">
+      <h3>Cisco Certified Specialist &mdash; Enterprise Core</h3>
+      <div class="issuer">Cisco</div>
+      <span class="verify">Verify on Credly &rarr;</span>
+    </a>
+    <a class="cert-card" href="https://www.credly.com/badges/5e0059c2-a164-431d-b502-f39d88a89eaa" target="_blank" rel="noopener">
+      <img src="https://images.credly.com/images/b4c5a1ef-ab6d-4bb1-860c-cfb11df545e4/linkedin_thumb_blob" alt="Cisco Certified Specialist Enterprise Cloud Connectivity badge" loading="lazy">
+      <h3>Cisco Certified Specialist &mdash; Enterprise Cloud Connectivity</h3>
+      <div class="issuer">Cisco</div>
+      <span class="verify">Verify on Credly &rarr;</span>
+    </a>
+    <a class="cert-card" href="https://www.credly.com/badges/3c29f190-6175-4260-9041-068c060215ca" target="_blank" rel="noopener">
+      <img src="https://images.credly.com/images/78e9e1fc-8b63-4967-ae68-faaf7493806b/linkedin_thumb_image.png" alt="Fortinet FortiGate 7.2 Administrator badge" loading="lazy">
+      <h3>FortiGate 7.2 Administrator</h3>
+      <div class="issuer">Fortinet</div>
+      <span class="verify">Verify on Credly &rarr;</span>
+    </a>
+    <a class="cert-card" href="https://www.credly.com/badges/0ca73014-1d50-46d1-ae7a-244fa3bf6c0b" target="_blank" rel="noopener">
+      <img src="https://images.credly.com/images/683783d8-eaac-4c37-a14d-11bd8a36321d/linkedin_thumb_ccna_600.png" alt="CCNA badge" loading="lazy">
+      <h3>CCNA</h3>
+      <div class="issuer">Cisco</div>
+      <span class="verify">Verify on Credly &rarr;</span>
+    </a>
+  </div>
+</section>
+
+<section id="timeline">
+  <div class="section-tag">show running-config</div>
+  <h2 class="section-title">Professional Journey</h2>
+  <div class="config">
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">foundation</span></div>
+      <div class="desc">Built a strong foundation in enterprise routing, switching, security, VLAN design, and network architecture.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">enterprise-networking</span></div>
+      <div class="desc">Delivered enterprise infrastructure solutions using VMware SD-WAN, Fortinet, Cisco, Aruba, and cloud-connected production environments.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">hybrid-cloud</span></div>
+      <div class="desc">Designed production-inspired AWS hybrid architectures integrating Transit Gateway, FortiGate NVAs, IPSec VPNs, and dynamic routing.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">current-focus</span></div>
+      <div class="desc">Continuing to expand into cloud infrastructure, Infrastructure as Code, automation, and cloud security while building on an enterprise networking foundation.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-tag">show configuration candidate</div>
+  <h2 class="section-title">Currently Learning</h2>
+  <div class="grid">
+    <div class="pending"><span class="tag">active</span>AWS Solutions Architect &mdash; Associate</div>
+    <div class="pending"><span class="tag">active</span>Infrastructure as Code (Terraform)</div>
+    <div class="pending"><span class="tag">active</span>Cloud Security</div>
+    <div class="pending"><span class="tag">active</span>CI/CD &amp; Automation</div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="section-tag">show interface Management0</div>
+  <h2 class="section-title">Let's Connect</h2>
+  <p class="section-sub">Interested in enterprise networking, hybrid cloud, infrastructure engineering, or AWS architecture? I'm always happy to connect, exchange ideas, and discuss challenging technical projects.</p>
+  <div class="mgmt">
+    <div class="line"><span class="rem">! email</span><br><span class="val"><a href="mailto:laxamanasr@gmail.com">laxamanasr@gmail.com</a></span></div>
+    <div class="line" style="margin-top:14px"><span class="rem">! github</span><br><span class="val"><a href="https://github.com/laxamanasr-blip" target="_blank">github.com/laxamanasr-blip</a></span></div>
+    <div class="line" style="margin-top:14px"><span class="rem">! linkedin</span><br><span class="val"><a href="https://www.linkedin.com/in/sidney-leigh-laxamana-270904241/" target="_blank">linkedin.com/in/sidney-leigh-laxamana</a></span></div>
+  </div>
+</section>
+
+<footer>
+  end &middot; hosted on Amazon S3 &middot; designed &amp; maintained by Sid Laxamana &middot; &copy; 2026 LaxStack
+</footer>
+
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+// ---- nav scroll state + progress bar + back-to-top ----
+const navEl=document.querySelector('nav');
+const progressEl=document.getElementById('scrollProgress');
+const toTopBtn=document.getElementById('toTop');
+function onScroll(){
+  const y=window.scrollY||document.documentElement.scrollTop;
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=max>0?(y/max)*100:0;
+  progressEl.style.width=pct+'%';
+  navEl.classList.toggle('scrolled', y>10);
+  toTopBtn.classList.toggle('show', y>500);
+}
+document.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+toTopBtn.addEventListener('click', ()=>window.scrollTo({top:0, behavior:'smooth'}));
+
+// ---- header mouse-spotlight ----
+const headerEl=document.querySelector('header');
+if(headerEl){
+  headerEl.addEventListener('mousemove', e=>{
+    const r=headerEl.getBoundingClientRect();
+    headerEl.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+    headerEl.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+  });
+}
+
+// ---- reveal on scroll ----
+const revealTargets=document.querySelectorAll(
+  '.iface, .lab-card, .module, .rack, .config, .pending, .mgmt, .snap-cell, .sfp-grid, .cert-card'
+);
+revealTargets.forEach(el=>el.classList.add('reveal'));
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    }
+  });
+}, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+revealTargets.forEach(el=>io.observe(el));
+
+document.querySelectorAll('.grid').forEach(grid=>{
+  [...grid.children].forEach((child,i)=>{
+    child.style.transitionDelay=Math.min(i*70,280)+'ms';
+  });
+});
+
+// ---- scrollspy: highlight the nav link for the section in view ----
+const navLinks=[...document.querySelectorAll('nav .links a[href^="#"]')];
+const spySections=navLinks
+  .map(a=>document.querySelector(a.getAttribute('href')))
+  .filter(Boolean);
+const spy=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const link=navLinks.find(a=>a.getAttribute('href')==='#'+entry.target.id);
+    if(!link) return;
+    if(entry.isIntersecting) navLinks.forEach(a=>a.classList.remove('active')), link.classList.add('active');
+  });
+}, {rootMargin:'-45% 0px -45% 0px'});
+spySections.forEach(s=>spy.observe(s));
+
+// ---- magnetic tilt on project + homelab cards ----
+function attachTilt(el){
+  el.addEventListener('mousemove', e=>{
+    const r=el.getBoundingClientRect();
+    const px=(e.clientX-r.left)/r.width-0.5;
+    const py=(e.clientY-r.top)/r.height-0.5;
+    el.style.transform=`perspective(700px) rotateX(${(-py*6).toFixed(2)}deg) rotateY(${(px*6).toFixed(2)}deg) translateY(-4px)`;
+  });
+  el.addEventListener('mouseleave', ()=>{ el.style.transform=''; });
+}
+document.querySelectorAll('.iface, .lab-card, .cert-card').forEach(attachTilt);
+
+// ---- cycling typewriter in the hero terminal line ----
+const typedEl=document.getElementById('typedText');
+if(typedEl){
+  const phrases=[
+    'show role — network to cloud',
+    'show uptime — 24/7 hybrid lab',
+    'whoami — enterprise network engineer'
+  ];
+  const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduceMotion){
+    let p=0, i=phrases[0].length, deleting=false;
+    typedEl.textContent=phrases[0];
+    setTimeout(loop, 2200);
+    function loop(){
+      const current=phrases[p];
+      if(!deleting){
+        i++;
+        if(i>current.length){ deleting=true; setTimeout(loop, 1800); return; }
+      }else{
+        i--;
+        if(i<0){ deleting=false; p=(p+1)%phrases.length; i=0; setTimeout(loop, 300); return; }
+      }
+      typedEl.textContent=current.slice(0,i);
+      setTimeout(loop, deleting?35:55);
+    }
+  }
+}
+</script>
+
+</body>
+</html>

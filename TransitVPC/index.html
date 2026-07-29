@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5HG3GBNTC1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5HG3GBNTC1');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hybrid Cloud Transit VPC | Sid Laxamana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d10;
+  --panel:#12161a;
+  --panel-2:#161b20;
+  --line:#262d34;
+  --line-soft:#1c2228;
+  --line-strong:#333c46;
+  --text:#e6ecf1;
+  --muted:#8b96a3;
+  --muted-dim:#5d6773;
+  --amber:#ffb020;
+  --amber-dim:#8a611c;
+  --green:#4ade80;
+  --green-dim:#1f4a34;
+  --blue:#38bdf8;
+  --blue-dim:#1a4d63;
+  --purple:#a78bfa;
+  --red:#ff6b6b;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:36px 36px;
+  pointer-events:none;
+  z-index:0;
+}
+a{color:inherit}
+img{max-width:100%;display:block}
+::selection{background:var(--amber);color:#0a0d10}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px 1px rgba(74,222,128,.7);
+  display:inline-block;
+  animation:blink 2.4s ease-in-out infinite;
+  flex-shrink:0;
+}
+.led.amber{background:var(--amber);box-shadow:0 0 6px 1px rgba(255,176,32,.7)}
+.led.blue{background:var(--blue);box-shadow:0 0 6px 1px rgba(56,189,248,.7)}
+@keyframes blink{0%,60%{opacity:1}62%,68%{opacity:.25}70%,100%{opacity:1}}
+@media (prefers-reduced-motion: reduce){
+  .led{animation:none}
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
+}
+
+/* ---------- Nav ---------- */
+nav{
+  position:sticky;top:0;z-index:99;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 8%;
+  background:rgba(10,13,16,.9);
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font-family:var(--mono);font-weight:600;font-size:.95rem;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+  text-decoration:none;
+}
+.logo .path{color:var(--muted-dim)}
+.logo .user{color:var(--amber)}
+.logo .back{color:var(--muted);margin-right:2px}
+nav .links{display:flex;gap:24px;font-family:var(--mono);font-size:.8rem;align-items:center}
+nav .links a{color:var(--muted);text-decoration:none}
+nav .links a:hover{color:var(--amber)}
+nav .links .repo-btn{
+  border:1px solid var(--line);padding:7px 14px;border-radius:3px;color:var(--text);
+  transition:.2s;
+}
+nav .links .repo-btn:hover{border-color:var(--amber);color:var(--amber)}
+
+/* ---------- Breadcrumb / Hero ---------- */
+header{padding:64px 8% 50px;position:relative;z-index:1}
+.crumb{
+  font-family:var(--mono);font-size:.8rem;color:var(--green);
+  background:var(--panel);border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:3px;margin-bottom:26px;
+}
+.crumb .prompt{color:var(--muted-dim)}
+
+h1{
+  font-family:var(--mono);font-weight:700;
+  font-size:clamp(2rem,4.2vw,3.1rem);
+  line-height:1.2;margin-bottom:16px;letter-spacing:-.01em;
+  max-width:900px;
+}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:760px;margin-bottom:26px}
+
+.badge-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px}
+.badge{
+  font-family:var(--mono);font-size:.76rem;display:flex;align-items:center;gap:7px;
+  border:1px solid var(--line);padding:6px 12px;border-radius:20px;color:var(--muted);
+  background:var(--panel);
+}
+.badge.status{color:var(--green);border-color:var(--green-dim)}
+
+.btn-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 20px;border-radius:3px;
+  font-family:var(--mono);font-size:.85rem;font-weight:600;
+  text-decoration:none;transition:.2s ease;border:1px solid transparent;
+}
+.btn.primary{background:var(--amber);color:#161200}
+.btn.primary:hover{background:#ffc350;transform:translateY(-2px)}
+.btn.secondary{border-color:var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-2px)}
+.btn .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ---------- Sections ---------- */
+section{padding:64px 8%;position:relative;z-index:1;border-top:1px solid var(--line-soft)}
+.section-tag{font-family:var(--mono);color:var(--muted-dim);font-size:.78rem;letter-spacing:.04em;margin-bottom:10px}
+.section-tag::before{content:"$ ";color:var(--green)}
+.section-title{font-family:var(--mono);font-size:1.55rem;font-weight:700;margin-bottom:16px}
+.section-sub{color:var(--muted);max-width:760px;margin-bottom:34px;font-size:.98rem}
+.prose{color:var(--muted);max-width:760px;font-size:.98rem}
+.prose p{margin-bottom:16px}
+.prose strong{color:var(--text)}
+
+/* ---------- Signature hop diagram ---------- */
+.hoppanel{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:20px 20px 8px;max-width:980px;
+}
+.hoppanel .hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding-bottom:10px;border-bottom:1px solid var(--line-soft);margin-bottom:6px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.hoppanel svg{width:100%;height:auto;display:block}
+
+/* ---------- Rack frame (for imported diagrams/screenshots) ---------- */
+.rack{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:16px;margin-top:28px;max-width:980px;
+}
+.rack .cap{
+  font-family:var(--mono);font-size:.74rem;color:var(--muted-dim);
+  padding-top:12px;letter-spacing:.02em;
+}
+.rack img{border-radius:2px}
+
+/* ---------- SFP stack chips ---------- */
+.sfp-grid{display:flex;flex-wrap:wrap;gap:10px}
+.sfp{
+  font-family:var(--mono);font-size:.8rem;color:var(--text);
+  border:1px solid var(--line);background:var(--panel);
+  padding:9px 14px 9px 30px;border-radius:3px;position:relative;
+}
+.sfp::before{
+  content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 5px rgba(74,222,128,.7);
+}
+
+/* ---------- Route table cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.route-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:20px;
+}
+.route-card .rt-hdr{
+  font-family:var(--mono);font-size:.68rem;color:var(--muted-dim);
+  display:flex;justify-content:space-between;align-items:center;
+  padding-bottom:12px;border-bottom:1px solid var(--line-soft);margin-bottom:12px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.rt-row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:.86rem}
+.rt-row .cidr{font-family:var(--mono);color:var(--amber)}
+.rt-row .purpose{color:var(--muted);text-align:right}
+
+/* ---------- BGP peering ---------- */
+.peer-wrap{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:28px;max-width:980px;
+}
+.peer-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.peer-node{
+  flex:1;min-width:220px;background:var(--panel-2);border:1px solid var(--line-strong);
+  border-radius:4px;padding:18px 20px;text-align:center;
+}
+.peer-node .name{font-family:var(--mono);font-weight:700;font-size:.98rem;margin-bottom:6px}
+.peer-node .asn{font-family:var(--mono);font-size:.78rem;color:var(--amber)}
+.peer-link{
+  flex:0 0 auto;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding:0 10px;min-width:160px;
+}
+.peer-link .line{height:2px;background:repeating-linear-gradient(90deg,var(--blue) 0 6px,transparent 6px 11px);margin:8px 0}
+
+.learn-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);margin-top:26px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.learn-col{background:var(--panel-2);padding:18px 20px}
+.learn-col h4{font-family:var(--mono);font-size:.78rem;color:var(--green);margin-bottom:10px;letter-spacing:.03em}
+.learn-col ul{list-style:none}
+.learn-col li{font-family:var(--mono);font-size:.85rem;color:var(--muted);padding:4px 0}
+.learn-note{font-family:var(--mono);font-size:.76rem;color:var(--muted-dim);margin-top:14px}
+
+/* ---------- Module / advantage cards ---------- */
+.module{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:22px}
+.module h3{font-family:var(--mono);font-size:.95rem;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.module p{color:var(--muted);font-size:.9rem}
+
+/* ---------- Comparison chips ---------- */
+.chip-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.chip{
+  font-family:var(--mono);font-size:.76rem;color:var(--blue);
+  border:1px solid var(--blue-dim);padding:6px 12px;border-radius:20px;background:var(--panel);
+}
+
+/* ---------- Screenshot grid ---------- */
+.shot{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;overflow:hidden}
+.shot img{border-radius:2px;border:1px solid var(--line-soft)}
+.shot .cap{font-family:var(--mono);font-size:.74rem;color:var(--muted-dim);padding-top:10px}
+
+/* ---------- Config diff (roadmap) ---------- */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.diff-col{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:20px}
+.diff-col .dc-hdr{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;
+  padding-bottom:12px;border-bottom:1px solid var(--line-soft);margin-bottom:12px;
+}
+.diff-col.committed .dc-hdr{color:var(--green)}
+.diff-col.pending .dc-hdr{color:var(--amber)}
+.diff-line{font-family:var(--mono);font-size:.85rem;padding:5px 0;display:flex;gap:10px}
+.diff-line .mark{flex-shrink:0}
+.diff-col.committed .mark{color:var(--green)}
+.diff-col.pending .mark{color:var(--amber)}
+.diff-line .val{color:var(--muted)}
+
+/* ---------- Lessons ---------- */
+.lessons{display:grid;grid-template-columns:1fr 1fr;gap:6px 40px;max-width:980px}
+.lesson-line{font-family:var(--mono);font-size:.86rem;color:var(--muted);padding:6px 0}
+.lesson-line .hash{color:var(--muted-dim);margin-right:8px}
+
+footer{
+  text-align:center;padding:44px;color:var(--muted-dim);
+  border-top:1px solid var(--line);font-family:var(--mono);font-size:.78rem;
+  position:relative;z-index:1;
+}
+footer a{color:var(--amber);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+@media(max-width:900px){
+  nav{padding:14px 6%;flex-wrap:wrap;row-gap:10px}
+  nav .links{gap:14px;flex-wrap:wrap;justify-content:center}
+  header{padding:48px 6% 36px}
+  section{padding:48px 6%}
+  .learn-grid{grid-template-columns:1fr}
+  .diff-grid{grid-template-columns:1fr}
+  .lessons{grid-template-columns:1fr}
+  .peer-row{flex-direction:column}
+  .peer-link{transform:rotate(90deg);min-width:auto;padding:14px 0}
+}
+
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr}
+  nav .links{gap:10px;font-size:.72rem}
+  .badge{font-size:.7rem;padding:5px 10px}
+  .crumb,h1,.section-tag{overflow-wrap:break-word;word-break:break-word}
+  .peer-node{min-width:0;width:100%}
+}
+
+/* Lightbox */
+.shot a{display:block;cursor:zoom-in}
+.shot img{transition:.25s ease}
+.shot:hover img{transform:scale(1.02);border-color:var(--amber)}
+.lightbox{display:none;position:fixed;z-index:9999;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:40px}
+.lightbox img{max-width:95%;max-height:90%;border:2px solid var(--amber);border-radius:6px;box-shadow:0 0 40px rgba(0,0,0,.6)}
+.lightbox .close{position:absolute;top:20px;right:30px;font-size:42px;color:#fff;cursor:pointer;font-family:Arial}
+
+/* ===== Sprint 1 redesign ===== */
+
+body{
+ background:
+ radial-gradient(circle at top,#17304f 0,#0a0d10 55%) fixed;
+}
+header{padding-top:56px;min-height:90vh}
+.hero-bg{
+ position:absolute;inset:0;
+ background:
+ radial-gradient(circle at 20% 10%,rgba(56,189,248,.18),transparent 30%),
+ radial-gradient(circle at 80% 20%,rgba(255,176,32,.15),transparent 28%);
+ z-index:-1;
+}
+.project-label{
+ display:inline-block;
+ letter-spacing:.25rem;
+ color:#7dd3fc;
+ font:700 .8rem var(--mono);
+ margin-bottom:1rem;
+}
+.hero-small{
+ font-size:1.2rem;
+ color:#7dd3fc;
+ letter-spacing:.2rem;
+}
+.hero-main{
+ font-size:clamp(2.1rem,10vw,5.8rem);
+ line-height:.95;
+ word-break:break-word;
+}
+.hero-accent{color:var(--amber)}
+.hero-panel{
+ margin:2rem 0;
+ max-width:700px;
+ padding:22px;
+ border:1px solid rgba(255,255,255,.08);
+ background:rgba(255,255,255,.04);
+ backdrop-filter:blur(18px);
+ border-radius:20px;
+ box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+.module,.route-card,.peer-wrap,.rack,.shot,.hoppanel{
+ border-radius:18px;
+ box-shadow:0 18px 40px rgba(0,0,0,.25);
+ transition:.25s;
+}
+.module:hover,.route-card:hover,.shot:hover{
+ transform:translateY(-6px);
+ border-color:#38bdf8;
+}
+.btn{
+ border-radius:999px;
+}
+.btn.primary{
+ box-shadow:0 12px 30px rgba(255,176,32,.35);
+}
+.section-title{
+ font-size:2.2rem;
+}
+</style>
+
+<style>
+/* ============ VISUAL POLISH PASS ============ */
+
+/* scroll progress bar */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;z-index:300;
+  background:linear-gradient(90deg,var(--amber),var(--blue),var(--purple));
+  box-shadow:0 0 10px rgba(255,176,32,.5);
+  transition:width .1s linear;
+}
+
+/* drifting aurora blobs, layered behind the existing hero-bg glow */
+.aurora{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.aurora span{position:absolute;border-radius:50%;filter:blur(80px);opacity:.14;will-change:transform}
+.aurora span:nth-child(1){width:560px;height:560px;background:var(--blue);top:-160px;left:-120px;animation:drift1 28s ease-in-out infinite}
+.aurora span:nth-child(2){width:480px;height:480px;background:var(--purple);top:8%;right:-160px;animation:drift2 34s ease-in-out infinite}
+.aurora span:nth-child(3){width:420px;height:420px;background:var(--amber);bottom:-160px;left:35%;animation:drift3 31s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(70px,90px)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-80px,70px)}}
+@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-70px)}}
+
+/* nav gets weight once scrolled */
+nav{transition:box-shadow .3s ease,background .3s ease}
+nav.scrolled{box-shadow:0 10px 30px rgba(0,0,0,.4);background:rgba(10,13,16,.85)}
+
+/* status LED gets a ping ring */
+.badge.status .led{position:relative}
+.badge.status .led::after{
+  content:"";position:absolute;inset:-4px;border-radius:50%;
+  border:1.5px solid var(--green);opacity:.8;
+  animation:ping 2.2s cubic-bezier(0,.5,.5,1) infinite;
+}
+@keyframes ping{0%{transform:scale(.7);opacity:.8}75%,100%{transform:scale(2.1);opacity:0}}
+
+/* signal bars for the status badge */
+.signal{display:inline-flex;align-items:flex-end;gap:2px;height:9px;margin-right:1px}
+.signal span{width:3px;background:var(--green);border-radius:1px;animation:sig 1.4s ease-in-out infinite}
+.signal span:nth-child(1){height:40%;animation-delay:0s}
+.signal span:nth-child(2){height:70%;animation-delay:.15s}
+.signal span:nth-child(3){height:100%;animation-delay:.3s}
+@keyframes sig{0%,100%{opacity:.4;transform:scaleY(.7)}50%{opacity:1;transform:scaleY(1)}}
+
+/* reveal-on-scroll */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+
+/* glowing gradient section dividers */
+section{border-top:1px solid transparent}
+section::before{
+  content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-strong) 20%,var(--blue) 50%,var(--amber) 80%,transparent);
+  opacity:.5;
+}
+
+/* hero heading entrance + gradient shimmer on the accent line */
+h1 span{display:inline-block;animation:heroIn .8s cubic-bezier(.2,.7,.2,1) both}
+h1 .hero-small{animation-delay:0s}
+h1 .hero-main{animation-delay:.08s}
+h1 .hero-accent{animation-delay:.16s;background:linear-gradient(90deg,var(--amber),#ffd580,var(--amber));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:heroIn .8s cubic-bezier(.2,.7,.2,1) both,shine 6s linear infinite 1s}
+@keyframes heroIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shine{to{background-position:200% center}}
+
+/* header mouse-spotlight, layered above the existing hero-bg */
+header::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(360px circle at var(--mx,50%) var(--my,15%),rgba(56,189,248,.14),transparent 70%);
+}
+header > *{position:relative;z-index:1}
+
+/* button shimmer sweep */
+.btn{position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;left:-120%;top:0;width:70%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transition:.6s}
+.btn:hover::after{left:140%}
+
+/* back to top */
+.to-top{
+  position:fixed;right:26px;bottom:26px;z-index:250;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .3s ease,transform .3s ease,border-color .2s,box-shadow .2s;
+}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.to-top:hover{border-color:var(--amber);box-shadow:0 8px 20px rgba(255,176,32,.25)}
+.to-top svg{width:18px;height:18px}
+
+/* lightbox fade + blur polish (keeps existing display:flex toggle in JS) */
+.lightbox{opacity:0;transition:opacity .25s ease;backdrop-filter:blur(6px)}
+.lightbox.open{opacity:1}
+
+/* click-to-enlarge on the hop diagram */
+.hoppanel{cursor:zoom-in;transition:border-color .2s ease,transform .2s ease}
+.hoppanel:hover{border-color:var(--amber-dim);transform:translateY(-3px)}
+.hoppanel .zoom-hint{
+  font-family:var(--mono);font-size:.68rem;color:var(--muted-dim);
+  display:flex;align-items:center;gap:5px;
+}
+.diagram-lightbox{
+  position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.86);backdrop-filter:blur(8px);padding:40px;
+  opacity:0;transition:opacity .25s ease;
+}
+.diagram-lightbox.open{opacity:1}
+.diagram-lightbox .dl-inner{position:relative;max-width:min(96vw,1500px);width:100%}
+.diagram-lightbox .dl-inner .hoppanel{cursor:default;max-width:none;width:100%;transform:none;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.diagram-lightbox .dl-inner .hoppanel svg{width:100%;height:auto}
+.diagram-lightbox .dl-inner .hoppanel:hover{transform:none}
+.dl-close{
+  position:absolute;top:-42px;right:0;width:32px;height:32px;border-radius:8px;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .aurora span,.badge.status .led::after,.signal span,h1 .hero-accent{animation:none !important}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav>
+  <a class="logo" href="/"><span class="back">&larr;</span><span class="user">sid</span><span class="path">@laxstack:~/projects$</span></a>
+  <div class="links">
+    <a href="#overview">overview</a>
+    <a href="#architecture">architecture</a>
+    <a href="#routing">routing</a>
+    <a href="#screenshots">screenshots</a>
+    <a class="repo-btn" href="https://github.com/laxamanasr-blip" target="_blank">View Repo</a>
+  </div>
+</nav>
+
+<header>
+<div class="hero-bg"></div>
+<div class="project-label">PROJECT 001</div>
+  <div class="crumb"><span class="prompt">&gt;</span> cat hybrid-cloud-transit-vpc.md</div>
+  <h1><span class="hero-small">HYBRID CLOUD</span><br><span class="hero-main">Transit VPC</span><br><span class="hero-accent">&amp; FortiGate NVA</span></h1>
+  <p class="hero-sub">
+    An enterprise-style hybrid cloud build connecting an on-prem home lab to AWS through a dedicated Transit VPC,
+    a FortiGate Network Virtual Appliance, AWS Transit Gateway, and dynamic routing over IPsec &mdash; designed as
+    a reusable network hub, not a one-off VPN tunnel.
+  </p>
+
+  <div class="badge-row">
+    <span class="badge status"><span class="signal"><span></span><span></span><span></span></span><span class="led"></span>architecture live</span>
+    <span class="badge">eBGP over IPsec VTI</span>
+    <span class="badge">ASN 65001 &harr; 65002</span>
+    <span class="badge">Transit Gateway hub-and-spoke</span>
+  </div>
+
+  <div class="hero-panel"><p>Enterprise-inspired hybrid networking architecture using AWS Transit Gateway, FortiGate NVA, IPsec VTI and eBGP.</p></div><div class="btn-row">
+    <a class="btn primary" target="_blank" href="https://github.com/laxamanasr-blip"><span class="dot"></span>View Repository</a>
+    <a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
+  </div>
+</header>
+
+<section id="overview">
+  <div class="section-tag">cat overview.md</div>
+  <h2 class="section-title">Why this exists</h2>
+  <div class="module" style="margin:24px 0 28px">
+    <h3><span class="led blue"></span>Project Summary</h3>
+    <p>This project demonstrates an enterprise-inspired hybrid cloud architecture that securely connects an on-premises environment to AWS using a dedicated Transit VPC, a FortiGate Network Virtual Appliance (NVA), AWS Transit Gateway, Route-Based IPsec VPN, and dynamic eBGP routing. Rather than building a simple point-to-point VPN, the design focuses on scalability, centralized security, and reusable network services commonly found in enterprise environments.</p>
+  </div>
+  <div class="prose">
+    <p>
+      Most home-lab hybrid cloud setups terminate a VPN straight into an application VPC. It works, but it doesn't
+      scale &mdash; every new workload means another tunnel, another route, another one-off decision.
+    </p>
+    <p>
+      This build separates <strong>network infrastructure</strong> from <strong>application infrastructure</strong>.
+      A dedicated <strong>Transit VPC</strong> acts as the network services layer, with a <strong>FortiGate VM</strong>
+      running inside it as the Network Virtual Appliance &mdash; handling routing and security centrally &mdash; while
+      <strong>AWS Transit Gateway</strong> fans connectivity out to application VPCs as they're added.
+    </p>
+    <p>
+      The first workload riding on this hub is an <strong>AdGuard Home</strong> instance, providing secondary DNS
+      resolution back to the home lab. The point isn't the DNS server &mdash; it's that the next VPC just attaches
+      to the Transit Gateway, with no redesign required.
+    </p>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="section-tag">show topology</div>
+  <h2 class="section-title">Architecture at a glance</h2>
+  <p class="section-sub">Traffic leaves the home lab over a route-based IPsec tunnel, lands on the FortiGate NVA inside the Transit VPC, and is handed to Transit Gateway for distribution to every attached VPC.</p>
+
+  <div class="hoppanel" id="hopPanel">
+    <div class="hdr"><span>path &mdash; home lab to workload</span><span class="zoom-hint">click to expand<span class="led amber" style="margin-left:6px"></span></span></div>
+    <svg viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of traffic path from home lab through IPsec VPN, FortiGate NVA in the Transit VPC, AWS Transit Gateway, to the Main VPC and future VPCs">
+      <defs>
+        <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <path d="M50,140 L230,140 L230,90 L410,90 L410,90 L590,90" fill="none" stroke="#2a3138" stroke-width="2" stroke-dasharray="4 5"/>
+      <path d="M590,90 L680,50" fill="none" stroke="#2a3138" stroke-width="2" stroke-dasharray="4 5"/>
+      <path d="M590,90 L680,150" fill="none" stroke="#2a3138" stroke-width="2" stroke-dasharray="4 5"/>
+
+      <circle r="4.5" fill="#ffb020" filter="url(#glow2)">
+        <animateMotion dur="4s" repeatCount="indefinite" path="M50,140 L230,140 L230,90 L410,90 L590,90 L680,50"/>
+      </circle>
+
+      <g font-family="JetBrains Mono, monospace" font-size="10" fill="#8b96a3">
+        <circle cx="50" cy="140" r="6" fill="#4ade80" filter="url(#glow2)"/>
+        <text x="50" y="165" text-anchor="middle">HOME LAB</text>
+
+        <circle cx="230" cy="140" r="5.5" fill="#38bdf8" filter="url(#glow2)"/>
+        <text x="230" y="165" text-anchor="middle">IPSEC VTI</text>
+        <text x="230" y="120" text-anchor="middle" font-size="9" fill="#5d6773">eBGP</text>
+
+        <circle cx="410" cy="90" r="6" fill="#ffb020" filter="url(#glow2)"/>
+        <text x="410" y="72" text-anchor="middle">FORTIGATE NVA</text>
+        <text x="410" y="112" text-anchor="middle" font-size="9" fill="#5d6773">transit vpc</text>
+
+        <circle cx="590" cy="90" r="6" fill="#a78bfa" filter="url(#glow2)"/>
+        <text x="590" y="72" text-anchor="middle">AWS TGW</text>
+
+        <circle cx="680" cy="50" r="5.5" fill="#4ade80" filter="url(#glow2)"/>
+        <text x="695" y="45" text-anchor="start">MAIN VPC</text>
+        <text x="695" y="60" text-anchor="start" font-size="9" fill="#5d6773">AdGuard DNS</text>
+
+        <circle cx="680" cy="150" r="5.5" fill="#5d6773" filter="url(#glow2)"/>
+        <text x="695" y="145" text-anchor="start">FUTURE VPCS</text>
+        <text x="695" y="160" text-anchor="start" font-size="9" fill="#5d6773">attach &amp; go</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="rack">
+    <img src="/Projects_TransitVPC/Images/Enterprise_Hybrid_Cloud.png" alt="Enterprise hybrid cloud architecture diagram">
+    <div class="cap">fig. 1 &mdash; full architecture diagram, home lab to AWS</div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="section-tag">show inventory</div>
+  <h2 class="section-title">Technologies Used</h2>
+  <div class="sfp-grid">
+    <span class="sfp">AWS</span><span class="sfp">FortiGate VM</span><span class="sfp">Transit Gateway</span>
+    <span class="sfp">IPsec (VTI)</span><span class="sfp">eBGP</span><span class="sfp">Proxmox</span>
+    <span class="sfp">OPNsense</span><span class="sfp">AdGuard Home</span><span class="sfp">Amazon Linux 2023</span>
+    <span class="sfp">VPC / Subnets</span><span class="sfp">Route Tables</span><span class="sfp">ENIs</span>
+  </div>
+</section>
+
+<section id="network">
+  <div class="section-tag">show ip route</div>
+  <h2 class="section-title">Network Layout</h2>
+  <div class="grid">
+    <div class="route-card">
+      <div class="rt-hdr"><span>home lab</span><span class="led"></span></div>
+      <div class="rt-row"><span class="cidr">10.72.15.0/24</span><span class="purpose">Servers &amp; infrastructure</span></div>
+      <div class="rt-row"><span class="cidr">192.168.69.0/24</span><span class="purpose">Home client devices</span></div>
+    </div>
+    <div class="route-card">
+      <div class="rt-hdr"><span>aws transit vpc</span><span class="led amber"></span></div>
+      <div class="rt-row"><span class="cidr">10.123.0.0/16</span><span class="purpose">Network services</span></div>
+      <div class="rt-row"><span class="cidr">10.123.20.0/24</span><span class="purpose">Public subnet</span></div>
+      <div class="rt-row"><span class="cidr">10.123.10.0/24</span><span class="purpose">Private subnet</span></div>
+      <div class="rt-row"><span class="cidr">&mdash;</span><span class="purpose">FortiGate NVA</span></div>
+    </div>
+    <div class="route-card">
+      <div class="rt-hdr"><span>main application vpc</span><span class="led blue"></span></div>
+      <div class="rt-row"><span class="cidr">172.31.0.0/16</span><span class="purpose">Workloads</span></div>
+      <div class="rt-row"><span class="cidr">&mdash;</span><span class="purpose">Amazon Linux utility server</span></div>
+      <div class="rt-row"><span class="cidr">&mdash;</span><span class="purpose">AdGuard secondary DNS</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="routing">
+  <div class="section-tag">show bgp neighbors</div>
+  <h2 class="section-title">Dynamic Routing over eBGP</h2>
+  <p class="section-sub">Routes are exchanged dynamically instead of statically &mdash; when an advertised prefix changes on either side, both ends learn it automatically.</p>
+
+  <div class="peer-wrap">
+    <div class="peer-row">
+      <div class="peer-node">
+        <div class="name">FortiGate NVA</div>
+        <div class="asn">ASN 65001</div>
+      </div>
+      <div class="peer-link">
+        <div>eBGP peering</div>
+        <div class="line"></div>
+        <div>over IPsec VTI</div>
+      </div>
+      <div class="peer-node">
+        <div class="name">OPNsense</div>
+        <div class="asn">ASN 65002</div>
+      </div>
+    </div>
+
+    <div class="learn-grid">
+      <div class="learn-col">
+        <h4>AWS learns</h4>
+        <ul><li>10.72.15.0/24</li><li>192.168.69.0/24</li></ul>
+      </div>
+      <div class="learn-col">
+        <h4>On-premises learns</h4>
+        <ul><li>172.31.0.0/16</li><li>10.123.0.0/16</li></ul>
+      </div>
+    </div>
+    <div class="learn-note">no manual route updates required when advertised prefixes change</div>
+  </div>
+</section>
+
+<section id="design">
+  <div class="section-tag">show design-rationale</div>
+  <h2 class="section-title">Why a Transit VPC</h2>
+  <p class="section-sub">A VPN dropped straight into an application VPC is a common lab pattern &mdash; it just doesn't hold up once more than one workload needs access.</p>
+
+  <div class="grid">
+    <div class="module">
+      <h3><span class="led"></span>Separation of Duties</h3>
+      <p>The Transit VPC is a dedicated network services layer. Application workloads stay isolated from VPN termination and routing infrastructure.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led amber"></span>Centralized Security</h3>
+      <p>All hybrid traffic traverses the FortiGate firewall &mdash; one place for policy enforcement, logging, inspection, and future IPS/IDS.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led blue"></span>Scalability</h3>
+      <p>Future VPCs simply attach to the Transit Gateway. No additional VPN tunnels, no re-architecture &mdash; the same tunnel securely serves every attached VPC.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led" style="background:var(--purple);box-shadow:0 0 6px 1px rgba(167,139,250,.7)"></span>Enterprise Pattern</h3>
+      <p>Mirrors how larger orgs actually do this &mdash; dedicated network hubs rather than VPNs terminated straight into workload VPCs, as seen in MSPs, financial institutions, and multi-account AWS Organizations.</p>
+    </div>
+  </div>
+
+  <p class="section-sub" style="margin-top:34px;margin-bottom:0">
+    Native AWS Site-to-Site VPN is solid, but it gives limited control over inspection and advanced routing.
+    A FortiGate NVA trades a bit of simplicity for:
+  </p>
+  <div class="chip-list">
+    <span class="chip">Stateful firewall policies</span>
+    <span class="chip">Future IPS capability</span>
+    <span class="chip">Full routing control</span>
+    <span class="chip">Traffic visibility</span>
+    <span class="chip">Vendor-neutral firewall</span>
+  </div>
+</section>
+
+<section id="screenshots">
+  <div class="section-tag">ls -la screenshots/</div>
+  <h2 class="section-title">From the Lab</h2>
+  <p class="section-sub">Live configuration and status output pulled directly from the on-prem and AWS sides of the tunnel.</p>
+
+  <div class="grid">
+    <div class="shot"><a href="/Projects_TransitVPC/Images/OPNSENSE_IPSEC.png" class="lightbox-trigger"><img src="/Projects_TransitVPC/Images/OPNSENSE_IPSEC.png" alt="OPNsense IPsec tunnel status"></a><div class="cap">OPNsense &mdash; IPsec tunnel status</div></div>
+    <div class="shot"><a href="/Projects_TransitVPC/Images/OPNSENSE_BGP_Routing_table.png" class="lightbox-trigger"><img src="/Projects_TransitVPC/Images/OPNSENSE_BGP_Routing_table.png" alt="OPNsense BGP routing table"></a><div class="cap">OPNsense &mdash; BGP routing table</div></div>
+    <div class="shot"><a href="/Projects_TransitVPC/Images/AWS_Fortigate.png" class="lightbox-trigger"><img src="/Projects_TransitVPC/Images/AWS_Fortigate.png" alt="AWS FortiGate NVA console"></a><div class="cap">AWS &mdash; FortiGate NVA</div></div>
+    <div class="shot"><a href="/Projects_TransitVPC/Images/Foritate_IPSEC.png" class="lightbox-trigger"><img src="/Projects_TransitVPC/Images/Foritate_IPSEC.png" alt="FortiGate IPsec phase status"></a><div class="cap">FortiGate &mdash; IPsec phase status</div></div>
+    <div class="shot"><a href="/Projects_TransitVPC/Images/FGT_Interfaces.png" class="lightbox-trigger"><img src="/Projects_TransitVPC/Images/FGT_Interfaces.png" alt="FortiGate interfaces"></a><div class="cap">FortiGate &mdash; interfaces</div></div>
+    <div class="shot"><a href="/Projects_TransitVPC/Images/TGW.png" class="lightbox-trigger"><img src="/Projects_TransitVPC/Images/TGW.png" alt="AWS Transit Gateway route table"></a><div class="cap">AWS &mdash; Transit Gateway route table</div></div>
+  </div>
+</section>
+
+<section id="responsibilities">
+<div class="section-tag">whoami</div>
+<h2 class="section-title">My Responsibilities</h2>
+<div class="grid">
+<div class="module"><h3><span class="led"></span>Architecture & Design</h3><p>Designed the Transit VPC, AWS Transit Gateway topology, IP addressing, and hybrid connectivity strategy.</p></div>
+<div class="module"><h3><span class="led amber"></span>Implementation</h3><p>Configured FortiGate NVA, Route-Based IPsec VPN, eBGP peering, VPC route tables, and deployed the Amazon Linux AdGuard workload.</p></div>
+<div class="module"><h3><span class="led blue"></span>Validation</h3><p>Verified dynamic route exchange, end-to-end connectivity, hybrid DNS resolution, and documented the complete architecture.</p></div>
+</div>
+</section>
+
+<section id="roadmap">
+  <div class="section-tag">git diff --stat</div>
+  <h2 class="section-title">Current State &amp; What's Next</h2>
+  <div class="diff-grid">
+    <div class="diff-col committed">
+      <div class="dc-hdr">committed &mdash; current features</div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">Dedicated Transit VPC</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">AWS Transit Gateway</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">FortiGate VM (NVA)</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">Route-based IPsec VPN (VTI)</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">eBGP dynamic routing</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">Amazon Linux utility server</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">AdGuard Home, hybrid DNS</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">Separate transit &amp; application VPCs</span></div>
+    </div>
+    <div class="diff-col pending">
+      <div class="dc-hdr">candidate-config &mdash; future enhancements</div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Multi-AZ FortiGate HA</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Additional application VPCs</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">AWS Inspection VPC</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">AWS Network Firewall comparison</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Wazuh SIEM integration</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Route53 Resolver Endpoints</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Terraform deployment</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">CI/CD with GitHub Actions</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="lessons">
+  <div class="section-tag">show notes</div>
+  <h2 class="section-title">Lessons Learned</h2>
+  <div class="lessons">
+    <div class="lesson-line"><span class="hash">#</span>AWS Transit Gateway architecture</div>
+    <div class="lesson-line"><span class="hash">#</span>Network Virtual Appliance design</div>
+    <div class="lesson-line"><span class="hash">#</span>Transit VPC patterns</div>
+    <div class="lesson-line"><span class="hash">#</span>Route-based VPNs</div>
+    <div class="lesson-line"><span class="hash">#</span>eBGP route advertisement</div>
+    <div class="lesson-line"><span class="hash">#</span>AWS route table design</div>
+    <div class="lesson-line"><span class="hash">#</span>Hybrid DNS architecture</div>
+    <div class="lesson-line"><span class="hash">#</span>Cloud network segmentation</div>
+    <div class="lesson-line"><span class="hash">#</span>Hub-and-spoke networking</div>
+    <div class="lesson-line"><span class="hash">#</span>Designing for scale, not just today</div>
+  </div>
+</section>
+
+<footer>
+  end &middot; <a href="/">&larr; back to portfolio</a> &middot; <a href="https://github.com/laxamanasr-blip" target="_blank">view repository</a> &middot; &copy; 2026 Sid Laxamana
+</footer>
+
+<div class="diagram-lightbox" id="diagramLightbox">
+  <div class="dl-inner">
+    <div class="dl-close" id="dlClose">&times;</div>
+    <div id="dlContent"></div>
+  </div>
+</div>
+
+
+<div id="lightbox" class="lightbox">
+<span class="close">&times;</span>
+<img id="lightbox-img" src="" alt="">
+</div>
+
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+// ---- lightbox (kept behavior, added fade class) ----
+const lb=document.getElementById('lightbox');
+const img=lb.querySelector('#lightbox-img');
+document.querySelectorAll('.lightbox-trigger').forEach(a=>{
+ a.addEventListener('click',e=>{
+   e.preventDefault();
+   img.src=a.href;
+   lb.style.display='flex';
+   requestAnimationFrame(()=>lb.classList.add('open'));
+ });
+});
+function closeLightbox(){
+  lb.classList.remove('open');
+  setTimeout(()=>{ lb.style.display='none'; img.src=''; }, 250);
+}
+lb.addEventListener('click',e=>{
+ if(e.target===lb||e.target.classList.contains('close')) closeLightbox();
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape' && lb.style.display==='flex') closeLightbox();
+});
+
+// ---- click-to-enlarge on the hop diagram ----
+const hopPanel=document.getElementById('hopPanel');
+const diagramLightbox=document.getElementById('diagramLightbox');
+const dlContent=document.getElementById('dlContent');
+const dlClose=document.getElementById('dlClose');
+function makeIdsUnique(svgEl, suffix){
+  svgEl.querySelectorAll('[id]').forEach(el=>{
+    const oldId=el.id, newId=oldId+suffix;
+    el.id=newId;
+    svgEl.querySelectorAll('*').forEach(node=>{
+      ['filter','fill','stroke'].forEach(attr=>{
+        const val=node.getAttribute(attr);
+        if(val && val.indexOf('#'+oldId)!==-1){
+          node.setAttribute(attr, val.split('#'+oldId).join('#'+newId));
+        }
+      });
+    });
+  });
+}
+function closeDiagramLightbox(){
+  diagramLightbox.classList.remove('open');
+  setTimeout(()=>{ diagramLightbox.style.display='none'; dlContent.innerHTML=''; }, 250);
+}
+if(hopPanel && diagramLightbox){
+  hopPanel.addEventListener('click', ()=>{
+    dlContent.innerHTML='';
+    const clone=hopPanel.cloneNode(true);
+    clone.removeAttribute('id');
+    const svgClone=clone.querySelector('svg');
+    if(svgClone) makeIdsUnique(svgClone, '-lb');
+    dlContent.appendChild(clone);
+    diagramLightbox.style.display='flex';
+    requestAnimationFrame(()=>diagramLightbox.classList.add('open'));
+  });
+  dlClose.addEventListener('click', closeDiagramLightbox);
+  diagramLightbox.addEventListener('click', e=>{
+    if(e.target===diagramLightbox) closeDiagramLightbox();
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && diagramLightbox.style.display==='flex') closeDiagramLightbox();
+  });
+}
+
+// ---- nav scroll state + progress bar + back-to-top ----
+const navEl=document.querySelector('nav');
+const progressEl=document.getElementById('scrollProgress');
+const toTopBtn=document.getElementById('toTop');
+function onScroll(){
+  const y=window.scrollY||document.documentElement.scrollTop;
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=max>0?(y/max)*100:0;
+  progressEl.style.width=pct+'%';
+  navEl.classList.toggle('scrolled', y>10);
+  toTopBtn.classList.toggle('show', y>500);
+}
+document.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+toTopBtn.addEventListener('click', ()=>window.scrollTo({top:0, behavior:'smooth'}));
+
+// ---- header mouse-spotlight ----
+const headerEl=document.querySelector('header');
+if(headerEl){
+  headerEl.addEventListener('mousemove', e=>{
+    const r=headerEl.getBoundingClientRect();
+    headerEl.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+    headerEl.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+  });
+}
+
+// ---- reveal on scroll ----
+const revealTargets=document.querySelectorAll(
+  '.module, .route-card, .peer-wrap, .rack, .shot, .hoppanel, .diff-col, .learn-col, .chip-list, .lessons, .sfp-grid'
+);
+revealTargets.forEach(el=>el.classList.add('reveal'));
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    }
+  });
+}, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+revealTargets.forEach(el=>io.observe(el));
+
+document.querySelectorAll('.grid').forEach(grid=>{
+  [...grid.children].forEach((child,i)=>{
+    child.style.transitionDelay=Math.min(i*70,280)+'ms';
+  });
+});
+</script>
+
+</body>
+</html>

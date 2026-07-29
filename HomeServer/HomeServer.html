@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5HG3GBNTC1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5HG3GBNTC1');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homelab Network Core | Sid Laxamana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f14;
+  --panel:#131a22;
+  --panel-2:#171f29;
+  --line:#232c38;
+  --line-strong:#2f3b4a;
+  --text:#eef2f6;
+  --muted:#93a1b0;
+  --muted-dim:#5c6b7a;
+
+  --violet:#8b7cf6;
+  --violet-soft:rgba(139,124,246,.14);
+  --teal:#2dd4bf;
+  --teal-soft:rgba(45,212,191,.14);
+  --sky:#60a5fa;
+  --sky-soft:rgba(96,165,250,.14);
+  --amber:#f2b84b;
+  --amber-soft:rgba(242,184,75,.14);
+
+  --disp:'Space Grotesk',sans-serif;
+  --sans:'Inter',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+a{color:inherit}
+img{max-width:100%;display:block;border-radius:8px}
+::selection{background:var(--violet);color:#0b0f14}
+:focus-visible{outline:2px solid var(--violet);outline-offset:3px}
+
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(139,124,246,.10), transparent 40%),
+    radial-gradient(circle at 88% 18%, rgba(45,212,191,.08), transparent 40%);
+}
+
+/* ---------- Nav ---------- */
+nav{
+  position:sticky;top:0;z-index:99;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 8%;
+  background:rgba(11,15,20,.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font-family:var(--disp);font-weight:700;font-size:1rem;
+  display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--text);
+}
+.logo .back{color:var(--muted);font-weight:500}
+.logo .dot3{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px 1px rgba(45,212,191,.6)}
+nav .links{display:flex;gap:22px;font-size:.86rem;align-items:center}
+nav .links a{color:var(--muted);text-decoration:none;font-weight:500}
+nav .links a:hover{color:var(--text)}
+nav .links .repo-btn{
+  border:1px solid var(--line-strong);padding:8px 16px;border-radius:8px;color:var(--text);
+  transition:.2s;
+}
+nav .links .repo-btn:hover{border-color:var(--violet);color:var(--violet)}
+
+/* ---------- Hero ---------- */
+header{padding:64px 8% 44px;position:relative;z-index:1}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.82rem;font-weight:600;color:var(--teal);
+  background:var(--teal-soft);border:1px solid rgba(45,212,191,.3);
+  padding:6px 14px;border-radius:999px;margin-bottom:22px;
+}
+h1{
+  font-family:var(--disp);font-weight:700;
+  font-size:clamp(2.1rem,4.2vw,3.2rem);
+  line-height:1.15;margin-bottom:16px;max-width:900px;
+}
+h1 .hl{color:var(--violet)}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:740px;margin-bottom:30px}
+
+.btn-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:38px}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 20px;border-radius:8px;
+  font-size:.9rem;font-weight:600;
+  text-decoration:none;transition:.2s ease;border:1px solid transparent;
+}
+.btn.primary{background:var(--violet);color:#0b0f14}
+.btn.primary:hover{background:#a496ff;transform:translateY(-2px)}
+.btn.secondary{border-color:var(--line-strong);color:var(--text)}
+.btn.secondary:hover{border-color:var(--violet);color:var(--violet);transform:translateY(-2px)}
+
+/* ---------- spec strip ---------- */
+.spec-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:1100px;
+}
+.spec-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:20px;
+}
+.spec-card .label{font-size:.72rem;color:var(--muted-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.spec-card .value{font-family:var(--mono);font-size:1.02rem;font-weight:600;color:var(--text)}
+.spec-card .sub{font-size:.78rem;color:var(--muted);margin-top:4px}
+
+/* ---------- Sections ---------- */
+section{padding:60px 8%;position:relative;z-index:1;border-top:1px solid var(--line)}
+.kicker{font-size:.78rem;font-weight:700;color:var(--violet);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.section-title{font-family:var(--disp);font-size:1.65rem;font-weight:700;margin-bottom:16px}
+.section-sub{color:var(--muted);max-width:760px;margin-bottom:34px;font-size:.98rem}
+.prose{color:var(--muted);max-width:760px;font-size:.98rem}
+.prose p{margin-bottom:16px}
+.prose strong{color:var(--text)}
+
+/* ---------- category header ---------- */
+.cat-header{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+}
+.cat-icon{
+  width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.cat-icon svg{width:18px;height:18px}
+.cat-header h3{font-family:var(--disp);font-size:1.15rem;font-weight:600}
+.cat-header .count{font-size:.78rem;color:var(--muted-dim);margin-left:auto;font-family:var(--mono)}
+
+.cat-block{margin-bottom:52px}
+.cat-block:last-child{margin-bottom:0}
+
+/* color variants */
+.v-violet .cat-icon{background:var(--violet-soft);color:var(--violet)}
+.v-teal .cat-icon{background:var(--teal-soft);color:var(--teal)}
+.v-sky .cat-icon{background:var(--sky-soft);color:var(--sky)}
+.v-amber .cat-icon{background:var(--amber-soft);color:var(--amber)}
+
+/* ---------- tile grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.tile{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:20px;transition:.2s ease;
+}
+.tile:hover{border-color:var(--line-strong);transform:translateY(-3px)}
+.tile .row1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.tile h4{font-size:.98rem;font-weight:600}
+.tile .pill{
+  font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:3px 9px;border-radius:999px;flex-shrink:0;margin-left:10px;
+}
+.pill.core{background:var(--teal-soft);color:var(--teal)}
+.pill.security{background:rgba(251,113,133,.14);color:#fb7185}
+.pill.identity{background:var(--violet-soft);color:var(--violet)}
+.pill.monitor{background:var(--sky-soft);color:var(--sky)}
+.pill.storage{background:var(--teal-soft);color:var(--teal)}
+.pill.lab{background:var(--amber-soft);color:var(--amber)}
+.tile p{color:var(--muted);font-size:.87rem;margin-bottom:14px}
+.tile .shot{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:12px}
+.tile .shot img{border-radius:0}
+.tile .cap{font-size:.72rem;color:var(--muted-dim);margin-top:8px}
+
+/* ---------- topology / VLAN ---------- */
+.rack{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:16px;margin-top:12px;max-width:1000px;
+}
+.rack .cap{font-size:.78rem;color:var(--muted-dim);padding-top:12px}
+
+.vlan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:24px}
+.vlan-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;
+  border-left:3px solid var(--violet);
+}
+.vlan-card.teal{border-left-color:var(--teal)}
+.vlan-card.sky{border-left-color:var(--sky)}
+.vlan-card.amber{border-left-color:var(--amber)}
+.vlan-card .vid{font-family:var(--mono);font-size:.78rem;color:var(--muted-dim);margin-bottom:6px}
+.vlan-card h5{font-size:.95rem;margin-bottom:6px}
+.vlan-card p{font-size:.84rem;color:var(--muted)}
+
+/* ---------- inventory tag cloud ---------- */
+.tag-cloud{display:flex;flex-wrap:wrap;gap:10px}
+.tagchip{
+  font-size:.82rem;color:var(--text);border:1px solid var(--line-strong);
+  background:var(--panel);padding:8px 14px;border-radius:999px;
+  display:flex;align-items:center;gap:8px;
+}
+.tagchip .d{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+
+/* ---------- goals checklist ---------- */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.check-list{list-style:none}
+.check-list li{
+  display:flex;gap:10px;padding:9px 0;font-size:.92rem;color:var(--muted);
+  border-bottom:1px solid var(--line);
+}
+.check-list li:last-child{border-bottom:none}
+.check-list .c{color:var(--teal);flex-shrink:0;font-weight:700}
+.roadmap-list li .c{color:var(--amber)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px}
+.card h4{font-family:var(--disp);font-size:1.05rem;margin-bottom:14px}
+
+footer{
+  text-align:center;padding:44px;color:var(--muted-dim);
+  border-top:1px solid var(--line);font-size:.85rem;
+  position:relative;z-index:1;
+}
+footer a{color:var(--violet);text-decoration:none;font-weight:600}
+footer a:hover{text-decoration:underline}
+
+@media(max-width:900px){
+  nav{padding:14px 6%}
+  nav .links{gap:12px}
+  header{padding:48px 6% 32px}
+  section{padding:44px 6%}
+  .spec-strip{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+}
+
+.hardware-showcase{
+display:grid;
+grid-template-columns:.85fr 1.15fr;
+gap:28px;
+align-items:center;
+margin-top:28px;
+margin-bottom:40px;
+}
+.hardware-showcase .hw-photo{
+display:flex;justify-content:center;
+}
+.hardware-showcase img{
+width:100%;
+max-width:380px;
+max-height:560px;
+object-fit:contain;
+border:1px solid var(--line);
+border-radius:12px;
+background:var(--panel);
+}
+.hardware-card{
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:12px;
+padding:24px;
+}
+.hardware-card h3{
+font-family:var(--disp);
+margin-bottom:14px;
+}
+.hardware-card .hw-lede{
+font-size:1.15rem;font-weight:600;color:var(--text);line-height:1.5;
+margin-bottom:14px;
+}
+.hardware-card .hw-lede .accent{color:var(--violet)}
+.hardware-card .hw-sub{color:var(--muted);font-size:.95rem;line-height:1.7}
+.hardware-card ul{list-style:none}
+.hardware-card li{
+padding:10px 0;
+border-top:1px solid var(--line);
+color:var(--muted);
+}
+.hardware-card li:first-child{border-top:none}
+@media(max-width:900px){
+.hardware-showcase{grid-template-columns:1fr;}
+}
+
+</style>
+
+<style>
+.hero-sub{max-width:850px}
+.tile{overflow:hidden;position:relative}
+.tile::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(139,124,246,.05),transparent 45%);opacity:0;transition:.35s}
+.tile:hover::before{opacity:1}
+.tile:hover{box-shadow:0 18px 40px rgba(0,0,0,.35);border-color:#8b7cf6}
+.shot{cursor:pointer}
+.shot img{transition:transform .45s ease}
+.tile:hover .shot img{transform:scale(1.05)}
+.btn{position:relative;overflow:hidden}
+.btn:after{content:"";position:absolute;left:-120%;top:0;width:80%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:.6s}
+.btn:hover:after{left:140%}
+.spec-card{transition:.3s}
+.spec-card:hover{transform:translateY(-4px);box-shadow:0 10px 25px rgba(0,0,0,.3)}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:9999}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:12px}
+</style>
+
+<style>
+/* ============ VISUAL POLISH PASS ============ */
+
+/* scroll progress bar */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;z-index:200;
+  background:linear-gradient(90deg,var(--violet),var(--sky),var(--teal));
+  box-shadow:0 0 10px rgba(139,124,246,.6);
+  transition:width .1s linear;
+}
+
+/* grid-line texture, matching the main landing page and Transit VPC page */
+body::before{
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:36px 36px;
+}
+.aurora{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
+}
+.aurora span{
+  position:absolute;border-radius:50%;filter:blur(70px);opacity:.16;
+  will-change:transform;
+}
+.aurora span:nth-child(1){width:520px;height:520px;background:var(--violet);top:-140px;left:-100px;animation:drift1 26s ease-in-out infinite;}
+.aurora span:nth-child(2){width:460px;height:460px;background:var(--teal);top:10%;right:-160px;animation:drift2 32s ease-in-out infinite;}
+.aurora span:nth-child(3){width:380px;height:380px;background:var(--sky);bottom:-140px;left:30%;animation:drift3 30s ease-in-out infinite;}
+@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,80px)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-70px,60px)}}
+@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(50px,-60px)}}
+
+/* nav gets a subtle lift once scrolled */
+nav{transition:box-shadow .3s ease,background .3s ease}
+nav.scrolled{box-shadow:0 8px 24px rgba(0,0,0,.35);background:rgba(11,15,20,.96)}
+
+/* ping ring on status dots */
+.dot3{position:relative}
+.dot3::after{
+  content:"";position:absolute;inset:-4px;border-radius:50%;
+  border:1.5px solid var(--teal);opacity:.8;
+  animation:ping 2.2s cubic-bezier(0,.5,.5,1) infinite;
+}
+@keyframes ping{0%{transform:scale(.7);opacity:.8}75%,100%{transform:scale(1.9);opacity:0}}
+
+/* signal bars inside eyebrow badge */
+.signal{display:inline-flex;align-items:flex-end;gap:2px;height:10px;margin-right:2px}
+.signal span{width:3px;background:var(--teal);border-radius:1px;animation:sig 1.4s ease-in-out infinite}
+.signal span:nth-child(1){height:40%;animation-delay:0s}
+.signal span:nth-child(2){height:70%;animation-delay:.15s}
+.signal span:nth-child(3){height:100%;animation-delay:.3s}
+@keyframes sig{0%,100%{opacity:.4;transform:scaleY(.7)}50%{opacity:1;transform:scaleY(1)}}
+
+/* reveal-on-scroll */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+
+/* glowing section dividers instead of flat lines */
+section{border-top:1px solid transparent;position:relative}
+section::before{
+  content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-strong) 20%,var(--violet) 50%,var(--teal) 80%,transparent);
+  opacity:.55;
+}
+
+/* floating hero product shot */
+@media (prefers-reduced-motion: no-preference){
+  .hardware-showcase img{animation:floaty 6s ease-in-out infinite}
+}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* colour-cycled accent on spec cards */
+.spec-strip .spec-card{border-top:3px solid var(--line);position:relative;overflow:hidden}
+.spec-strip .spec-card:nth-child(1){border-top-color:var(--violet)}
+.spec-strip .spec-card:nth-child(2){border-top-color:var(--teal)}
+.spec-strip .spec-card:nth-child(3){border-top-color:var(--sky)}
+.spec-strip .spec-card:nth-child(4){border-top-color:var(--amber)}
+
+/* header mouse-spotlight */
+header{position:relative;overflow:hidden}
+header::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,20%),rgba(139,124,246,.14),transparent 70%);
+  transition:background .1s ease;
+}
+header > *{position:relative;z-index:1}
+
+/* back to top */
+.to-top{
+  position:fixed;right:26px;bottom:26px;z-index:150;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .3s ease,transform .3s ease,border-color .2s,box-shadow .2s;
+}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.to-top:hover{border-color:var(--violet);box-shadow:0 8px 20px rgba(139,124,246,.25)}
+.to-top svg{width:18px;height:18px}
+
+/* lightbox polish */
+.lightbox{
+  backdrop-filter:blur(6px);
+  opacity:0;transition:opacity .25s ease;
+}
+.lightbox.open{display:flex;opacity:1}
+.lightbox figure{position:relative;max-width:90vw;max-height:90vh}
+.lightbox img{box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.lightbox .lb-close{
+  position:absolute;top:-40px;right:0;width:32px;height:32px;border-radius:8px;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;
+}
+.lightbox .lb-cap{
+  text-align:center;color:var(--muted);font-size:.82rem;margin-top:12px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .aurora span,.dot3::after,.signal span,.hardware-showcase img{animation:none !important}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav>
+  <a class="logo" href="/"><span class="back">&larr;</span>sid<span class="dot3"></span></a>
+  <div class="links">
+    <a href="#services">services</a>
+    <a href="#network">network</a>
+    <a href="#goals">goals</a>
+    <a class="repo-btn" href="https://github.com/laxamanasr-blip" target="_blank">View Repo</a>
+  </div>
+</nav>
+
+<header>
+  <span class="eyebrow"><span class="signal"><span></span><span></span><span></span></span><span class="dot3"></span>24/7 &middot; self-hosted &middot; still growing</span>
+  <h1>A 6-year-old gaming PC, <span class="hl">reborn as a homelab.</span></h1>
+  <p class="hero-sub">
+    This is the network core my other projects run on top of &mdash; a Proxmox host doing enterprise-style
+    virtualization, routing, identity, monitoring, and self-hosting, all on hardware that used to just play games.
+  </p>
+
+  <div class="btn-row">
+    <a class="btn primary" target="_blank" href="https://github.com/laxamanasr-blip">View Repository</a>
+    <a class="btn secondary" href="/">Back to Portfolio</a>
+  </div>
+
+  
+<div class="hardware-showcase">
+<div class="hw-photo">
+<img src="/Projects_HomeServer/Images/Physical.png" alt="Physical Homelab Server">
+</div>
+<div class="hardware-card">
+<h3>From Gaming Rig to Server</h3>
+<p class="hw-lede">Used to chase frame rates in <span class="accent">Dota 2</span>. Now it chases uptime.</p>
+<p class="hw-sub">
+Same silicon, new job. No new hardware purchase required &mdash; just Proxmox, a bit of patience,
+and a Ryzen 5 that had a few good years left in it. Full specs are below.
+</p>
+</div>
+</div>
+
+
+<div class="spec-strip">
+    <div class="spec-card"><div class="label">CPU</div><div class="value">Ryzen 5 3600</div><div class="sub">6c / 12t</div></div>
+    <div class="spec-card"><div class="label">GPU</div><div class="value">GTX 1660 Super</div><div class="sub">passthrough-capable</div></div>
+    <div class="spec-card"><div class="label">Memory</div><div class="value">80 GB RAM</div><div class="sub">upgraded for VM density</div></div>
+    <div class="spec-card"><div class="label">Hypervisor</div><div class="value">Proxmox VE</div><div class="sub">primary platform</div></div>
+  </div>
+</header>
+
+<section id="overview">
+  <div class="kicker">Overview</div>
+  <h2 class="section-title">Why this box exists</h2>
+  <div class="prose">
+    <p>
+      This repository showcases the production-inspired homelab I continuously build and operate to develop practical skills in <strong>enterprise-style networking,
+      virtualization, identity, monitoring, storage, and security operations</strong>.
+    </p>
+    <p>
+      At the center is <strong>Proxmox VE</strong>, with an <strong>OPNsense router-on-a-stick (ROAS)</strong> design
+      handling firewalling, routing, WAN connectivity, and VLAN segmentation. On top of that network core sit the
+      services I actually use day to day &mdash; identity, DNS, PKI, monitoring, secrets management, documentation,
+      media, and storage.
+    </p>
+    <p>
+      It's both a <strong>working platform</strong> for internal services and a <strong>practice environment</strong>
+      for networking, cloud, and security work &mdash; and the foundation for future projects around SIEM pipelines,
+      WAF testing, hybrid connectivity, and network automation.
+    </p>
+  </div>
+</section>
+
+<section id="network">
+  <div class="kicker">Network Architecture</div>
+  <h2 class="section-title">OPNsense Router-on-a-Stick</h2>
+  <p class="section-sub">
+    A VLAN-aware Linux bridge (<code>vmbr0</code>) on the Proxmox host carries tagged networks from a managed switch
+    straight into the OPNsense VM, which terminates every VLAN-backed interface while the lab stays consolidated on
+    a single hypervisor.
+  </p>
+
+  <div class="rack">
+    <img src="Images/topology.png" alt="Homelab network topology diagram">
+    <div class="cap">fig. 1 &mdash; dual-ISP handoff, Deco uplink, and isolated VM compute network</div>
+  </div>
+
+  <div class="vlan-grid">
+    <div class="vlan-card">
+      <div class="vid">VLAN 10</div>
+      <h5>PLDT WAN</h5>
+      <p>Primary ISP handoff, presented to OPNsense as a dedicated WAN interface.</p>
+    </div>
+    <div class="vlan-card teal">
+      <div class="vid">VLAN 30</div>
+      <h5>Globe WAN</h5>
+      <p>Secondary / backup ISP handoff for WAN failover.</p>
+    </div>
+    <div class="vlan-card sky">
+      <div class="vid">VLAN 50</div>
+      <h5>Deco / Home Uplink</h5>
+      <p>TP-Link Deco mesh uplink and home client network, routed separately from infrastructure.</p>
+    </div>
+    <div class="vlan-card amber">
+      <div class="vid">VLAN 60</div>
+      <h5>Internal VM / Compute</h5>
+      <p>Isolated network for VMs and internal services, with OPNsense as gateway.</p>
+    </div>
+  </div>
+
+  <div class="rack">
+    <img src="Images/OPNsense_int.png" alt="OPNsense interface configuration">
+    <div class="cap">fig. 2 &mdash; OPNsense interface assignment across VLANs</div>
+  </div>
+
+  <p class="section-sub" style="margin-top:28px">
+    A managed switch trunks the required VLANs to the Proxmox host. Inside Proxmox, the OPNsense VM handles routing
+    between internal networks, WAN connectivity and failover pathing, firewall policy enforcement, gateway services
+    for the isolated VM network, and separation between home/client traffic and infrastructure workloads.
+  </p>
+</section>
+
+<section id="services">
+  <div class="kicker">Core Infrastructure</div>
+  <h2 class="section-title">Platform Services & Self-Hosted Applications</h2>
+  <p class="section-sub">Grouped the way I actually think about the lab &mdash; virtualization and network core first, then the services layered on top.</p>
+
+  <div class="cat-block v-teal">
+    <div class="cat-header">
+      <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/><circle cx="7" cy="7" r="0.6" fill="currentColor"/><circle cx="7" cy="17" r="0.6" fill="currentColor"/></svg></div>
+      <h3>Virtualization &amp; Network Core</h3>
+      <span class="count">04</span>
+    </div>
+    <div class="grid">
+      <div class="tile">
+        <div class="row1"><h4>Proxmox VE</h4><span class="pill core">core</span></div>
+        <p>Primary hypervisor for every infrastructure and application VM in the lab.</p>
+        <div class="shot"><img src="Images/Proxmox.png" alt="Proxmox VE dashboard"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>OPNsense</h4><span class="pill core">core</span></div>
+        <p>Virtual firewall/router: inter-VLAN routing, dual-WAN, policy enforcement, gateway services.</p>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Managed Trunk Switch</h4><span class="pill core">core</span></div>
+        <p>Carries tagged VLANs between the physical network and the Proxmox host.</p>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>TP-Link Deco Mesh</h4><span class="pill core">core</span></div>
+        <p>Home network mesh, connected through a dedicated VLAN/uplink path.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-block" style="border-left:0">
+    <div class="cat-header v-fbrose" style="--i:0">
+      <div class="cat-icon" style="background:rgba(251,113,133,.14);color:#fb7185">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>
+      </div>
+      <h3>Security &amp; Filtering</h3>
+      <span class="count">03</span>
+    </div>
+    <div class="grid">
+      <div class="tile">
+        <div class="row1"><h4>Suricata IDS/IPS</h4><span class="pill security">security</span></div>
+        <p>Intrusion detection and prevention attached to the OPNsense platform.</p>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Zenarmor NGFW</h4><span class="pill security">security</span></div>
+        <p>Next-gen firewall layer for deeper traffic inspection.</p>
+        <div class="shot"><img src="Images/OPNsense_Zen.png" alt="Zenarmor and OPNsense dashboard"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>AdGuard Home</h4><span class="pill security">security</span></div>
+        <p>DNS filtering and resolver functions, plus visibility into DNS activity.</p>
+        <div class="shot"><img src="Images/adguard.png" alt="AdGuard Home dashboard"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-block v-violet">
+    <div class="cat-header">
+      <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/></svg></div>
+      <h3>Identity &amp; Core Services</h3>
+      <span class="count">03</span>
+    </div>
+    <div class="grid">
+      <div class="tile">
+        <div class="row1"><h4>Windows Server</h4><span class="pill identity">identity</span></div>
+        <p>DNS, NPS (RADIUS-style auth testing), and Certificate Authority for internal PKI.</p>
+        <div class="shot"><img src="Images/cert.png" alt="Certificate Authority console"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Authentik</h4><span class="pill identity">identity</span></div>
+        <p>Identity provider / SSO for centralized authentication across internal services.</p>
+        <div class="shot"><img src="Images/authentik.png" alt="Authentik identity provider dashboard"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Vaultwarden</h4><span class="pill identity">identity</span></div>
+        <p>Self-hosted password and credential management for the lab.</p>
+        <div class="shot"><img src="Images/vaultwarden.png" alt="Vaultwarden vault"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-block v-sky">
+    <div class="cat-header">
+      <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16M6 19V9m5 10V5m5 14v-7"/></svg></div>
+      <h3>Monitoring, IPAM &amp; Documentation</h3>
+      <span class="count">03</span>
+    </div>
+    <div class="grid">
+      <div class="tile">
+        <div class="row1"><h4>NetBox</h4><span class="pill monitor">docs</span></div>
+        <p>Source of truth for IP allocations, VLAN/subnet docs, and infrastructure inventory.</p>
+        <div class="shot"><img src="Images/netbox.png" alt="NetBox IPAM dashboard"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>PRTG</h4><span class="pill monitor">monitoring</span></div>
+        <p>Infrastructure health monitoring, reachability checks, service monitoring.</p>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Grafana</h4><span class="pill monitor">monitoring</span></div>
+        <p>Dashboards and visualization, with room to grow into more telemetry sources.</p>
+        <div class="shot"><img src="Images/grafana.png" alt="Grafana dashboard"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-block v-teal">
+    <div class="cat-header">
+      <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg></div>
+      <h3>Remote Access &amp; Storage</h3>
+      <span class="count">04</span>
+    </div>
+    <div class="grid">
+      <div class="tile">
+        <div class="row1"><h4>Tailscale Gateway</h4><span class="pill storage">access</span></div>
+        <p>Secure remote access into the lab without broadly exposing services to the internet.</p>
+        <div class="shot"><img src="Images/tailscale.png" alt="Tailscale admin console"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Nextcloud</h4><span class="pill storage">storage</span></div>
+        <p>Self-hosted cloud storage and internal file platform.</p>
+        <div class="shot"><img src="Images/nextcloud.png" alt="Nextcloud dashboard"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Jellyfin</h4><span class="pill storage">media</span></div>
+        <p>Self-hosted media service running inside the lab.</p>
+        <div class="shot"><img src="Images/jelly.png" alt="Jellyfin media server"></div>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>Agent DVR</h4><span class="pill storage">media</span></div>
+        <p>Video / surveillance-related workloads.</p>
+        <div class="shot"><img src="Images/AgentDVR.png" alt="Agent DVR interface"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-block v-amber">
+    <div class="cat-header">
+      <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5l-6 10a1.5 1.5 0 0 0 1.3 2.2h13.4A1.5 1.5 0 0 0 20 18L14 8V3"/></svg></div>
+      <h3>Network Lab Platforms</h3>
+      <span class="count">02</span>
+    </div>
+    <div class="grid">
+      <div class="tile">
+        <div class="row1"><h4>EVE-NG</h4><span class="pill lab">lab</span></div>
+        <p>Network simulation for testing designs and routing/switching scenarios.</p>
+      </div>
+      <div class="tile">
+        <div class="row1"><h4>GNS3</h4><span class="pill lab">lab</span></div>
+        <p>Isolated network labs for practicing troubleshooting without touching production.</p>
+        <div class="shot"><img src="Images/gns3.png" alt="GNS3 network simulation"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="inventory">
+  <div class="kicker">Inventory</div>
+  <h2 class="section-title">Current Service List</h2>
+  <div class="tag-cloud">
+    <span class="tagchip"><span class="d"></span>Proxmox VE</span>
+    <span class="tagchip"><span class="d"></span>OPNsense</span>
+    <span class="tagchip"><span class="d"></span>Windows Server</span>
+    <span class="tagchip"><span class="d"></span>Authentik</span>
+    <span class="tagchip"><span class="d"></span>AdGuard Home</span>
+    <span class="tagchip"><span class="d"></span>NetBox</span>
+    <span class="tagchip"><span class="d"></span>Vaultwarden</span>
+    <span class="tagchip"><span class="d"></span>PRTG</span>
+    <span class="tagchip"><span class="d"></span>Grafana</span>
+    <span class="tagchip"><span class="d"></span>Tailscale</span>
+    <span class="tagchip"><span class="d"></span>Nextcloud</span>
+    <span class="tagchip"><span class="d"></span>Jellyfin</span>
+    <span class="tagchip"><span class="d"></span>Agent DVR</span>
+    <span class="tagchip"><span class="d"></span>EVE-NG</span>
+    <span class="tagchip"><span class="d"></span>GNS3</span>
+  </div>
+</section>
+
+<section id="goals">
+  <div class="kicker">Design Goals &amp; Roadmap</div>
+  <h2 class="section-title">Where it's going</h2>
+  <div class="two-col">
+    <div class="card">
+      <h4>Security design goals</h4>
+      <ul class="check-list">
+        <li><span class="c">&#10003;</span>Segment infrastructure and user/client traffic</li>
+        <li><span class="c">&#10003;</span>Firewall policy enforcement between services and networks</li>
+        <li><span class="c">&#10003;</span>Limit unnecessary exposure of internal services</li>
+        <li><span class="c">&#10003;</span>Centralize identity where possible</li>
+        <li><span class="c">&#10003;</span>Use internal PKI for certificate-based workflows</li>
+        <li><span class="c">&#10003;</span>Improve visibility with monitoring &amp; security tooling</li>
+        <li><span class="c">&#10003;</span>Document assets, IPs, and infrastructure relationships</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Repository roadmap</h4>
+      <ul class="check-list roadmap-list">
+        <li><span class="c">&#9679;</span>Topology diagrams</li>
+        <li><span class="c">&#9679;</span>VLAN / subnet documentation</li>
+        <li><span class="c">&#9679;</span>VM inventory &amp; service dependency notes</li>
+        <li><span class="c">&#9679;</span>Reverse proxy / access flow notes</li>
+        <li><span class="c">&#9679;</span>NetBox structure documentation</li>
+        <li><span class="c">&#9679;</span>Lessons learned &amp; design decisions</li>
+        <li><span class="c">&#9679;</span>Sanitized configuration examples</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="section-sub" style="margin-top:34px">
+    This lab is also the base platform for future work in AWS/hybrid networking, SIEM and log pipelines,
+    reverse proxy &amp; WAF security, and network automation &mdash; most of that work will show up as its own
+    project once it's running here first.
+  </p>
+</section>
+
+<footer>
+  <a href="/">&larr; back to portfolio</a> &middot; <a href="https://github.com/laxamanasr-blip" target="_blank">view repository</a> &middot; &copy; 2026 Sid Laxamana
+</footer>
+
+
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<div class="lightbox" id="lb">
+  <figure>
+    <div class="lb-close" id="lbClose">&times;</div>
+    <img id="lbimg" alt="">
+    <div class="lb-cap" id="lbcap"></div>
+  </figure>
+</div>
+
+<script>
+// ---- lightbox ----
+const lb = document.getElementById('lb');
+const lbimg = document.getElementById('lbimg');
+const lbcap = document.getElementById('lbcap');
+document.querySelectorAll('.shot img').forEach(i=>{
+  i.addEventListener('click',()=>{
+    lb.classList.add('open');
+    lbimg.src = i.src;
+    lbimg.alt = i.alt || '';
+    lbcap.textContent = i.alt || '';
+  });
+});
+function closeLb(){ lb.classList.remove('open'); }
+lb.addEventListener('click', e=>{ if(e.target === lb) closeLb(); });
+document.getElementById('lbClose').addEventListener('click', closeLb);
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeLb(); });
+
+// ---- nav scroll state + progress bar + back-to-top ----
+const navEl = document.querySelector('nav');
+const progressEl = document.getElementById('scrollProgress');
+const toTopBtn = document.getElementById('toTop');
+function onScroll(){
+  const y = window.scrollY || document.documentElement.scrollTop;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = max > 0 ? (y / max) * 100 : 0;
+  progressEl.style.width = pct + '%';
+  navEl.classList.toggle('scrolled', y > 10);
+  toTopBtn.classList.toggle('show', y > 500);
+}
+document.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+toTopBtn.addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+
+// ---- header mouse spotlight ----
+const headerEl = document.querySelector('header');
+if(headerEl){
+  headerEl.addEventListener('mousemove', e=>{
+    const r = headerEl.getBoundingClientRect();
+    headerEl.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    headerEl.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+  });
+}
+
+// ---- reveal on scroll ----
+const revealTargets = document.querySelectorAll(
+  '.cat-block, .tile, .card, .vlan-card, .spec-card, .rack, .hardware-card, section > .kicker'
+);
+revealTargets.forEach(el => el.classList.add('reveal'));
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    }
+  });
+}, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+revealTargets.forEach(el => io.observe(el));
+
+// stagger tiles within each grid a little
+document.querySelectorAll('.grid').forEach(grid=>{
+  [...grid.children].forEach((child,i)=>{
+    child.style.transitionDelay = Math.min(i*70,280)+'ms';
+  });
+});
+</script>
+</body>
+</html>
