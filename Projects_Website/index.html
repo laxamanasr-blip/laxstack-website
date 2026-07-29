@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LaxStack Portfolio Website | Sid Laxamana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d10;
+  --panel:#12161a;
+  --panel-2:#161b20;
+  --line:#262d34;
+  --line-soft:#1c2228;
+  --line-strong:#333c46;
+  --text:#e6ecf1;
+  --muted:#8b96a3;
+  --muted-dim:#5d6773;
+  --amber:#ff9900;
+  --amber-dim:#8a5300;
+  --green:#4ade80;
+  --green-dim:#1f4a34;
+  --blue:#29b6d8;
+  --blue-dim:#134552;
+  --purple:#a78bfa;
+  --red:#ff6b6b;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:radial-gradient(circle at top,#17304f 0,#0a0d10 55%) fixed;
+  color:var(--text);
+  line-height:1.7;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:36px 36px;
+  pointer-events:none;
+  z-index:0;
+}
+a{color:inherit}
+img{max-width:100%;display:block}
+::selection{background:var(--amber);color:#0a0d10}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px 1px rgba(74,222,128,.7);
+  display:inline-block;
+  animation:blink 2.4s ease-in-out infinite;
+  flex-shrink:0;
+}
+.led.amber{background:var(--amber);box-shadow:0 0 6px 1px rgba(255,153,0,.7)}
+.led.blue{background:var(--blue);box-shadow:0 0 6px 1px rgba(41,182,216,.7)}
+.led.purple{background:var(--purple);box-shadow:0 0 6px 1px rgba(167,139,250,.7)}
+@keyframes blink{0%,60%{opacity:1}62%,68%{opacity:.25}70%,100%{opacity:1}}
+@media (prefers-reduced-motion: reduce){
+  .led{animation:none}
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
+}
+
+/* ---------- Nav ---------- */
+nav{
+  position:sticky;top:0;z-index:99;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 8%;
+  background:rgba(19,25,33,.92);
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font-family:var(--mono);font-weight:600;font-size:.95rem;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+  text-decoration:none;
+}
+.logo .path{color:var(--muted-dim)}
+.logo .user{color:var(--amber)}
+.logo .back{color:var(--muted);margin-right:2px}
+nav .links{display:flex;gap:24px;font-family:var(--mono);font-size:.8rem;align-items:center}
+nav .links a{color:var(--muted);text-decoration:none}
+nav .links a:hover{color:var(--amber)}
+nav .links .repo-btn{
+  border:1px solid var(--line);padding:7px 14px;border-radius:6px;color:var(--text);
+  transition:.2s;
+}
+nav .links .repo-btn:hover{border-color:var(--amber);color:var(--amber)}
+
+/* ---------- Breadcrumb / Hero ---------- */
+header{padding:56px 8% 50px;position:relative;z-index:1;min-height:90vh;overflow:hidden}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(41,182,216,.18),transparent 30%),
+    radial-gradient(circle at 80% 20%,rgba(255,153,0,.15),transparent 28%);
+  z-index:-1;
+}
+.project-label{
+  display:inline-block;letter-spacing:.25rem;color:#5fd4e8;
+  font:700 .8rem var(--mono);margin-bottom:1rem;
+}
+.crumb{
+  font-family:var(--mono);font-size:.8rem;color:var(--green);
+  background:var(--panel);border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:3px;margin-bottom:26px;
+}
+.crumb .prompt{color:var(--muted-dim)}
+
+h1{
+  font-family:var(--mono);font-weight:700;
+  font-size:clamp(2rem,4.2vw,3.1rem);
+  line-height:1.2;margin-bottom:16px;letter-spacing:-.01em;
+  max-width:900px;
+}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:760px;margin-bottom:26px}
+
+.badge-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px}
+.badge{
+  font-family:var(--mono);font-size:.76rem;display:flex;align-items:center;gap:7px;
+  border:1px solid var(--line);padding:6px 12px;border-radius:20px;color:var(--muted);
+  background:var(--panel);
+}
+.badge.status{color:var(--green);border-color:var(--green-dim)}
+
+.btn-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 20px;border-radius:6px;
+  font-family:var(--mono);font-size:.85rem;font-weight:600;
+  text-decoration:none;transition:.2s ease;border:1px solid transparent;
+  position:relative;overflow:hidden;
+}
+.btn::after{content:"";position:absolute;left:-120%;top:0;width:70%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transition:.6s}
+.btn:hover::after{left:140%}
+.btn.primary{background:var(--amber);color:#161200;box-shadow:0 12px 30px rgba(255,153,0,.35)}
+.btn.primary:hover{background:#ffc350;transform:translateY(-2px)}
+.btn.secondary{border-color:var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-2px)}
+.btn .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ---------- Sections ---------- */
+section{padding:64px 8%;position:relative;z-index:1;border-top:1px solid transparent}
+section::before{
+  content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-strong) 20%,var(--amber) 50%,var(--blue) 80%,transparent);
+  opacity:.5;
+}
+.section-tag{font-family:var(--mono);color:var(--muted-dim);font-size:.78rem;letter-spacing:.04em;margin-bottom:10px}
+.section-tag::before{content:"$ ";color:var(--green)}
+.section-title{font-family:var(--mono);font-size:1.7rem;font-weight:700;margin-bottom:16px}
+.section-sub{color:var(--muted);max-width:760px;margin-bottom:34px;font-size:.98rem}
+.prose{color:var(--muted);max-width:760px;font-size:.98rem}
+.prose p{margin-bottom:16px}
+.prose strong{color:var(--text)}
+
+/* ---------- Signature hop diagram ---------- */
+.hoppanel{
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:20px 20px 8px;max-width:1000px;
+  box-shadow:0 4px 14px rgba(0,0,0,.35);
+  cursor:zoom-in;transition:border-color .2s ease,transform .2s ease;
+}
+.hoppanel:hover{border-color:var(--amber-dim);transform:translateY(-3px)}
+.hoppanel .hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding-bottom:10px;border-bottom:1px solid var(--line-soft);margin-bottom:6px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.hoppanel .zoom-hint{font-family:var(--mono);font-size:.68rem;color:var(--muted-dim);display:flex;align-items:center;gap:5px}
+.hoppanel svg{width:100%;height:auto;display:block}
+
+/* ---------- Modules ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.module{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:.25s}
+.module:hover{transform:translateY(-6px);border-color:var(--blue)}
+.module h3{font-family:var(--mono);font-size:.95rem;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.module p{color:var(--muted);font-size:.9rem}
+
+/* ---------- SFP stack chips ---------- */
+.sfp-grid{display:flex;flex-wrap:wrap;gap:10px}
+.sfp{
+  font-family:var(--mono);font-size:.8rem;color:var(--text);
+  border:1px solid var(--line);background:var(--panel);
+  padding:9px 14px 9px 30px;border-radius:999px;position:relative;
+}
+.sfp::before{
+  content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 5px rgba(74,222,128,.7);
+}
+
+/* ---------- Config lines (deployment workflow) ---------- */
+.config{
+  font-family:var(--mono);font-size:.88rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:8px 0;box-shadow:0 4px 14px rgba(0,0,0,.35);max-width:1000px;
+}
+.cfg-line{
+  display:grid;grid-template-columns:170px 1fr;gap:18px;
+  padding:16px 24px;border-top:1px solid var(--line-soft);
+}
+.cfg-line:first-child{border-top:none}
+.cfg-line .bang{color:var(--muted-dim)}
+.cfg-line .stage{color:var(--amber);font-weight:600}
+.cfg-line .desc{color:var(--muted);font-family:var(--sans);font-size:.92rem}
+
+/* ---------- Cross-account trust (peer) ---------- */
+.peer-wrap{
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:28px;max-width:1000px;box-shadow:0 4px 14px rgba(0,0,0,.35);
+}
+.peer-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.peer-node{
+  flex:1;min-width:220px;background:var(--panel-2);border:1px solid var(--line-strong);
+  border-radius:12px;padding:18px 20px;text-align:center;
+}
+.peer-node .name{font-family:var(--mono);font-weight:700;font-size:.98rem;margin-bottom:6px}
+.peer-node .role{font-family:var(--mono);font-size:.78rem;color:var(--amber)}
+.peer-link{
+  flex:0 0 auto;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding:0 10px;min-width:170px;
+}
+.peer-link .line{height:2px;background:repeating-linear-gradient(90deg,var(--blue) 0 6px,transparent 6px 11px);margin:8px 0}
+
+.learn-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);margin-top:26px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.learn-col{background:var(--panel-2);padding:18px 20px}
+.learn-col h4{font-family:var(--mono);font-size:.78rem;color:var(--green);margin-bottom:10px;letter-spacing:.03em}
+.learn-col ul{list-style:none}
+.learn-col li{font-family:var(--mono);font-size:.85rem;color:var(--muted);padding:4px 0}
+.learn-note{font-family:var(--mono);font-size:.76rem;color:var(--muted-dim);margin-top:14px}
+
+/* ---------- Comparison chips ---------- */
+.chip-list{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  font-family:var(--mono);font-size:.76rem;color:var(--blue);
+  border:1px solid var(--blue-dim);padding:6px 12px;border-radius:20px;background:var(--panel);
+}
+
+/* ---------- Screenshot grid ---------- */
+.shot{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:.25s}
+.shot:hover{transform:translateY(-6px);border-color:var(--amber)}
+.shot a{display:block;cursor:zoom-in}
+.shot img{border-radius:8px;border:1px solid var(--line-soft);transition:.25s ease}
+.shot:hover img{transform:scale(1.02)}
+.shot .cap{font-family:var(--mono);font-size:.74rem;color:var(--muted-dim);padding-top:10px}
+
+/* ---------- Config diff (roadmap) ---------- */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.diff-col{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.diff-col .dc-hdr{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;
+  padding-bottom:12px;border-bottom:1px solid var(--line-soft);margin-bottom:12px;
+}
+.diff-col.committed .dc-hdr{color:var(--green)}
+.diff-col.pending .dc-hdr{color:var(--amber)}
+.diff-line{font-family:var(--mono);font-size:.85rem;padding:5px 0;display:flex;gap:10px}
+.diff-line .mark{flex-shrink:0}
+.diff-col.committed .mark{color:var(--green)}
+.diff-col.pending .mark{color:var(--amber)}
+.diff-line .val{color:var(--muted)}
+
+/* ---------- Lessons ---------- */
+.lessons{display:grid;grid-template-columns:1fr 1fr;gap:6px 40px;max-width:1000px}
+.lesson-line{font-family:var(--mono);font-size:.86rem;color:var(--muted);padding:6px 0}
+.lesson-line .hash{color:var(--muted-dim);margin-right:8px}
+
+footer{
+  text-align:center;padding:44px;color:var(--muted-dim);
+  border-top:1px solid var(--line);font-family:var(--mono);font-size:.78rem;
+  position:relative;z-index:1;
+}
+footer a{color:var(--amber);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* ---------- Screenshot lightbox ---------- */
+.lightbox{display:none;position:fixed;z-index:9999;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:40px;opacity:0;transition:opacity .25s ease;backdrop-filter:blur(6px)}
+.lightbox.open{opacity:1}
+.lightbox img{max-width:95%;max-height:90%;border:2px solid var(--amber);border-radius:6px;box-shadow:0 0 40px rgba(0,0,0,.6)}
+.lightbox .close{position:absolute;top:20px;right:30px;font-size:42px;color:#fff;cursor:pointer;font-family:Arial}
+
+/* ---------- diagram click-to-enlarge ---------- */
+.diagram-lightbox{
+  position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.86);backdrop-filter:blur(8px);padding:40px;
+  opacity:0;transition:opacity .25s ease;
+}
+.diagram-lightbox.open{opacity:1}
+.diagram-lightbox .dl-inner{position:relative;max-width:min(96vw,1500px);width:100%}
+.diagram-lightbox .dl-inner .hoppanel{cursor:default;max-width:none;width:100%;transform:none;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.diagram-lightbox .dl-inner .hoppanel:hover{transform:none}
+.diagram-lightbox .dl-inner .hoppanel svg{width:100%;height:auto}
+.dl-close{
+  position:absolute;top:-42px;right:0;width:32px;height:32px;border-radius:8px;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;
+}
+
+/* ---------- scroll effects ---------- */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;z-index:300;
+  background:linear-gradient(90deg,var(--amber),var(--blue),var(--green));
+  box-shadow:0 0 10px rgba(255,153,0,.5);
+  transition:width .1s linear;
+}
+.aurora{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.aurora span{position:absolute;border-radius:50%;filter:blur(90px);opacity:.14;will-change:transform}
+.aurora span:nth-child(1){width:600px;height:600px;background:var(--amber);top:-180px;left:-140px;animation:drift1 30s ease-in-out infinite}
+.aurora span:nth-child(2){width:520px;height:520px;background:var(--blue);top:8%;right:-180px;animation:drift2 36s ease-in-out infinite}
+.aurora span:nth-child(3){width:440px;height:440px;background:var(--green);bottom:-160px;left:38%;animation:drift3 33s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(80px,100px)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-90px,80px)}}
+@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(70px,-80px)}}
+nav{transition:box-shadow .3s ease,background .3s ease}
+nav.scrolled{box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+.to-top{
+  position:fixed;right:26px;bottom:26px;z-index:250;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .3s ease,transform .3s ease,border-color .2s,box-shadow .2s;
+}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.to-top:hover{border-color:var(--amber);box-shadow:0 8px 20px rgba(255,153,0,.25)}
+.to-top svg{width:18px;height:18px}
+header::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(380px circle at var(--mx,50%) var(--my,10%),rgba(41,182,216,.14),transparent 70%);
+}
+header > *{position:relative;z-index:1}
+
+@media(max-width:900px){
+  nav{flex-direction:column;gap:12px;padding:16px 6%}
+  nav .links{flex-wrap:wrap;justify-content:center;gap:16px}
+  header{padding:48px 6% 36px}
+  section{padding:48px 6%}
+  .learn-grid{grid-template-columns:1fr}
+  .diff-grid{grid-template-columns:1fr}
+  .lessons{grid-template-columns:1fr}
+  .peer-row{flex-direction:column}
+  .peer-link{transform:rotate(90deg);min-width:auto;padding:14px 0}
+  .cfg-line{grid-template-columns:1fr;gap:4px}
+}
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr}
+  nav .links{gap:10px;font-size:.74rem}
+  h1{font-size:clamp(1.7rem,7vw,2.4rem)}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav>
+  <a class="logo" href="/"><span class="back">&larr;</span><span class="user">sid</span><span class="path">@laxstack:~/projects$</span></a>
+  <div class="links">
+    <a href="#overview">overview</a>
+    <a href="#architecture">architecture</a>
+    <a href="#cicd">ci/cd</a>
+    <a href="#security">security</a>
+    <a href="#screenshots">screenshots</a>
+    <a class="repo-btn" href="https://github.com/laxamanasr-blip" target="_blank">View Repo</a>
+  </div>
+</nav>
+
+<header>
+  <div class="hero-bg" aria-hidden="true"></div>
+  <span class="project-label">PROJECT 002</span>
+  <div class="crumb"><span class="prompt">&gt;</span> cat laxstack-portfolio.md</div>
+  <h1>This website, <span style="color:var(--amber)">deployed by itself.</span></h1>
+  <p class="hero-sub">
+    The site you're reading right now runs entirely on AWS-managed services &mdash; Route 53, CloudFront, WAF, and S3
+    &mdash; with zero manual deployments. Every push to <code>main</code> is built, shipped, and cache-busted by a
+    GitHub Actions pipeline that never touches a long-lived AWS key.
+  </p>
+
+  <div class="badge-row">
+    <span class="badge status"><span class="led"></span>infrastructure live</span>
+    <span class="badge">zero stored aws keys</span>
+    <span class="badge">github oidc + sts</span>
+    <span class="badge">cross-account iam</span>
+  </div>
+
+  <div class="btn-row">
+    <a class="btn primary" target="_blank" href="https://laxstack.com"><span class="dot"></span>Visit laxstack.com</a>
+    <a class="btn secondary" target="_blank" href="https://github.com/laxamanasr-blip"><span class="dot"></span>View Repository</a>
+    <a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
+  </div>
+</header>
+
+<section id="overview">
+  <div class="section-tag">cat overview.md</div>
+  <h2 class="section-title">No servers. No SSH. No 2am uploads.</h2>
+  <div class="prose">
+    <p>
+      <strong>laxstack.com</strong> is fully serverless &mdash; there's no EC2 instance to patch and no origin server
+      sitting behind the scenes. It's static HTML, CSS, and JavaScript in an S3 bucket, distributed globally through
+      CloudFront, filtered by WAF before it ever reaches the origin, resolved by Route 53, and encrypted end-to-end
+      with a certificate ACM renews on its own.
+    </p>
+    <p>
+      Getting the infrastructure live was only half of this project. The other half was making sure updating the
+      site never meant manually re-uploading files to S3 or babysitting a cache invalidation by hand &mdash; that's
+      what the GitHub Actions + OIDC pipeline below solves.
+    </p>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="section-tag">show topology</div>
+  <h2 class="section-title">Request Path</h2>
+  <p class="section-sub">The bucket is never exposed directly to the internet &mdash; every request is fronted by CloudFront and screened by WAF before it reaches storage.</p>
+
+  <div class="hoppanel" id="hopPanelArch">
+    <div class="hdr"><span>path &mdash; request to origin</span><span class="zoom-hint">click to expand<span class="led amber" style="margin-left:6px"></span></span></div>
+    <svg viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the request path: from your browser through Route 53 DNS, Amazon CloudFront, AWS WAF, to the Amazon S3 origin bucket">
+      <defs>
+        <filter id="glowArch" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M25,225 L120,190 L215,145 L310,95 L410,35" fill="none" stroke="#2a3138" stroke-width="2" stroke-dasharray="4 5"/>
+      <circle r="4.5" fill="#ff9900" filter="url(#glowArch)">
+        <animateMotion dur="4.5s" repeatCount="indefinite" path="M25,225 L120,190 L215,145 L310,95 L410,35"/>
+      </circle>
+      <g font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8b96a3">
+        <circle cx="25" cy="225" r="6" fill="#4ade80" filter="url(#glowArch)"/>
+        <text x="25" y="245" text-anchor="middle">YOU</text>
+
+        <circle cx="120" cy="190" r="6" fill="#4ade80" filter="url(#glowArch)"/>
+        <text x="120" y="175" text-anchor="middle">ROUTE 53</text>
+
+        <circle cx="215" cy="145" r="6" fill="#29b6d8" filter="url(#glowArch)"/>
+        <text x="215" y="165" text-anchor="middle">CLOUDFRONT</text>
+
+        <circle cx="310" cy="95" r="6" fill="#ff6b6b" filter="url(#glowArch)"/>
+        <text x="310" y="80" text-anchor="middle">AWS WAF</text>
+
+        <circle cx="410" cy="35" r="6" fill="#ff9900" filter="url(#glowArch)"/>
+        <text x="410" y="22" text-anchor="middle">AMAZON S3</text>
+      </g>
+    </svg>
+    <div class="hop-caption" style="font-family:var(--mono);font-size:.7rem;color:var(--muted-dim);text-align:center;padding:10px 0 4px">5 hops &middot; https via acm &middot; edge cached &middot; waf filtered</div>
+  </div>
+</section>
+
+<section>
+  <div class="section-tag">show interfaces</div>
+  <h2 class="section-title">Website Infrastructure</h2>
+  <div class="grid">
+    <div class="module">
+      <h3><span class="led amber"></span>Amazon S3</h3>
+      <p>Origin for the website &mdash; static hosting, object storage, and durable storage behind CloudFront.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led blue"></span>Amazon CloudFront</h3>
+      <p>Global CDN, HTTPS termination, edge caching, and lower latency for every visitor.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Amazon Route 53</h3>
+      <p>Authoritative DNS for laxstack.com, with an alias record pointing straight at CloudFront.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>AWS Certificate Manager</h3>
+      <p>Issues and auto-renews the TLS certificate CloudFront uses &mdash; HTTPS with nothing to renew by hand.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led" style="background:var(--red);box-shadow:0 0 6px 1px rgba(255,107,107,.7)"></span>AWS WAF</h3>
+      <p>Managed rule groups filter common exploits before requests ever reach CloudFront's origin.</p>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="section-tag">show inventory</div>
+  <h2 class="section-title">Technologies Used</h2>
+  <div class="sfp-grid">
+    <span class="sfp">HTML / CSS / JS</span><span class="sfp">Git</span><span class="sfp">GitHub</span>
+    <span class="sfp">GitHub Actions</span><span class="sfp">GitHub OIDC</span><span class="sfp">Amazon S3</span>
+    <span class="sfp">Amazon CloudFront</span><span class="sfp">Amazon Route 53</span><span class="sfp">AWS WAF</span>
+    <span class="sfp">AWS IAM</span><span class="sfp">AWS STS</span><span class="sfp">AWS ACM</span>
+  </div>
+</section>
+
+<section id="cicd">
+  <div class="section-tag">show pipeline</div>
+  <h2 class="section-title">Deployment Pipeline</h2>
+  <p class="section-sub">Manually uploading to S3 and invalidating CloudFront by hand worked, but it wasn't how production gets managed. This is what replaced it.</p>
+
+  <div class="hoppanel" id="hopPanelCicd">
+    <div class="hdr"><span>path &mdash; commit to live</span><span class="zoom-hint">click to expand<span class="led amber" style="margin-left:6px"></span></span></div>
+    <svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the deployment pipeline: from a developer push through GitHub Actions, GitHub OIDC and AWS STS, syncing to S3, assuming a cross-account role, to CloudFront invalidation">
+      <defs>
+        <filter id="glowCicd" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30" fill="none" stroke="#2a3138" stroke-width="2" stroke-dasharray="4 5"/>
+      <circle r="4.5" fill="#ff9900" filter="url(#glowCicd)">
+        <animateMotion dur="5s" repeatCount="indefinite" path="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30"/>
+      </circle>
+      <g font-family="IBM Plex Mono, monospace" font-size="9" fill="#8b96a3">
+        <circle cx="25" cy="225" r="6" fill="#4ade80" filter="url(#glowCicd)"/>
+        <text x="25" y="245" text-anchor="middle">DEV PUSH</text>
+
+        <circle cx="115" cy="195" r="6" fill="#4ade80" filter="url(#glowCicd)"/>
+        <text x="115" y="180" text-anchor="middle">GITHUB ACTIONS</text>
+
+        <circle cx="205" cy="160" r="6" fill="#29b6d8" filter="url(#glowCicd)"/>
+        <text x="205" y="145" text-anchor="middle">OIDC + STS</text>
+
+        <circle cx="295" cy="120" r="6" fill="#ff9900" filter="url(#glowCicd)"/>
+        <text x="295" y="140" text-anchor="middle">S3 SYNC</text>
+
+        <circle cx="390" cy="75" r="6" fill="#a78bfa" filter="url(#glowCicd)"/>
+        <text x="390" y="60" text-anchor="middle">ASSUME ROLE</text>
+
+        <circle cx="490" cy="30" r="6" fill="#4ade80" filter="url(#glowCicd)"/>
+        <text x="490" y="18" text-anchor="middle">CDN INVALIDATED</text>
+      </g>
+    </svg>
+    <div class="hop-caption" style="font-family:var(--mono);font-size:.7rem;color:var(--muted-dim);text-align:center;padding:10px 0 4px">6 hops &middot; zero stored aws keys &middot; two aws accounts</div>
+  </div>
+</section>
+
+<section>
+  <div class="section-tag">show running-config</div>
+  <h2 class="section-title">Deployment Workflow</h2>
+  <div class="config">
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">01-commit</span></div>
+      <div class="desc">Developer commits locally and pushes to GitHub.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">02-trigger</span></div>
+      <div class="desc">GitHub Actions workflow is run manually via "Run workflow."</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">03-oidc-auth</span></div>
+      <div class="desc">GitHub authenticates to AWS via OpenID Connect &mdash; no stored access keys.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">04-sts-creds</span></div>
+      <div class="desc">AWS STS issues short-lived credentials scoped to the deploy role.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">05-s3-sync</span></div>
+      <div class="desc">Website files sync to the S3 bucket in the free AWS account.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">06-cross-account</span></div>
+      <div class="desc">The deploy role assumes a role in the paid AWS account via STS.</div>
+    </div>
+    <div class="cfg-line">
+      <div><span class="bang">!</span> <span class="stage">07-invalidate</span></div>
+      <div class="desc">CloudFront cache is invalidated &mdash; visitors get the latest build.</div>
+    </div>
+  </div>
+</section>
+
+<section id="security">
+  <div class="section-tag">show iam trust-policy</div>
+  <h2 class="section-title">Cross-Account Trust</h2>
+  <p class="section-sub">The pipeline spans two AWS accounts &mdash; a free account handling deployment, and a paid account holding CloudFront and WAF. Each role can do exactly one thing.</p>
+
+  <div class="peer-wrap">
+    <div class="peer-row">
+      <div class="peer-node">
+        <div class="name">Free AWS Account</div>
+        <div class="role">Github-website-Deploy</div>
+      </div>
+      <div class="peer-link">
+        <div>cross-account</div>
+        <div class="line"></div>
+        <div>AssumeRole via STS</div>
+      </div>
+      <div class="peer-node">
+        <div class="name">Paid AWS Account</div>
+        <div class="role">Cloudfront-Invalidation</div>
+      </div>
+    </div>
+
+    <div class="learn-grid">
+      <div class="learn-col">
+        <h4>Github-website-Deploy can</h4>
+        <ul>
+          <li>s3:ListBucket</li>
+          <li>s3:GetObject</li>
+          <li>s3:PutObject</li>
+          <li>s3:DeleteObject</li>
+          <li>sts:AssumeRole</li>
+        </ul>
+      </div>
+      <div class="learn-col">
+        <h4>Cloudfront-Invalidation can</h4>
+        <ul>
+          <li>cloudfront:CreateInvalidation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="learn-note">the paid account trusts only this one deploy role &mdash; nothing else</div>
+  </div>
+
+  <p class="section-sub" style="margin-top:34px;margin-bottom:16px">
+    The trickiest part of this build wasn't the AWS side &mdash; it was GitHub's OIDC trust policy. Diagnosing a
+    failed federation handshake meant decoding the actual JWT claims GitHub was sending and tracing a mismatch back
+    to GitHub's newer subject-claim format. That's the kind of bug that doesn't show up until federation actually
+    happens.
+  </p>
+  <div class="chip-list">
+    <span class="chip">GitHub OIDC</span>
+    <span class="chip">Temporary STS credentials</span>
+    <span class="chip">Least-privilege IAM</span>
+    <span class="chip">Cross-account role assumption</span>
+    <span class="chip">AWS WAF protection</span>
+    <span class="chip">HTTPS via ACM</span>
+    <span class="chip">Zero stored AWS keys</span>
+  </div>
+</section>
+
+<section id="screenshots">
+  <div class="section-tag">ls -la Images/</div>
+  <h2 class="section-title">From the Console</h2>
+  <p class="section-sub">Live configuration pulled directly from both AWS accounts and the GitHub side of the pipeline.</p>
+
+  <div class="grid">
+    <div class="shot"><a href="Projects_Website/Images/S3-Bucket.png" class="lightbox-trigger"><img src="Projects_Website/Images/S3-Bucket.png" alt="Amazon S3 origin bucket configuration"></a><div class="cap">Amazon S3 &mdash; origin bucket</div></div>
+    <div class="shot"><a href="Projects_Website/Images/Bucket-Policy-OAC.png" class="lightbox-trigger"><img src="Projects_Website/Images/Bucket-Policy-OAC.png" alt="S3 bucket policy restricting access to CloudFront via Origin Access Control"></a><div class="cap">S3 bucket policy &mdash; Origin Access Control</div></div>
+    <div class="shot"><a href="Projects_Website/Images/CloudFront-Distribution.png" class="lightbox-trigger"><img src="Projects_Website/Images/CloudFront-Distribution.png" alt="CloudFront distribution settings"></a><div class="cap">CloudFront &mdash; distribution</div></div>
+    <div class="shot"><a href="Projects_Website/Images/Route53-Records.png" class="lightbox-trigger"><img src="Projects_Website/Images/Route53-Records.png" alt="Route 53 DNS records"></a><div class="cap">Route 53 &mdash; DNS records</div></div>
+    <div class="shot"><a href="Projects_Website/Images/ACM.png" class="lightbox-trigger"><img src="Projects_Website/Images/ACM.png" alt="AWS Certificate Manager issued certificate"></a><div class="cap">ACM &mdash; issued certificate</div></div>
+    <div class="shot"><a href="Projects_Website/Images/WAF.png" class="lightbox-trigger"><img src="Projects_Website/Images/WAF.png" alt="AWS WAF managed rule groups"></a><div class="cap">AWS WAF &mdash; rule groups</div></div>
+    <div class="shot"><a href="Projects_Website/Images/IAM-IDP.png" class="lightbox-trigger"><img src="Projects_Website/Images/IAM-IDP.png" alt="IAM identity provider for GitHub OIDC"></a><div class="cap">IAM &mdash; GitHub OIDC identity provider</div></div>
+    <div class="shot"><a href="Projects_Website/Images/IAM-Role-Github-Cross-Account.png" class="lightbox-trigger"><img src="Projects_Website/Images/IAM-Role-Github-Cross-Account.png" alt="Cross-account IAM role trust policy"></a><div class="cap">IAM &mdash; cross-account trust policy</div></div>
+    <div class="shot"><a href="Projects_Website/Images/Git-Commands.png" class="lightbox-trigger"><img src="Projects_Website/Images/Git-Commands.png" alt="Git commands used to trigger deployment"></a><div class="cap">Git &mdash; deployment trigger</div></div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="section-tag">git diff --stat</div>
+  <h2 class="section-title">Current State &amp; What's Next</h2>
+  <div class="diff-grid">
+    <div class="diff-col committed">
+      <div class="dc-hdr">committed &mdash; current features</div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">Serverless static hosting on S3</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">CloudFront CDN + HTTPS termination</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">AWS WAF request filtering</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">Route 53 DNS management</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">ACM auto-renewing TLS</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">GitHub Actions CI/CD</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">GitHub OIDC auth, zero stored keys</span></div>
+      <div class="diff-line"><span class="mark">+</span><span class="val">Cross-account IAM role assumption</span></div>
+    </div>
+    <div class="diff-col pending">
+      <div class="dc-hdr">candidate-config &mdash; future improvements</div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Infrastructure as Code via Terraform</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">AWS CDK implementation</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Separate dev / prod environments</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Automated HTML validation</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Lighthouse performance testing</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Slack / Teams deploy notifications</span></div>
+      <div class="diff-line"><span class="mark">~</span><span class="val">Automated security scanning</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="lessons">
+  <div class="section-tag">show notes</div>
+  <h2 class="section-title">Lessons Learned</h2>
+  <div class="lessons">
+    <div class="lesson-line"><span class="hash">#</span>Static hosting on Amazon S3</div>
+    <div class="lesson-line"><span class="hash">#</span>Content delivery with CloudFront</div>
+    <div class="lesson-line"><span class="hash">#</span>DNS management with Route 53</div>
+    <div class="lesson-line"><span class="hash">#</span>HTTPS via ACM</div>
+    <div class="lesson-line"><span class="hash">#</span>Web protection with AWS WAF</div>
+    <div class="lesson-line"><span class="hash">#</span>GitHub Actions automation</div>
+    <div class="lesson-line"><span class="hash">#</span>OpenID Connect (OIDC)</div>
+    <div class="lesson-line"><span class="hash">#</span>AWS Security Token Service</div>
+    <div class="lesson-line"><span class="hash">#</span>IAM trust &amp; permission policies</div>
+    <div class="lesson-line"><span class="hash">#</span>Cross-account role assumption</div>
+    <div class="lesson-line"><span class="hash">#</span>CloudFront cache invalidation</div>
+    <div class="lesson-line"><span class="hash">#</span>Designing secure CI/CD, not just working CI/CD</div>
+  </div>
+</section>
+
+<footer>
+  end &middot; <a href="/">&larr; back to portfolio</a> &middot; <a href="https://github.com/laxamanasr-blip" target="_blank">view repository</a> &middot; &copy; 2026 Sid Laxamana
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <span class="close">&times;</span>
+  <img id="lightbox-img" alt="">
+</div>
+
+<div class="diagram-lightbox" id="diagramLightbox">
+  <div class="dl-inner">
+    <div class="dl-close" id="dlClose">&times;</div>
+    <div id="dlContent"></div>
+  </div>
+</div>
+
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+// ---- screenshot lightbox ----
+const lb=document.getElementById('lightbox');
+const img=lb.querySelector('#lightbox-img');
+document.querySelectorAll('.lightbox-trigger').forEach(a=>{
+ a.addEventListener('click',e=>{
+   e.preventDefault();
+   img.src=a.href;
+   lb.style.display='flex';
+   requestAnimationFrame(()=>lb.classList.add('open'));
+ });
+});
+function closeLightbox(){
+  lb.classList.remove('open');
+  setTimeout(()=>{ lb.style.display='none'; img.src=''; }, 250);
+}
+lb.addEventListener('click',e=>{
+ if(e.target===lb||e.target.classList.contains('close')) closeLightbox();
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape' && lb.style.display==='flex') closeLightbox();
+});
+
+// ---- click-to-enlarge on the hop diagrams ----
+const diagramLightbox=document.getElementById('diagramLightbox');
+const dlContent=document.getElementById('dlContent');
+const dlClose=document.getElementById('dlClose');
+function makeIdsUnique(svgEl, suffix){
+  svgEl.querySelectorAll('[id]').forEach(el=>{
+    const oldId=el.id, newId=oldId+suffix;
+    el.id=newId;
+    svgEl.querySelectorAll('*').forEach(node=>{
+      ['filter','fill','stroke'].forEach(attr=>{
+        const val=node.getAttribute(attr);
+        if(val && val.indexOf('#'+oldId)!==-1){
+          node.setAttribute(attr, val.split('#'+oldId).join('#'+newId));
+        }
+      });
+    });
+  });
+}
+function closeDiagramLightbox(){
+  diagramLightbox.classList.remove('open');
+  setTimeout(()=>{ diagramLightbox.style.display='none'; dlContent.innerHTML=''; }, 250);
+}
+document.querySelectorAll('.hoppanel[id]').forEach(panel=>{
+  panel.addEventListener('click', ()=>{
+    dlContent.innerHTML='';
+    const clone=panel.cloneNode(true);
+    clone.removeAttribute('id');
+    const svgClone=clone.querySelector('svg');
+    if(svgClone) makeIdsUnique(svgClone, '-lb-'+Math.random().toString(36).slice(2,7));
+    dlContent.appendChild(clone);
+    diagramLightbox.style.display='flex';
+    requestAnimationFrame(()=>diagramLightbox.classList.add('open'));
+  });
+});
+dlClose.addEventListener('click', closeDiagramLightbox);
+diagramLightbox.addEventListener('click', e=>{
+  if(e.target===diagramLightbox) closeDiagramLightbox();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && diagramLightbox.style.display==='flex') closeDiagramLightbox();
+});
+
+// ---- nav scroll state + progress bar + back-to-top ----
+const navEl=document.querySelector('nav');
+const progressEl=document.getElementById('scrollProgress');
+const toTopBtn=document.getElementById('toTop');
+function onScroll(){
+  const y=window.scrollY||document.documentElement.scrollTop;
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=max>0?(y/max)*100:0;
+  progressEl.style.width=pct+'%';
+  navEl.classList.toggle('scrolled', y>10);
+  toTopBtn.classList.toggle('show', y>500);
+}
+document.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+toTopBtn.addEventListener('click', ()=>window.scrollTo({top:0, behavior:'smooth'}));
+
+// ---- header mouse-spotlight ----
+const headerEl=document.querySelector('header');
+if(headerEl){
+  headerEl.addEventListener('mousemove', e=>{
+    const r=headerEl.getBoundingClientRect();
+    headerEl.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+    headerEl.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+  });
+}
+
+// ---- reveal on scroll ----
+const revealTargets=document.querySelectorAll(
+  '.module, .shot, .config, .peer-wrap, .diff-col, .lessons, .sfp-grid, .hoppanel'
+);
+revealTargets.forEach(el=>el.classList.add('reveal'));
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    }
+  });
+}, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+revealTargets.forEach(el=>io.observe(el));
+
+document.querySelectorAll('.grid').forEach(grid=>{
+  [...grid.children].forEach((child,i)=>{
+    child.style.transitionDelay=Math.min(i*70,280)+'ms';
+  });
+});
+</script>
+
+</body>
+</html>
