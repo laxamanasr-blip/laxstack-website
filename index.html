@@ -492,6 +492,15 @@ section::before{
   .reveal{opacity:1;transform:none;transition:none}
 }
 </style>
+
+<style id="project-card-fix">
+.grid{align-items:stretch}
+.iface-link{display:flex;height:100%}
+.iface{display:flex;flex-direction:column;height:100%}
+.iface p{flex-grow:1}
+.tech{margin-top:auto}
+</style>
+
 </head>
 <body>
 
@@ -592,7 +601,7 @@ section::before{
     <div class="iface">
       <div class="row1"><span class="ifname">eth0/2</span><span class="status"><span class="led"></span>up</span></div>
       <h3>Portfolio on AWS</h3>
-      <p>Deployed on AWS-native services end to end &mdash; Amazon S3 for static hosting, Route 53 for DNS, CloudFront as the CDN edge, AWS WAF for protection, and ACM-issued TLS. Terraform and automated CI/CD deployments are next.</p>
+      <p>Built on AWS-native services end to end using Amazon S3 for static hosting, Route 53 for DNS, CloudFront with Origin Access Control as the global CDN, AWS WAF for protection, ACM-managed TLS, and a secure GitHub Actions CI/CD pipeline using GitHub OIDC, AWS STS, and cross-account IAM roles. Future enhancements include Infrastructure as Code with Terraform.</p>
       <div class="tech"><span class="chip">S3</span><span class="chip">Route 53</span><span class="chip">CloudFront</span><span class="chip">WAF</span><span class="chip">ACM</span></div>
     </div>
 </a>
