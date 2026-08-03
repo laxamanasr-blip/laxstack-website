@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hybrid AWS Security Monitoring Pipeline | Sid Laxamana</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0d10;
+  --panel:#12161a;
+  --panel-2:#161b20;
+  --line:#232a30;
+  --line-soft:#1b2126;
+  --line-strong:#2f3a3f;
+  --text:#e6ecf1;
+  --muted:#8b96a3;
+  --muted-dim:#5d6773;
+  --teal:#14b8a6;
+  --teal-dim:#0a5c53;
+  --red:#ef4444;
+  --red-dim:#7a1f1f;
+  --green:#4ade80;
+  --green-dim:#1f4a34;
+  --amber:#f5a524;
+  --mono:'Fira Code',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:36px 36px;
+  pointer-events:none;
+  z-index:0;
+}
+a{color:inherit}
+img{max-width:100%;display:block}
+::selection{background:var(--teal);color:#04110f}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px 1px rgba(74,222,128,.7);
+  display:inline-block;
+  animation:blink 2.4s ease-in-out infinite;
+  flex-shrink:0;
+}
+.led.teal{background:var(--teal);box-shadow:0 0 6px 1px rgba(20,184,166,.7)}
+.led.red{background:var(--red);box-shadow:0 0 6px 1px rgba(239,68,68,.7)}
+@keyframes blink{0%,60%{opacity:1}62%,68%{opacity:.25}70%,100%{opacity:1}}
+@media (prefers-reduced-motion: reduce){
+  .led{animation:none}
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
+}
+
+/* ---------- Nav ---------- */
+nav{
+  position:sticky;top:0;z-index:99;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 8%;
+  background:rgba(10,14,13,.92);
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font-family:var(--mono);font-weight:600;font-size:.95rem;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+  text-decoration:none;
+}
+.logo .path{color:var(--muted-dim)}
+.logo .user{color:var(--teal)}
+.logo .back{color:var(--muted);margin-right:2px}
+nav .links{display:flex;gap:24px;font-family:var(--mono);font-size:.8rem;align-items:center}
+nav .links a{color:var(--muted);text-decoration:none}
+nav .links a:hover{color:var(--teal)}
+nav .links .repo-btn{
+  border:1px solid var(--line);padding:7px 14px;border-radius:4px;color:var(--text);
+  transition:.2s;
+}
+nav .links .repo-btn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ---------- Hero ---------- */
+header{padding:56px 8% 50px;position:relative;z-index:1}
+.crumb{
+  font-family:var(--mono);font-size:.8rem;color:var(--teal);
+  background:var(--panel);border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:4px;margin-bottom:26px;
+}
+.crumb .prompt{color:var(--muted-dim)}
+.project-label{
+  display:inline-block;letter-spacing:.25rem;color:var(--muted-dim);
+  font:700 .78rem var(--mono);margin-bottom:.8rem;
+}
+
+h1{
+  font-family:var(--mono);font-weight:700;
+  font-size:clamp(1.9rem,4vw,2.9rem);
+  line-height:1.25;margin-bottom:16px;letter-spacing:-.01em;
+  max-width:920px;
+}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:760px;margin-bottom:26px}
+
+.badge-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px}
+.badge{
+  font-family:var(--mono);font-size:.76rem;display:flex;align-items:center;gap:7px;
+  border:1px solid var(--line);padding:6px 12px;border-radius:20px;color:var(--muted);
+  background:var(--panel);
+}
+.badge.status{color:var(--green);border-color:var(--green-dim)}
+.badge.alert{color:var(--red);border-color:var(--red-dim)}
+
+.btn-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 20px;border-radius:4px;
+  font-family:var(--mono);font-size:.85rem;font-weight:600;
+  text-decoration:none;transition:.2s ease;border:1px solid transparent;
+  position:relative;overflow:hidden;
+}
+.btn::after{content:"";position:absolute;left:-120%;top:0;width:70%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:.6s}
+.btn:hover::after{left:140%}
+.btn.primary{background:var(--teal);color:#04110f}
+.btn.primary:hover{background:#2dd4c4;transform:translateY(-2px)}
+.btn.secondary{border-color:var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-2px)}
+.btn .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ---------- Sections ---------- */
+section{padding:60px 8%;position:relative;z-index:1;border-top:1px solid transparent}
+section::before{
+  content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-strong) 20%,var(--teal) 50%,var(--red) 80%,transparent);
+  opacity:.45;
+}
+.section-tag{font-family:var(--mono);color:var(--muted-dim);font-size:.78rem;letter-spacing:.04em;margin-bottom:10px}
+.section-tag::before{content:"$ ";color:var(--teal)}
+.section-title{font-family:var(--mono);font-size:1.6rem;font-weight:700;margin-bottom:16px}
+.section-sub{color:var(--muted);max-width:760px;margin-bottom:34px;font-size:.98rem}
+.prose{color:var(--muted);max-width:760px;font-size:.98rem}
+.prose p{margin-bottom:16px}
+.prose strong{color:var(--text)}
+
+/* ---------- Pipeline hop diagram ---------- */
+.hoppanel{
+  background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  padding:20px 20px 8px;max-width:1020px;
+  cursor:zoom-in;transition:border-color .2s ease,transform .2s ease;
+}
+.hoppanel:hover{border-color:var(--teal-dim);transform:translateY(-3px)}
+.hoppanel .hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding-bottom:10px;border-bottom:1px solid var(--line-soft);margin-bottom:6px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.hoppanel .zoom-hint{font-family:var(--mono);font-size:.68rem;color:var(--muted-dim);display:flex;align-items:center;gap:5px}
+.hoppanel svg{width:100%;height:auto;display:block}
+.hop-caption{font-family:var(--mono);font-size:.7rem;color:var(--muted-dim);text-align:center;padding:10px 0 4px}
+
+/* ---------- Modules ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.module{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:22px;transition:.2s}
+.module:hover{border-color:var(--teal-dim);transform:translateY(-4px)}
+.module h3{font-family:var(--mono);font-size:.95rem;color:var(--teal);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.module p{color:var(--muted);font-size:.9rem}
+.module ul{list-style:none;color:var(--muted);font-size:.9rem}
+.module li{padding:5px 0;border-top:1px solid var(--line-soft)}
+.module li:first-child{border-top:none}
+
+/* ---------- Stack chips ---------- */
+.sfp-grid{display:flex;flex-wrap:wrap;gap:10px}
+.sfp{
+  font-family:var(--mono);font-size:.8rem;color:var(--text);
+  border:1px solid var(--line);background:var(--panel);
+  padding:9px 14px 9px 30px;border-radius:4px;position:relative;
+}
+.sfp::before{
+  content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--teal);
+  box-shadow:0 0 5px rgba(20,184,166,.7);
+}
+
+/* ---------- Sample alert card ---------- */
+.alert-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  max-width:640px;overflow:hidden;
+}
+.alert-card .ac-hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;border-bottom:1px solid var(--line-soft);
+  font-family:var(--mono);font-size:.74rem;color:var(--muted-dim);
+  letter-spacing:.03em;text-transform:uppercase;
+}
+.sev{
+  font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.04em;
+  padding:3px 10px;border-radius:20px;text-transform:uppercase;
+}
+.sev.medium{background:rgba(245,165,36,.12);color:var(--amber);border:1px solid rgba(245,165,36,.35)}
+.sev.high{background:rgba(239,68,68,.12);color:var(--red);border:1px solid var(--red-dim)}
+.alert-card pre{
+  margin:0;padding:20px;background:#08090b;color:#7dd8cc;
+  font-family:var(--mono);font-size:.82rem;overflow-x:auto;line-height:1.6;
+}
+.alert-card .ac-note{padding:12px 20px 16px;font-size:.78rem;color:var(--muted-dim);font-family:var(--mono)}
+
+/* ---------- Config diff (roadmap) ---------- */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.diff-col{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px}
+.diff-col .dc-hdr{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;
+  padding-bottom:12px;border-bottom:1px solid var(--line-soft);margin-bottom:12px;
+}
+.diff-col.committed .dc-hdr{color:var(--green)}
+.diff-col.pending .dc-hdr{color:var(--amber)}
+.diff-line{font-family:var(--mono);font-size:.85rem;padding:5px 0;display:flex;gap:10px}
+.diff-line .mark{flex-shrink:0}
+.diff-col.committed .mark{color:var(--green)}
+.diff-col.pending .mark{color:var(--amber)}
+.diff-line .val{color:var(--muted)}
+
+/* ---------- Lessons ---------- */
+.lessons{display:grid;grid-template-columns:1fr 1fr;gap:6px 40px;max-width:1000px}
+.lesson-line{font-family:var(--mono);font-size:.86rem;color:var(--muted);padding:6px 0}
+.lesson-line .hash{color:var(--muted-dim);margin-right:8px}
+
+footer{
+  text-align:center;padding:44px;color:var(--muted-dim);
+  border-top:1px solid var(--line);font-family:var(--mono);font-size:.78rem;
+  position:relative;z-index:1;
+}
+footer a{color:var(--teal);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* ---------- diagram click-to-enlarge ---------- */
+.diagram-lightbox{
+  position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.86);backdrop-filter:blur(8px);padding:40px;
+  opacity:0;transition:opacity .25s ease;
+}
+.diagram-lightbox.open{opacity:1}
+.diagram-lightbox .dl-inner{position:relative;max-width:min(96vw,1400px);width:100%}
+.diagram-lightbox .dl-inner .hoppanel{cursor:default;max-width:none;width:100%;transform:none;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.diagram-lightbox .dl-inner .hoppanel:hover{transform:none}
+.diagram-lightbox .dl-inner .hoppanel svg{width:100%;height:auto}
+.dl-close{
+  position:absolute;top:-42px;right:0;width:32px;height:32px;border-radius:6px;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;
+}
+
+/* ---------- scroll effects ---------- */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;z-index:300;
+  background:linear-gradient(90deg,var(--teal),var(--red));
+  box-shadow:0 0 10px rgba(20,184,166,.5);
+  transition:width .1s linear;
+}
+.aurora{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.aurora span{position:absolute;border-radius:50%;filter:blur(90px);opacity:.13;will-change:transform}
+.aurora span:nth-child(1){width:580px;height:580px;background:var(--teal);top:-170px;left:-140px;animation:drift1 30s ease-in-out infinite}
+.aurora span:nth-child(2){width:480px;height:480px;background:var(--red);top:10%;right:-170px;animation:drift2 34s ease-in-out infinite}
+.aurora span:nth-child(3){width:420px;height:420px;background:var(--green);bottom:-150px;left:36%;animation:drift3 32s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(75px,95px)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-85px,75px)}}
+@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(65px,-75px)}}
+nav{transition:box-shadow .3s ease,background .3s ease}
+nav.scrolled{box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+.to-top{
+  position:fixed;right:26px;bottom:26px;z-index:250;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .3s ease,transform .3s ease,border-color .2s,box-shadow .2s;
+}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.to-top:hover{border-color:var(--teal);box-shadow:0 8px 20px rgba(20,184,166,.25)}
+.to-top svg{width:18px;height:18px}
+header{overflow:hidden}
+header::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(380px circle at var(--mx,50%) var(--my,10%),rgba(20,184,166,.12),transparent 70%);
+}
+header > *{position:relative;z-index:1}
+
+@media(max-width:900px){
+  nav{flex-direction:column;gap:12px;padding:16px 6%}
+  nav .links{flex-wrap:wrap;justify-content:center;gap:16px}
+  header{padding:48px 6% 36px}
+  section{padding:48px 6%}
+  .diff-grid{grid-template-columns:1fr}
+  .lessons{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr}
+  nav .links{gap:10px;font-size:.74rem}
+  h1{font-size:clamp(1.6rem,7vw,2.2rem)}
+}
+
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px}
+.shot{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.shot img{width:100%;display:block}
+.shot .cap{padding:14px}
+.shot h3{font-family:var(--mono);font-size:.9rem;color:var(--teal);margin-bottom:6px}
+.shot p{font-size:.9rem;color:var(--muted)}
+
+.shot a{display:block;position:relative;cursor:zoom-in}
+.shot a::after{
+content:"Click to enlarge";
+position:absolute;
+right:12px;
+bottom:12px;
+background:rgba(0,0,0,.7);
+color:#fff;
+padding:6px 10px;
+border-radius:4px;
+font-family:var(--mono);
+font-size:.72rem;
+opacity:0;
+transition:.2s;
+}
+.shot a:hover::after{opacity:1}
+</style>
+</head>
+<body>
+<div aria-hidden="true" class="aurora"><span></span><span></span><span></span></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+<nav>
+<a class="logo" href="/"><span class="back">←</span><span class="user">sid</span><span class="path">@laxstack:~/projects$</span></a>
+<div class="links">
+<a href="#overview">overview</a>
+<a href="#architecture">architecture</a>
+<a href="#detections">detections</a>
+<a href="#roadmap">roadmap</a>
+<a class="repo-btn" href="https://github.com/laxamanasr-blip" target="_blank">View Repo</a>
+</div>
+</nav>
+<header>
+<span class="project-label">PROJECT 003 · CLOUD SECURITY</span>
+<div class="crumb"><span class="prompt">&gt;</span> cat cloudsec-pipeline.md</div>
+<h1>Extending an on-prem SOC into AWS, <span style="color:var(--teal)">without a second SIEM.</span></h1>
+<p class="hero-sub">
+    A hybrid cloud security project that pipes AWS network telemetry — VPC Flow Logs, by way of CloudWatch
+    — into an existing on-premises Wazuh deployment. Raw flow records are normalized into structured,
+    MITRE-aligned behavioral events before they ever reach the SOC, instead of dumping every packet record into
+    a second, expensive cloud SIEM.
+  </p>
+<div class="badge-row">
+<span class="badge status"><span class="led"></span>mvp — live telemetry</span>
+<span class="badge">hybrid soc, one siem</span>
+<span class="badge alert"><span class="led red"></span>mitre att&amp;ck aligned</span>
+<span class="badge">no per-gb siem licensing</span>
+</div>
+<div class="btn-row">
+<a class="btn primary" href="https://github.com/laxamanasr-blip" target="_blank"><span class="dot"></span>View Repository</a>
+<a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
+</div>
+</header>
+<section id="overview">
+<div class="section-tag">cat overview.md</div>
+<h2 class="section-title">The visibility gap</h2>
+<div class="prose">
+<p>
+      Most orgs moving workloads into AWS keep running their SOC on-prem — and that split creates a real gap.
+      Cloud resources generate genuinely useful network telemetry, but getting it collected, transported, and
+      analyzed securely and cost-effectively is a different problem than watching on-prem traffic.
+    </p>
+<p>
+      Commercial cloud SIEMs (Sentinel, Splunk ES, QRadar, Cortex XSIAM) solve this well — at a licensing and
+      ingestion cost that's hard to justify for a lab, a small team, or anyone learning the space.
+    </p>
+<p>
+      Rather than standing up a second SIEM in the cloud, this project extends an existing <strong>on-prem Wazuh</strong>
+      deployment outward using AWS-native services — giving one SOC visibility into both environments instead
+      of two SOCs that don't talk to each other.
+    </p>
+</div>
+</section>
+<section>
+<div class="section-tag">show challenges</div>
+<h2 class="section-title">The Problem, in Three Parts</h2>
+<div class="grid">
+<div class="module">
+<h3><span class="led teal"></span>Cloud Visibility</h3>
+<p>AWS workloads generate valuable network telemetry that traditionally stays isolated from on-prem security monitoring.</p>
+</div>
+<div class="module">
+<h3><span class="led"></span>Cost</h3>
+<p>Enterprise cloud SIEM platforms bring licensing, ingestion, and storage costs that are hard to justify for a personal lab.</p>
+</div>
+<div class="module">
+<h3><span class="led red"></span>Signal vs. Noise</h3>
+<p>Forwarding every raw VPC Flow Log into a SIEM inflates storage and makes analyst investigations harder, not easier.</p>
+</div>
+</div>
+</section>
+<section id="architecture">
+<div class="section-tag">show topology</div>
+<h2 class="section-title">Pipeline Architecture</h2>
+<p class="section-sub">Telemetry is normalized into structured security events before it ever leaves AWS — the on-prem SOC receives signal, not raw noise.</p>
+<div class="hoppanel" id="hopPanelPipeline">
+<div class="hdr"><span>path — vpc to soc dashboard</span><span class="zoom-hint">click to expand<span class="led teal" style="margin-left:6px"></span></span></div>
+<svg aria-label="Diagram of the telemetry pipeline: from the AWS VPC through Flow Logs, CloudWatch, an EC2 processing layer, to the on-prem Wazuh manager and OpenSearch dashboard" role="img" viewbox="0 0 560 260" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<filter height="200%" id="glowPipe" width="200%" x="-50%" y="-50%">
+<fegaussianblur result="blur" stddeviation="3"></fegaussianblur>
+<femerge><femergenode in="blur"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+</defs>
+<path d="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30" fill="none" stroke="#242c2f" stroke-dasharray="4 5" stroke-width="2"></path>
+<circle fill="#14b8a6" filter="url(#glowPipe)" r="4.5">
+<animatemotion dur="5s" path="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30" repeatcount="indefinite"></animatemotion>
+</circle>
+<g fill="#8b96a3" font-family="Fira Code, monospace" font-size="9">
+<circle cx="25" cy="225" fill="#4ade80" filter="url(#glowPipe)" r="6"></circle>
+<text text-anchor="middle" x="25" y="245">AWS VPC</text>
+<circle cx="115" cy="195" fill="#14b8a6" filter="url(#glowPipe)" r="6"></circle>
+<text text-anchor="middle" x="115" y="180">FLOW LOGS</text>
+<circle cx="205" cy="160" fill="#14b8a6" filter="url(#glowPipe)" r="6"></circle>
+<text text-anchor="middle" x="205" y="145">CLOUDWATCH</text>
+<circle cx="295" cy="120" fill="#ef4444" filter="url(#glowPipe)" r="6"></circle>
+<text text-anchor="middle" x="295" y="140">PROCESSING (EC2)</text>
+<circle cx="390" cy="75" fill="#14b8a6" filter="url(#glowPipe)" r="6"></circle>
+<text text-anchor="middle" x="390" y="60">WAZUH (ON-PREM)</text>
+<circle cx="490" cy="30" fill="#4ade80" filter="url(#glowPipe)" r="6"></circle>
+<text text-anchor="middle" x="490" y="18">OPENSEARCH</text>
+</g>
+</svg>
+<div class="hop-caption">6 hops · flow logs → behavioral events · on-prem soc dashboard</div>
+</div>
+</section>
+<section>
+<div class="section-tag">show interfaces</div>
+<h2 class="section-title">Cloud Infrastructure Highlights</h2>
+<div class="grid">
+<div class="module">
+<h3><span class="led"></span>Amazon VPC</h3>
+<p>The core networking foundation the whole pipeline observes — EC2, ALB, NAT Gateway, and other resources all sit inside it.</p>
+</div>
+<div class="module">
+<h3><span class="led teal"></span>VPC Flow Logs</h3>
+<p>Centralized network telemetry at the interface level — every accepted and rejected connection, without touching the host OS.</p>
+</div>
+<div class="module">
+<h3><span class="led teal"></span>Amazon CloudWatch</h3>
+<p>The managed aggregation layer flow logs land in before anything gets processed or forwarded onward.</p>
+</div>
+<div class="module">
+<h3><span class="led red"></span>EC2 Processing Layer</h3>
+<p>Transforms raw telemetry into structured security events — the step that turns noise into signal.</p>
+</div>
+<div class="module">
+<h3><span class="led"></span>IAM, Least Privilege</h3>
+<p>Service permissions scoped tightly to what the pipeline actually needs to read and forward — nothing broader.</p>
+</div>
+</div>
+<div class="module" style="max-width:760px;margin-top:18px">
+<h3><span class="led teal"></span>Why VPC Flow Logs?</h3>
+<p>Unlike host-based logging, VPC Flow Logs give visibility into network communication across EC2, ALBs, NAT Gateways, and other supported interfaces — observing cloud networking behavior directly, rather than relying solely on what an individual OS chooses to log.</p>
+</div>
+</section>
+<section id="stack">
+<div class="section-tag">show inventory</div>
+<h2 class="section-title">Technologies Used</h2>
+<div class="sfp-grid">
+<span class="sfp">AWS Networking</span><span class="sfp">Amazon VPC</span><span class="sfp">VPC Flow Logs</span>
+<span class="sfp">CloudWatch Logs</span><span class="sfp">Amazon EC2</span><span class="sfp">AWS IAM</span>
+<span class="sfp">Hybrid Cloud</span><span class="sfp">Wazuh</span><span class="sfp">OpenSearch</span>
+<span class="sfp">SIEM Integration</span><span class="sfp">Detection Engineering</span><span class="sfp">Cloud Security</span>
+</div>
+</section>
+<section id="detections">
+<div class="section-tag">show detections</div>
+<h2 class="section-title">What Gets Detected</h2>
+<p class="section-sub">
+    Instead of forwarding every raw network record into Wazuh, the processing layer normalizes AWS telemetry and
+    emits structured behavioral events — built so new detections can be added later without redesigning the
+    pipeline.
+  </p>
+<div class="grid" style="margin-bottom:30px">
+<div class="module">
+<h3><span class="led red"></span>Port Scan Detection</h3>
+<p>Flags a source touching an unusual spread of destination ports in a short window — classic reconnaissance behavior.</p>
+</div>
+<div class="module">
+<h3><span class="led red"></span>Brute Force Detection</h3>
+<p>Flags repeated connection attempts against a single service, distinguishing accepted from rejected traffic.</p>
+</div>
+<div class="module">
+<h3><span class="led teal"></span>MITRE ATT&amp;CK Alignment</h3>
+<p>Structured events are generated with MITRE-ready alerting in mind, so findings map to a recognized framework.</p>
+</div>
+</div>
+<div class="alert-card">
+<div class="ac-hdr"><span>example structured event · synthetic</span><span class="sev medium">medium</span></div>
+<pre>{
+  "event_type": "port_scan_detected",
+  "source_ip": "203.0.113.42",
+  "destination_ports_touched": 14,
+  "window_seconds": 60,
+  "mitre_technique": "T1595 - Active Scanning",
+  "severity": "medium"
+}</pre>
+<div class="ac-note">illustrative event shape — not a captured production alert</div>
+</div>
+<p class="section-sub" style="margin-top:30px;margin-bottom:0">
+    Network-layer detections here are designed to complement, not replace, host-level signal — a repeated
+    connection attempt flagged by this pipeline reads very differently next to a corresponding authentication
+    failure from a database audit log. Correlating the two is where the next roadmap phase is headed.
+  </p>
+</section>
+<section>
+<div class="section-tag">cat business-value.md</div>
+<h2 class="section-title">Why This, Instead of a Second SIEM</h2>
+<div class="prose">
+<p>
+      This shows how to extend existing on-prem security operations into AWS without introducing a second
+      enterprise SIEM platform to license, tune, and maintain.
+    </p>
+<p>
+      By leaning on AWS-native logging and doing the noise reduction before ingestion, the pipeline improves cloud
+      visibility, keeps log volume sane, and leaves room to grow into more advanced cloud security capability later
+      — without a redesign.
+    </p>
+</div>
+</section>
+<section id="screenshots"><div class="section-tag">ls Images/</div><h2 class="section-title">Implementation Walkthrough</h2><p class="section-sub">Screenshots captured from the live deployment showing telemetry flow from AWS into the on-premises Wazuh SIEM.</p><div class="gallery"><div class="shot"><a href="Images/EC2.png" target="_blank"><img alt="EC2 Processing Layer" src="Images/EC2.png"/></a><div class="cap"><h3>EC2 Processing Layer</h3><p>AWS EC2 instance acting as the log collection and processing server.</p></div></div><div class="shot"><a href="Images/VPC_flog_logs.png" target="_blank"><img alt="CloudWatch VPC Flow Logs" src="Images/VPC_flog_logs.png"/></a><div class="cap"><h3>CloudWatch VPC Flow Logs</h3><p>VPC Flow Logs generated by AWS and stored in CloudWatch.</p></div></div><div class="shot"><a href="Images/VPC_logs_ingested.png" target="_blank"><img alt="Flow Logs Ingested" src="Images/VPC_logs_ingested.png"/></a><div class="cap"><h3>Flow Logs Ingested</h3><p>Normalized VPC Flow Logs successfully ingested into Wazuh archives.</p></div></div><div class="shot"><a href="Images/Wazuh.png" target="_blank"><img alt="Wazuh Agents" src="Images/Wazuh.png"/></a><div class="cap"><h3>Wazuh Agents</h3><p>Hybrid environment with AWS and on-prem agents connected.</p></div></div><div class="shot"><a href="Images/wazuh_detection.png" target="_blank"><img alt="Threat Detections" src="Images/wazuh_detection.png"/></a><div class="cap"><h3>Threat Detections</h3><p>Custom detections including port scans and brute-force attempts.</p></div></div><div class="shot"><a href="Images/MariaDB_detection.png" target="_blank"><img alt="MariaDB Correlation" src="Images/MariaDB_detection.png"/></a><div class="cap"><h3>MariaDB Correlation</h3><p>Database authentication events correlated with network telemetry.</p></div></div><div class="shot"><a href="Images/Threat_hunting.png" target="_blank"><img alt="Threat Hunting Dashboard" src="Images/Threat_hunting.png"/></a><div class="cap"><h3>Threat Hunting Dashboard</h3><p>Security analytics dashboard showing detections and alert trends.</p></div></div><div class="shot"><a href="Images/vulnerability_detection.png" target="_blank"><img alt="Vulnerability Detection" src="Images/vulnerability_detection.png"/></a><div class="cap"><h3>Vulnerability Detection</h3><p>Wazuh vulnerability dashboard for the AWS collector instance.</p></div></div></div></section><section id="roadmap">
+<div class="section-tag">git diff --stat</div>
+<h2 class="section-title">Current State &amp; What's Next</h2>
+<div class="diff-grid">
+<div class="diff-col committed">
+<div class="dc-hdr">committed — current state (mvp)</div>
+<div class="diff-line"><span class="mark">+</span><span class="val">Production telemetry ingestion via Flow Logs</span></div>
+<div class="diff-line"><span class="mark">+</span><span class="val">Modular behavioral detection framework</span></div>
+<div class="diff-line"><span class="mark">+</span><span class="val">Live Wazuh integration, on-prem</span></div>
+<div class="diff-line"><span class="mark">+</span><span class="val">MITRE-ready alerting</span></div>
+<div class="diff-line"><span class="mark">+</span><span class="val">OpenSearch dashboard visualization</span></div>
+<div class="diff-line"><span class="mark">+</span><span class="val">Port scan &amp; brute force detection</span></div>
+</div>
+<div class="diff-col pending">
+<div class="dc-hdr">candidate-config — roadmap</div>
+<div class="diff-line"><span class="mark">~</span><span class="val">CloudTrail integration</span></div>
+<div class="diff-line"><span class="mark">~</span><span class="val">GuardDuty &amp; Security Hub correlation</span></div>
+<div class="diff-line"><span class="mark">~</span><span class="val">AWS WAF log ingestion</span></div>
+<div class="diff-line"><span class="mark">~</span><span class="val">GeoIP / ASN enrichment</span></div>
+<div class="diff-line"><span class="mark">~</span><span class="val">Threat intelligence feeds</span></div>
+<div class="diff-line"><span class="mark">~</span><span class="val">Lateral movement &amp; exfil analytics</span></div>
+<div class="diff-line"><span class="mark">~</span><span class="val">Terraform + CI/CD</span></div>
+</div>
+</div>
+</section>
+<section id="lessons">
+<div class="section-tag">show notes</div>
+<h2 class="section-title">Lessons Learned</h2>
+<div class="lessons">
+<div class="lesson-line"><span class="hash">#</span>Designing a hybrid telemetry pipeline end to end</div>
+<div class="lesson-line"><span class="hash">#</span>Reducing signal-to-noise before SIEM ingestion</div>
+<div class="lesson-line"><span class="hash">#</span>Structuring network events for behavioral analysis</div>
+<div class="lesson-line"><span class="hash">#</span>Extending on-prem SOC tooling into the cloud</div>
+<div class="lesson-line"><span class="hash">#</span>Correlating network detections with auth logs</div>
+<div class="lesson-line"><span class="hash">#</span>Counting connection attempts, not just log records</div>
+<div class="lesson-line"><span class="hash">#</span>Least-privilege IAM for telemetry pipelines</div>
+<div class="lesson-line"><span class="hash">#</span>Designing for modular growth, not a rebuild</div>
+</div>
+</section>
+<footer>
+  end · <a href="/">← back to portfolio</a> · <a href="https://github.com/laxamanasr-blip" target="_blank">view repository</a> · © 2026 Sid Laxamana
+</footer>
+<div class="diagram-lightbox" id="diagramLightbox">
+<div class="dl-inner">
+<div class="dl-close" id="dlClose">×</div>
+<div id="dlContent"></div>
+</div>
+</div>
+<button aria-label="Back to top" class="to-top" id="toTop">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+</button>
+<script>
+// ---- click-to-enlarge on the pipeline diagram ----
+const diagramLightbox=document.getElementById('diagramLightbox');
+const dlContent=document.getElementById('dlContent');
+const dlClose=document.getElementById('dlClose');
+function makeIdsUnique(svgEl, suffix){
+  svgEl.querySelectorAll('[id]').forEach(el=>{
+    const oldId=el.id, newId=oldId+suffix;
+    el.id=newId;
+    svgEl.querySelectorAll('*').forEach(node=>{
+      ['filter','fill','stroke'].forEach(attr=>{
+        const val=node.getAttribute(attr);
+        if(val && val.indexOf('#'+oldId)!==-1){
+          node.setAttribute(attr, val.split('#'+oldId).join('#'+newId));
+        }
+      });
+    });
+  });
+}
+function closeDiagramLightbox(){
+  diagramLightbox.classList.remove('open');
+  setTimeout(()=>{ diagramLightbox.style.display='none'; dlContent.innerHTML=''; }, 250);
+}
+document.querySelectorAll('.hoppanel[id]').forEach(panel=>{
+  panel.addEventListener('click', ()=>{
+    dlContent.innerHTML='';
+    const clone=panel.cloneNode(true);
+    clone.removeAttribute('id');
+    const svgClone=clone.querySelector('svg');
+    if(svgClone) makeIdsUnique(svgClone, '-lb-'+Math.random().toString(36).slice(2,7));
+    dlContent.appendChild(clone);
+    diagramLightbox.style.display='flex';
+    requestAnimationFrame(()=>diagramLightbox.classList.add('open'));
+  });
+});
+dlClose.addEventListener('click', closeDiagramLightbox);
+diagramLightbox.addEventListener('click', e=>{
+  if(e.target===diagramLightbox) closeDiagramLightbox();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && diagramLightbox.style.display==='flex') closeDiagramLightbox();
+});
+
+// ---- nav scroll state + progress bar + back-to-top ----
+const navEl=document.querySelector('nav');
+const progressEl=document.getElementById('scrollProgress');
+const toTopBtn=document.getElementById('toTop');
+function onScroll(){
+  const y=window.scrollY||document.documentElement.scrollTop;
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=max>0?(y/max)*100:0;
+  progressEl.style.width=pct+'%';
+  navEl.classList.toggle('scrolled', y>10);
+  toTopBtn.classList.toggle('show', y>500);
+}
+document.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+toTopBtn.addEventListener('click', ()=>window.scrollTo({top:0, behavior:'smooth'}));
+
+// ---- header mouse-spotlight ----
+const headerEl=document.querySelector('header');
+if(headerEl){
+  headerEl.addEventListener('mousemove', e=>{
+    const r=headerEl.getBoundingClientRect();
+    headerEl.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+    headerEl.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+  });
+}
+
+// ---- reveal on scroll ----
+const revealTargets=document.querySelectorAll(
+  '.module, .hoppanel, .alert-card, .diff-col, .lessons, .sfp-grid'
+);
+revealTargets.forEach(el=>el.classList.add('reveal'));
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    }
+  });
+}, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+revealTargets.forEach(el=>io.observe(el));
+
+document.querySelectorAll('.grid').forEach(grid=>{
+  [...grid.children].forEach((child,i)=>{
+    child.style.transitionDelay=Math.min(i*70,280)+'ms';
+  });
+});
+</script>
+</body>
+</html>
