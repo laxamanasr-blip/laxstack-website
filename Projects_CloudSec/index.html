@@ -1,12 +1,24 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5HG3GBNTC1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5HG3GBNTC1');
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hybrid AWS Security Monitoring Pipeline | Sid Laxamana</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Favicon -->
+<link href="/favicon.ico" rel="icon" sizes="any"/>
+<link href="/favicon.ico" rel="shortcut icon"/>
+<link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0a0d10;
@@ -84,7 +96,7 @@ nav{
 .logo .path{color:var(--muted-dim)}
 .logo .user{color:var(--teal)}
 .logo .back{color:var(--muted);margin-right:2px}
-nav .links{display:flex;gap:24px;font-family:var(--mono);font-size:.8rem;align-items:center}
+nav .links{display:flex;gap:22px;font-family:var(--mono);font-size:.8rem;align-items:center}
 nav .links a{color:var(--muted);text-decoration:none}
 nav .links a:hover{color:var(--teal)}
 nav .links .repo-btn{
@@ -172,15 +184,39 @@ section::before{
 .hoppanel svg{width:100%;height:auto;display:block}
 .hop-caption{font-family:var(--mono);font-size:.7rem;color:var(--muted-dim);text-align:center;padding:10px 0 4px}
 
+/* ---------- Design decisions (pre-architecture) ---------- */
+.decision-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:1020px;margin-bottom:30px}
+.decision-chip{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:14px 16px;
+  font-family:var(--mono);font-size:.8rem;color:var(--muted);
+}
+.decision-chip b{color:var(--teal);display:block;margin-bottom:4px;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase}
+
 /* ---------- Modules ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
 .module{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:22px;transition:.2s}
 .module:hover{border-color:var(--teal-dim);transform:translateY(-4px)}
 .module h3{font-family:var(--mono);font-size:.95rem;color:var(--teal);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .module p{color:var(--muted);font-size:.9rem}
-.module ul{list-style:none;color:var(--muted);font-size:.9rem}
-.module li{padding:5px 0;border-top:1px solid var(--line-soft)}
-.module li:first-child{border-top:none}
+.module .trade{
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);
+  font-size:.82rem;color:var(--muted-dim);
+}
+.module .trade b{color:var(--amber);font-family:var(--mono);font-size:.7rem;letter-spacing:.03em;text-transform:uppercase;display:block;margin-bottom:4px}
+
+/* ---------- Evidence screenshot (contextual, annotated) ---------- */
+.evidence{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:18px;max-width:820px}
+.evidence a{display:block;cursor:zoom-in;position:relative}
+.evidence a::after{
+  content:"click to enlarge";position:absolute;right:10px;bottom:10px;
+  background:rgba(0,0,0,.7);color:#fff;padding:5px 9px;border-radius:4px;
+  font-family:var(--mono);font-size:.68rem;opacity:0;transition:.2s;
+}
+.evidence a:hover::after{opacity:1}
+.evidence img{width:100%;display:block;border-bottom:1px solid var(--line-soft)}
+.ev-note{padding:14px 18px}
+.ev-note .ev-row{display:flex;gap:10px;font-size:.82rem;color:var(--muted);padding:4px 0}
+.ev-note .ev-row b{color:var(--teal);font-family:var(--mono);font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;flex-shrink:0;width:80px}
 
 /* ---------- Stack chips ---------- */
 .sfp-grid{display:flex;flex-wrap:wrap;gap:10px}
@@ -218,6 +254,41 @@ section::before{
 }
 .alert-card .ac-note{padding:12px 20px 16px;font-size:.78rem;color:var(--muted-dim);font-family:var(--mono)}
 
+/* ---------- Follow an Attack timeline ---------- */
+.timeline{position:relative;padding-left:44px;max-width:820px}
+.timeline::before{content:"";position:absolute;left:15px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--teal),var(--red))}
+.stage{position:relative;margin-bottom:34px}
+.stage:last-child{margin-bottom:0}
+.stage-num{
+  position:absolute;left:-44px;top:0;width:32px;height:32px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.8rem;color:var(--teal);font-weight:700;
+}
+.stage.compromise .stage-num{border-color:var(--red);color:var(--red)}
+.stage-body{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px}
+.stage-body h3{font-family:var(--mono);font-size:1rem;margin-bottom:8px}
+.stage-body p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
+.stage-shot{border:1px solid var(--line-soft);border-radius:4px;overflow:hidden;position:relative}
+.stage-shot a{display:block;cursor:zoom-in;position:relative}
+.stage-shot a::after{
+  content:"click to enlarge";position:absolute;right:10px;bottom:10px;
+  background:rgba(0,0,0,.7);color:#fff;padding:5px 9px;border-radius:4px;
+  font-family:var(--mono);font-size:.68rem;opacity:0;transition:.2s;
+}
+.stage-shot a:hover::after{opacity:1}
+.stage-shot img{width:100%;display:block}
+.stage-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.stage-tags span{
+  font-family:var(--mono);font-size:.68rem;color:var(--muted-dim);
+  border:1px solid var(--line-soft);padding:3px 9px;border-radius:20px;
+}
+
+/* ---------- Correlation panel ---------- */
+.correlate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;max-width:1020px}
+.correlate-col{background:var(--panel-2);padding:20px}
+.correlate-col h4{font-family:var(--mono);font-size:.8rem;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.correlate-col p{color:var(--muted);font-size:.85rem}
+
 /* ---------- Config diff (roadmap) ---------- */
 .diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .diff-col{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px}
@@ -232,6 +303,20 @@ section::before{
 .diff-col.committed .mark{color:var(--green)}
 .diff-col.pending .mark{color:var(--amber)}
 .diff-line .val{color:var(--muted)}
+
+/* ---------- Maturity ladder (roadmap) ---------- */
+.ladder{max-width:900px;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.phase{display:flex;gap:18px;padding:18px 22px;border-top:1px solid var(--line-soft);align-items:flex-start}
+.phase:first-child{border-top:none}
+.phase .ph-num{font-family:var(--mono);font-size:.74rem;color:var(--muted-dim);width:64px;flex-shrink:0;padding-top:3px}
+.phase.current .ph-num{color:var(--green)}
+.phase-body{flex:1}
+.phase-body h4{font-family:var(--mono);font-size:.94rem;margin-bottom:4px;display:inline-block}
+.phase.current .phase-body h4{color:var(--green)}
+.phase-body p{color:var(--muted);font-size:.85rem;margin-top:4px}
+.phase-tag{display:inline-block;font-family:var(--mono);font-size:.63rem;padding:2px 9px;border-radius:20px;margin-left:10px;vertical-align:middle;letter-spacing:.03em;text-transform:uppercase}
+.phase.current .phase-tag{background:rgba(74,222,128,.12);color:var(--green);border:1px solid var(--green-dim)}
+.phase:not(.current) .phase-tag{background:rgba(139,150,163,.08);color:var(--muted-dim);border:1px solid var(--line)}
 
 /* ---------- Lessons ---------- */
 .lessons{display:grid;grid-template-columns:1fr 1fr;gap:6px 40px;max-width:1000px}
@@ -262,6 +347,17 @@ footer a:hover{text-decoration:underline}
   background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
   display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;
 }
+
+/* ---------- screenshot lightbox (shared by evidence + stage + gallery) ---------- */
+.gallery-lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.9);backdrop-filter:blur(6px);z-index:99999}
+.gallery-lightbox.open{display:flex}
+.gallery-lightbox img{max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.gallery-close{
+  position:fixed;top:24px;right:24px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;
+  background:#12161a;border:2px solid #14b8a6;border-radius:50%;color:#ffffff;font-size:32px;font-weight:bold;
+  cursor:pointer;z-index:100000;box-shadow:0 0 20px rgba(20,184,166,.35);transition:.2s ease;user-select:none;
+}
+.gallery-close:hover{background:#14b8a6;color:#04110f;transform:scale(1.08)}
 
 /* ---------- scroll effects ---------- */
 .scroll-progress{
@@ -307,240 +403,349 @@ header > *{position:relative;z-index:1}
   section{padding:48px 6%}
   .diff-grid{grid-template-columns:1fr}
   .lessons{grid-template-columns:1fr}
+  .correlate-grid{grid-template-columns:1fr}
+  .timeline{padding-left:36px}
+  .stage-num{left:-36px;width:28px;height:28px;font-size:.72rem}
 }
 @media(max-width:480px){
   .grid{grid-template-columns:1fr}
   nav .links{gap:10px;font-size:.74rem}
   h1{font-size:clamp(1.6rem,7vw,2.2rem)}
-}
-
-.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px}
-.shot{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.shot img{width:100%;display:block}
-.shot .cap{padding:14px}
-.shot h3{font-family:var(--mono);font-size:.9rem;color:var(--teal);margin-bottom:6px}
-.shot p{font-size:.9rem;color:var(--muted)}
-
-.shot a{display:block;position:relative;cursor:zoom-in}
-.shot a::after{
-content:"Click to enlarge";
-position:absolute;
-right:12px;
-bottom:12px;
-background:rgba(0,0,0,.7);
-color:#fff;
-padding:6px 10px;
-border-radius:4px;
-font-family:var(--mono);
-font-size:.72rem;
-opacity:0;
-transition:.2s;
-}
-.shot a:hover::after{opacity:1}
-
-.gallery-lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.9);backdrop-filter:blur(6px);z-index:99999}
-.gallery-lightbox.open{display:flex}
-.gallery-lightbox img{max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
-.gallery-close{
-position:fixed;
-top:24px;
-right:24px;
-width:52px;
-height:52px;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#12161a;
-border:2px solid #14b8a6;
-border-radius:50%;
-color:#ffffff;
-font-size:32px;
-font-weight:bold;
-cursor:pointer;
-z-index:100000;
-box-shadow:0 0 20px rgba(20,184,166,.35);
-transition:.2s ease;
-user-select:none;
-}
-.gallery-close:hover{
-background:#14b8a6;
-color:#04110f;
-transform:scale(1.08);
+  .phase{flex-direction:column;gap:4px}
+  .phase .ph-num{width:auto}
 }
 </style>
 </head>
 <body>
-<div aria-hidden="true" class="aurora"><span></span><span></span><span></span></div>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
 <div class="scroll-progress" id="scrollProgress"></div>
+
 <nav>
-<a class="logo" href="/"><span class="back">←</span><span class="user">sid</span><span class="path">@laxstack:~/projects$</span></a>
-<div class="links">
-<a href="#overview">overview</a>
-<a href="#architecture">architecture</a>
-<a href="#detections">detections</a>
-<a href="#roadmap">roadmap</a>
-<a class="repo-btn" href="https://github.com/laxamanasr-blip" target="_blank">View Repo</a>
-</div>
+  <a class="logo" href="/"><span class="back">&larr;</span><span class="user">sid</span><span class="path">@laxstack:~/projects$</span></a>
+  <div class="links">
+    <a href="#why">why</a>
+    <a href="#architecture">architecture</a>
+    <a href="#attack">follow an attack</a>
+    <a href="#correlation">correlation</a>
+    <a href="#roadmap">roadmap</a>
+    <a class="repo-btn" href="https://github.com/laxamanasr-blip" target="_blank">View Repo</a>
+  </div>
 </nav>
+
 <header>
-<span class="project-label">PROJECT 003 · CLOUD SECURITY</span>
-<div class="crumb"><span class="prompt">&gt;</span> cat cloudsec-pipeline.md</div>
-<h1>Extending an on-prem SOC into AWS, <span style="color:var(--teal)">without a second SIEM.</span></h1>
-<p class="hero-sub">
-    A hybrid cloud security project that pipes AWS network telemetry — VPC Flow Logs, by way of CloudWatch
-    — into an existing on-premises Wazuh deployment. Raw flow records are normalized into structured,
-    MITRE-aligned behavioral events before they ever reach the SOC, instead of dumping every packet record into
-    a second, expensive cloud SIEM.
+  <span class="project-label">PROJECT 003 &middot; CLOUD SECURITY</span>
+  <div class="crumb"><span class="prompt">&gt;</span> cat cloudsec-pipeline.md</div>
+  <h1>Building a Hybrid Cloud <span style="color:var(--teal)">Security Operations Center.</span></h1>
+  <p class="hero-sub">
+    Extending an existing on-premises Wazuh SIEM into AWS using native cloud services, centralized network
+    telemetry, and behavioral analytics &mdash; so one SOC covers both environments instead of two that don't
+    talk to each other.
   </p>
-<div class="badge-row">
-<span class="badge status"><span class="led"></span>mvp — live telemetry</span>
-<span class="badge">hybrid soc, one siem</span>
-<span class="badge alert"><span class="led red"></span>mitre att&amp;ck aligned</span>
-<span class="badge">no per-gb siem licensing</span>
-</div>
-<div class="btn-row">
-<a class="btn primary" href="https://github.com/laxamanasr-blip" target="_blank"><span class="dot"></span>View Repository</a>
-<a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
-</div>
+
+  <div class="badge-row">
+    <span class="badge status"><span class="led"></span>mvp &mdash; live telemetry</span>
+    <span class="badge">hybrid soc, one siem</span>
+    <span class="badge alert"><span class="led red"></span>mitre att&amp;ck aligned</span>
+    <span class="badge">no per-gb siem licensing</span>
+  </div>
+
+  <div class="btn-row">
+    <a class="btn primary" target="_blank" href="https://github.com/laxamanasr-blip"><span class="dot"></span>View Repository</a>
+    <a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
+  </div>
 </header>
-<section id="overview">
-<div class="section-tag">cat overview.md</div>
-<h2 class="section-title">The visibility gap</h2>
-<div class="prose">
-<p>
-      Most orgs moving workloads into AWS keep running their SOC on-prem — and that split creates a real gap.
-      Cloud resources generate genuinely useful network telemetry, but getting it collected, transported, and
-      analyzed securely and cost-effectively is a different problem than watching on-prem traffic.
+
+<section id="why">
+  <div class="section-tag">cat why-build-this.md</div>
+  <h2 class="section-title">Why Build This?</h2>
+  <div class="prose">
+    <p>
+      Most organizations already run a SOC and a SIEM. The problem isn't a lack of security tooling &mdash; it's
+      that cloud adoption outpaces it. Workloads move into AWS generating real network telemetry, while the SOC
+      keeps watching on-prem traffic through the same tools it always has. That split is a visibility gap, and
+      it's the gap this project closes.
     </p>
-<p>
-      Commercial cloud SIEMs (Sentinel, Splunk ES, QRadar, Cortex XSIAM) solve this well — at a licensing and
-      ingestion cost that's hard to justify for a lab, a small team, or anyone learning the space.
+    <p>
+      Commercial cloud SIEMs &mdash; <strong>Microsoft Sentinel, Splunk Enterprise Security, IBM QRadar, Cortex
+      XSIAM</strong> &mdash; are genuinely excellent at solving this. They're also expensive: licensing, per-GB
+      ingestion, and storage costs that are hard to justify for a lab, a small team, or anyone still learning the
+      space.
     </p>
-<p>
-      Rather than standing up a second SIEM in the cloud, this project extends an existing <strong>on-prem Wazuh</strong>
-      deployment outward using AWS-native services — giving one SOC visibility into both environments instead
-      of two SOCs that don't talk to each other.
+    <p>
+      The engineering goal here was never to replace an enterprise SIEM. It was to explore how far AWS-native
+      services can extend an <strong>existing</strong> SOC before that spend becomes necessary &mdash; and how
+      much of the noise-reduction work can happen before anything reaches the SIEM at all.
     </p>
-</div>
+  </div>
+
+  <div class="grid" style="margin-top:34px">
+    <div class="module">
+      <h3><span class="led teal"></span>Cloud Visibility</h3>
+      <p>AWS workloads generate valuable network telemetry that traditionally stays isolated from on-prem security monitoring.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Cost</h3>
+      <p>Enterprise cloud SIEM platforms bring licensing, ingestion, and storage costs that are hard to justify for a personal lab.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led red"></span>Signal vs. Noise</h3>
+      <p>Forwarding every raw VPC Flow Log into a SIEM inflates storage and makes analyst investigations harder, not easier.</p>
+    </div>
+  </div>
 </section>
-<section>
-<div class="section-tag">show challenges</div>
-<h2 class="section-title">The Problem, in Three Parts</h2>
-<div class="grid">
-<div class="module">
-<h3><span class="led teal"></span>Cloud Visibility</h3>
-<p>AWS workloads generate valuable network telemetry that traditionally stays isolated from on-prem security monitoring.</p>
-</div>
-<div class="module">
-<h3><span class="led"></span>Cost</h3>
-<p>Enterprise cloud SIEM platforms bring licensing, ingestion, and storage costs that are hard to justify for a personal lab.</p>
-</div>
-<div class="module">
-<h3><span class="led red"></span>Signal vs. Noise</h3>
-<p>Forwarding every raw VPC Flow Log into a SIEM inflates storage and makes analyst investigations harder, not easier.</p>
-</div>
-</div>
-</section>
+
 <section id="architecture">
-<div class="section-tag">show topology</div>
-<h2 class="section-title">Pipeline Architecture</h2>
-<p class="section-sub">Telemetry is normalized into structured security events before it ever leaves AWS — the on-prem SOC receives signal, not raw noise.</p>
-<div class="hoppanel" id="hopPanelPipeline">
-<div class="hdr"><span>path — vpc to soc dashboard</span><span class="zoom-hint">click to expand<span class="led teal" style="margin-left:6px"></span></span></div>
-<svg aria-label="Diagram of the telemetry pipeline: from the AWS VPC through Flow Logs, CloudWatch, an EC2 processing layer, to the on-prem Wazuh manager and OpenSearch dashboard" role="img" viewbox="0 0 560 260" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<filter height="200%" id="glowPipe" width="200%" x="-50%" y="-50%">
-<fegaussianblur result="blur" stddeviation="3"></fegaussianblur>
-<femerge><femergenode in="blur"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
-</filter>
-</defs>
-<path d="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30" fill="none" stroke="#242c2f" stroke-dasharray="4 5" stroke-width="2"></path>
-<circle fill="#14b8a6" filter="url(#glowPipe)" r="4.5">
-<animatemotion dur="5s" path="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30" repeatcount="indefinite"></animatemotion>
-</circle>
-<g fill="#8b96a3" font-family="Fira Code, monospace" font-size="9">
-<circle cx="25" cy="225" fill="#4ade80" filter="url(#glowPipe)" r="6"></circle>
-<text text-anchor="middle" x="25" y="245">AWS VPC</text>
-<circle cx="115" cy="195" fill="#14b8a6" filter="url(#glowPipe)" r="6"></circle>
-<text text-anchor="middle" x="115" y="180">FLOW LOGS</text>
-<circle cx="205" cy="160" fill="#14b8a6" filter="url(#glowPipe)" r="6"></circle>
-<text text-anchor="middle" x="205" y="145">CLOUDWATCH</text>
-<circle cx="295" cy="120" fill="#ef4444" filter="url(#glowPipe)" r="6"></circle>
-<text text-anchor="middle" x="295" y="140">PROCESSING (EC2)</text>
-<circle cx="390" cy="75" fill="#14b8a6" filter="url(#glowPipe)" r="6"></circle>
-<text text-anchor="middle" x="390" y="60">WAZUH (ON-PREM)</text>
-<circle cx="490" cy="30" fill="#4ade80" filter="url(#glowPipe)" r="6"></circle>
-<text text-anchor="middle" x="490" y="18">OPENSEARCH</text>
-</g>
-</svg>
-<div class="hop-caption">6 hops · flow logs → behavioral events · on-prem soc dashboard</div>
-</div>
+  <div class="section-tag">cat design-decisions.md</div>
+  <h2 class="section-title">Architecture Story</h2>
+  <p class="section-sub">Four decisions shaped this pipeline before a single log ever moved &mdash; the diagram below is what they add up to.</p>
+
+  <div class="decision-strip">
+    <div class="decision-chip"><b>01</b>VPC Flow Logs, not host agents</div>
+    <div class="decision-chip"><b>02</b>CloudWatch as the managed transport layer</div>
+    <div class="decision-chip"><b>03</b>An EC2 layer to normalize events</div>
+    <div class="decision-chip"><b>04</b>Forward enriched events, never raw logs</div>
+  </div>
+
+  <div class="hoppanel" id="hopPanelPipeline">
+    <div class="hdr"><span>path &mdash; vpc to soc dashboard</span><span class="zoom-hint">click to expand<span class="led teal" style="margin-left:6px"></span></span></div>
+    <svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the telemetry pipeline: from the AWS VPC through Flow Logs, CloudWatch, an EC2 processing layer, to the on-prem Wazuh manager and OpenSearch dashboard">
+      <defs>
+        <filter id="glowPipe" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30" fill="none" stroke="#242c2f" stroke-width="2" stroke-dasharray="4 5"/>
+      <circle r="4.5" fill="#14b8a6" filter="url(#glowPipe)">
+        <animateMotion dur="5s" repeatCount="indefinite" path="M25,225 L115,195 L205,160 L295,120 L390,75 L490,30"/>
+      </circle>
+      <g font-family="Fira Code, monospace" font-size="9" fill="#8b96a3">
+        <circle cx="25" cy="225" r="6" fill="#4ade80" filter="url(#glowPipe)"/>
+        <text x="25" y="245" text-anchor="middle">AWS VPC</text>
+
+        <circle cx="115" cy="195" r="6" fill="#14b8a6" filter="url(#glowPipe)"/>
+        <text x="115" y="180" text-anchor="middle">FLOW LOGS</text>
+
+        <circle cx="205" cy="160" r="6" fill="#14b8a6" filter="url(#glowPipe)"/>
+        <text x="205" y="145" text-anchor="middle">CLOUDWATCH</text>
+
+        <circle cx="295" cy="120" r="6" fill="#ef4444" filter="url(#glowPipe)"/>
+        <text x="295" y="140" text-anchor="middle">PROCESSING (EC2)</text>
+
+        <circle cx="390" cy="75" r="6" fill="#14b8a6" filter="url(#glowPipe)"/>
+        <text x="390" y="60" text-anchor="middle">WAZUH (ON-PREM)</text>
+
+        <circle cx="490" cy="30" r="6" fill="#4ade80" filter="url(#glowPipe)"/>
+        <text x="490" y="18" text-anchor="middle">OPENSEARCH</text>
+      </g>
+    </svg>
+    <div class="hop-caption">6 hops &middot; flow logs &rarr; behavioral events &middot; on-prem soc dashboard</div>
+  </div>
 </section>
-<section>
-<div class="section-tag">show interfaces</div>
-<h2 class="section-title">Cloud Infrastructure Highlights</h2>
-<div class="grid">
-<div class="module">
-<h3><span class="led"></span>Amazon VPC</h3>
-<p>The core networking foundation the whole pipeline observes — EC2, ALB, NAT Gateway, and other resources all sit inside it.</p>
-</div>
-<div class="module">
-<h3><span class="led teal"></span>VPC Flow Logs</h3>
-<p>Centralized network telemetry at the interface level — every accepted and rejected connection, without touching the host OS.</p>
-</div>
-<div class="module">
-<h3><span class="led teal"></span>Amazon CloudWatch</h3>
-<p>The managed aggregation layer flow logs land in before anything gets processed or forwarded onward.</p>
-</div>
-<div class="module">
-<h3><span class="led red"></span>EC2 Processing Layer</h3>
-<p>Transforms raw telemetry into structured security events — the step that turns noise into signal.</p>
-</div>
-<div class="module">
-<h3><span class="led"></span>IAM, Least Privilege</h3>
-<p>Service permissions scoped tightly to what the pipeline actually needs to read and forward — nothing broader.</p>
-</div>
-</div>
-<div class="module" style="max-width:760px;margin-top:18px">
-<h3><span class="led teal"></span>Why VPC Flow Logs?</h3>
-<p>Unlike host-based logging, VPC Flow Logs give visibility into network communication across EC2, ALBs, NAT Gateways, and other supported interfaces — observing cloud networking behavior directly, rather than relying solely on what an individual OS chooses to log.</p>
-</div>
+
+<section id="networking">
+  <div class="section-tag">show ip flow-logs</div>
+  <h2 class="section-title">Cloud Networking Focus</h2>
+  <div class="prose">
+    <p>
+      Every ENI in the VPC &mdash; on an EC2 instance, an ALB, a NAT Gateway &mdash; emits its own VPC Flow Log
+      records. That's the mechanism: no agent to install, no host to touch. The network fabric itself is the
+      sensor.
+    </p>
+    <p>
+      That matters because network telemetry can surface activity <strong>before</strong> an endpoint log ever
+      would. A port scan against a host with minimal logging might never show up locally &mdash; but it's
+      unmissable at the network layer, because the connections themselves are the evidence.
+    </p>
+    <p>
+      There's a real difference between a raw flow record and behavioral intelligence. A flow record is just
+      <code>src_ip, dst_ip, dst_port, action</code> &mdash; a fact about one connection. Fourteen of those facts
+      from the same source in sixty seconds is a port scan. The record doesn't know that; the processing layer
+      does.
+    </p>
+  </div>
+
+  <div class="evidence">
+    <a href="Images/VPC_flog_logs.png" class="lightbox-link" aria-label="View larger: CloudWatch VPC Flow Logs group">
+      <img src="Images/VPC_flog_logs.png" alt="AWS CloudWatch log group /aws/vpc/flowlogs showing log streams per network interface">
+    </a>
+    <div class="ev-note">
+      <div class="ev-row"><b>what</b><span>The <code>/aws/vpc/flowlogs</code> CloudWatch log group, with one log stream per ENI.</span></div>
+      <div class="ev-row"><b>why</b><span>This is the backbone &mdash; a managed, durable transport layer that exists between "AWS generates telemetry" and "something processes it," with nothing to run or patch.</span></div>
+      <div class="ev-row"><b>stage</b><span>Architecture &middot; CloudWatch transport layer</span></div>
+    </div>
+  </div>
+
+  <div class="evidence">
+    <a href="Images/VPC_logs_ingested.png" class="lightbox-link" aria-label="View larger: raw flow log records in Wazuh archives">
+      <img src="Images/VPC_logs_ingested.png" alt="Raw VPC Flow Log records ingested into Wazuh archives, showing ACCEPT and REJECT actions per connection">
+    </a>
+    <div class="ev-note">
+      <div class="ev-row"><b>what</b><span>Raw, unprocessed flow records &mdash; <code>data.src_ip</code>, <code>data.dst_port</code>, <code>data.action</code> &mdash; landing in Wazuh's archive index.</span></div>
+      <div class="ev-row"><b>why</b><span>This is what "before behavioral intelligence" actually looks like: 28,000+ individual facts with no story attached yet. Necessary raw material, not something an analyst should be reading directly.</span></div>
+      <div class="ev-row"><b>stage</b><span>Networking &middot; raw telemetry, pre-processing</span></div>
+    </div>
+  </div>
 </section>
+
 <section id="stack">
-<div class="section-tag">show inventory</div>
-<h2 class="section-title">Technologies Used</h2>
-<div class="sfp-grid">
-<span class="sfp">AWS Networking</span><span class="sfp">Amazon VPC</span><span class="sfp">VPC Flow Logs</span>
-<span class="sfp">CloudWatch Logs</span><span class="sfp">Amazon EC2</span><span class="sfp">AWS IAM</span>
-<span class="sfp">Hybrid Cloud</span><span class="sfp">Wazuh</span><span class="sfp">OpenSearch</span>
-<span class="sfp">SIEM Integration</span><span class="sfp">Detection Engineering</span><span class="sfp">Cloud Security</span>
-</div>
+  <div class="section-tag">show inventory</div>
+  <h2 class="section-title">Technologies Used</h2>
+  <div class="sfp-grid">
+    <span class="sfp">AWS Networking</span><span class="sfp">Amazon VPC</span><span class="sfp">VPC Flow Logs</span>
+    <span class="sfp">CloudWatch Logs</span><span class="sfp">Amazon EC2</span><span class="sfp">AWS IAM</span>
+    <span class="sfp">Hybrid Cloud</span><span class="sfp">Wazuh</span><span class="sfp">OpenSearch</span>
+    <span class="sfp">SIEM Integration</span><span class="sfp">Detection Engineering</span><span class="sfp">Cloud Security</span>
+  </div>
 </section>
+
+<section id="attack">
+  <div class="section-tag">show investigation timeline</div>
+  <h2 class="section-title">Follow an Attack</h2>
+  <p class="section-sub">
+    A real captured sequence, walked stage by stage &mdash; from first recon touch to a signal worth an analyst's
+    attention.
+  </p>
+
+  <div class="timeline">
+    <div class="stage">
+      <div class="stage-num">1</div>
+      <div class="stage-body">
+        <h3>Internet Attacker</h3>
+        <p>An external host begins probing the environment. Nothing has fired yet &mdash; this is just traffic arriving at a public IP.</p>
+        <div class="stage-tags"><span>recon begins</span></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num">2</div>
+      <div class="stage-body">
+        <h3>Port Scan Detected</h3>
+        <p>The same source IP touches an unusual spread of destination ports in a short window. The pipeline flags it as reconnaissance before anything downstream is touched.</p>
+        <div class="stage-shot">
+          <a href="Images/Port-scan-detected.png" class="lightbox-link" aria-label="View larger: Wazuh alert list showing potential port scan detections">
+            <img src="Images/Port-scan-detected.png" alt="Wazuh alerts showing Potential Port Scan detections against the environment">
+          </a>
+        </div>
+        <div class="stage-tags"><span>rule: potential port scan</span><span>network layer</span></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num">3</div>
+      <div class="stage-body">
+        <h3>Brute Force Against MySQL</h3>
+        <p>The same source IP (<code>119.94.164.8</code>) shifts from scanning to repeated connection attempts against the database host on port 3306 &mdash; recon giving way to an actual attempt.</p>
+        <div class="stage-shot">
+          <a href="Images/MYSQL_bruteforce.png" class="lightbox-link" aria-label="View larger: Wazuh alert list showing potential brute force against MySQL">
+            <img src="Images/MYSQL_bruteforce.png" alt="Wazuh alerts showing Potential Brute Force against MySQL detections">
+          </a>
+        </div>
+        <div class="stage-tags"><span>rule: potential brute force</span><span>dst_port: 3306</span></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num">4</div>
+      <div class="stage-body">
+        <h3>MariaDB Failed Login</h3>
+        <p>On the database host itself, MariaDB's own audit log confirms it &mdash; repeated <code>Access denied for user 'root'@'119.94.164.8'</code> entries, the same source IP the network layer already flagged.</p>
+        <div class="stage-shot">
+          <a href="Images/MariaDB-failed-login.png" class="lightbox-link" aria-label="View larger: Wazuh alert list showing MariaDB failed login attempts">
+            <img src="Images/MariaDB-failed-login.png" alt="Wazuh alerts showing repeated MariaDB Failed Login Attempt entries for user root">
+          </a>
+        </div>
+        <div class="stage-tags"><span>rule: mariadb failed login</span><span>host layer</span></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num">5</div>
+      <div class="stage-body">
+        <h3>MariaDB Successful Login</h3>
+        <p>Interspersed with the failures, successful logins start appearing from the same source &mdash; the same view, the same host, a very different outcome.</p>
+        <div class="stage-shot">
+          <a href="Images/MariaDB_detection.png" class="lightbox-link" aria-label="View larger: Wazuh alert list showing MariaDB successful logins">
+            <img src="Images/MariaDB_detection.png" alt="Wazuh alerts showing MariaDB Successful Login entries alongside failed attempts">
+          </a>
+        </div>
+        <div class="stage-tags"><span>rule: mariadb successful login</span><span>root account</span></div>
+      </div>
+    </div>
+
+    <div class="stage compromise">
+      <div class="stage-num">6</div>
+      <div class="stage-body">
+        <h3>Signal Worth Escalating</h3>
+        <p>
+          This pipeline also watches session and privilege-escalation activity on its own collector infrastructure
+          &mdash; PAM login sessions and a <code>sudo</code> to root, captured the same way. Shown here as what that
+          class of signal looks like when it fires, not a confirmed link to the database event above; that's exactly
+          the kind of connection the correlation work below is for.
+        </p>
+        <div class="stage-shot">
+          <a href="Images/PAM-login.png" class="lightbox-link" aria-label="View larger: Wazuh alert list showing PAM login session and sudo to root events">
+            <img src="Images/PAM-login.png" alt="Wazuh alerts showing PAM login session opened, closed, and a successful sudo to root">
+          </a>
+        </div>
+        <div class="stage-tags"><span>rule: pam / sudo to root</span><span>privilege escalation signal</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="correlation">
+  <div class="section-tag">show correlation-engine</div>
+  <h2 class="section-title">Cross-Source Correlation</h2>
+  <p class="section-sub">The platform correlates three sources instead of trusting any one of them in isolation.</p>
+
+  <div class="correlate-grid">
+    <div class="correlate-col">
+      <h4><span class="led teal"></span>VPC Flow Logs</h4>
+      <p>Ground truth for network activity &mdash; every connection attempt, accepted or rejected, regardless of what happens at the application layer.</p>
+    </div>
+    <div class="correlate-col">
+      <h4><span class="led red"></span>Behavioral Detections</h4>
+      <p>Pattern recognition over those flow logs &mdash; a port scan, a brute force shape &mdash; the recon and attempt stages of an investigation.</p>
+    </div>
+    <div class="correlate-col">
+      <h4><span class="led"></span>MariaDB Audit Logs</h4>
+      <p>The application's own record of what actually happened &mdash; authentication success or failure, independent of what the network saw.</p>
+    </div>
+  </div>
+
+  <p class="prose" style="margin-top:24px">
+    Individually, a brute-force alert is a maybe. A failed login is routine. Correlated &mdash; same source IP,
+    same destination, adjacent timestamps, moving from network-layer recon into application-layer authentication
+    &mdash; an analyst can tell whether reconnaissance actually progressed into a successful login, instead of
+    treating three separate low-confidence signals as three separate non-events.
+  </p>
+
+  <div class="evidence" style="margin-top:24px">
+    <a href="Images/Failed_login_alert.png" class="lightbox-link" aria-label="View larger: expanded Wazuh alert document for a MariaDB failed login">
+      <img src="Images/Failed_login_alert.png" alt="Expanded Wazuh alert document for a MariaDB Failed Login Attempt, showing rule metadata and decoder detail">
+    </a>
+    <div class="ev-note">
+      <div class="ev-row"><b>what</b><span>The expanded document behind one MariaDB failed-login alert &mdash; rule level 10, fired 27 times, decoded automatically by Wazuh's built-in MariaDB decoder.</span></div>
+      <div class="ev-row"><b>why</b><span>This is the kind of structured detail correlation runs on &mdash; not just "a login failed," but a rule ID, a severity level, and a repeat count that can be matched against the network-layer alert for the same source and window.</span></div>
+      <div class="ev-row"><b>stage</b><span>Correlation &middot; application-layer evidence</span></div>
+    </div>
+  </div>
+</section>
+
 <section id="detections">
-<div class="section-tag">show detections</div>
-<h2 class="section-title">What Gets Detected</h2>
-<p class="section-sub">
+  <div class="section-tag">show detections</div>
+  <h2 class="section-title">What Gets Detected</h2>
+  <p class="section-sub">
     Instead of forwarding every raw network record into Wazuh, the processing layer normalizes AWS telemetry and
-    emits structured behavioral events — built so new detections can be added later without redesigning the
+    emits structured behavioral events &mdash; built so new detections can be added later without redesigning the
     pipeline.
   </p>
-<div class="grid" style="margin-bottom:30px">
-<div class="module">
-<h3><span class="led red"></span>Port Scan Detection</h3>
-<p>Flags a source touching an unusual spread of destination ports in a short window — classic reconnaissance behavior.</p>
-</div>
-<div class="module">
-<h3><span class="led red"></span>Brute Force Detection</h3>
-<p>Flags repeated connection attempts against a single service, distinguishing accepted from rejected traffic.</p>
-</div>
-<div class="module">
-<h3><span class="led teal"></span>MITRE ATT&amp;CK Alignment</h3>
-<p>Structured events are generated with MITRE-ready alerting in mind, so findings map to a recognized framework.</p>
-</div>
-</div>
-<div class="alert-card">
-<div class="ac-hdr"><span>example structured event · synthetic</span><span class="sev medium">medium</span></div>
-<pre>{
+
+  <div class="alert-card">
+    <div class="ac-hdr"><span>example structured event &middot; synthetic</span><span class="sev medium">medium</span></div>
+    <pre>{
   "event_type": "port_scan_detected",
   "source_ip": "203.0.113.42",
   "destination_ports_touched": 14,
@@ -548,80 +753,239 @@ transform:scale(1.08);
   "mitre_technique": "T1595 - Active Scanning",
   "severity": "medium"
 }</pre>
-<div class="ac-note">illustrative event shape — not a captured production alert</div>
-</div>
-<p class="section-sub" style="margin-top:30px;margin-bottom:0">
-    Network-layer detections here are designed to complement, not replace, host-level signal — a repeated
-    connection attempt flagged by this pipeline reads very differently next to a corresponding authentication
-    failure from a database audit log. Correlating the two is where the next roadmap phase is headed.
-  </p>
+    <div class="ac-note">illustrative event shape &mdash; not a captured production alert</div>
+  </div>
 </section>
-<section>
-<div class="section-tag">cat business-value.md</div>
-<h2 class="section-title">Why This, Instead of a Second SIEM</h2>
-<div class="prose">
-<p>
-      This shows how to extend existing on-prem security operations into AWS without introducing a second
-      enterprise SIEM platform to license, tune, and maintain.
-    </p>
-<p>
-      By leaning on AWS-native logging and doing the noise reduction before ingestion, the pipeline improves cloud
-      visibility, keeps log volume sane, and leaves room to grow into more advanced cloud security capability later
-      — without a redesign.
-    </p>
+
+<section id="decisions">
+  <div class="section-tag">show engineering-decisions</div>
+  <h2 class="section-title">Engineering Decisions</h2>
+  <p class="section-sub">Every choice here traded something for something &mdash; worth being honest about both sides.</p>
+
+  <div class="grid">
+    <div class="module">
+      <h3><span class="led teal"></span>Why VPC Flow Logs?</h3>
+      <p>Network-layer visibility with zero agents to install, update, or lose track of across instances.</p>
+      <div class="trade"><b>trade-off</b>No process-level context &mdash; you see the connection, not what made it.</div>
+    </div>
+    <div class="module">
+      <h3><span class="led teal"></span>Why CloudWatch?</h3>
+      <p>Managed, durable transport with nothing to provision or keep patched between generation and processing.</p>
+      <div class="trade"><b>trade-off</b>Cost scales with volume, so raw logs can't just sit there indefinitely.</div>
+    </div>
+    <div class="module">
+      <h3><span class="led red"></span>Why EC2, not Lambda?</h3>
+      <p>Port-scan and brute-force detection both need state &mdash; tracking unique ports or attempts per source over a rolling window. That's awkward across short-lived, stateless invocations.</p>
+      <div class="trade"><b>trade-off</b>An always-on instance to patch and secure, instead of Lambda's zero-idle-cost model.</div>
+      <div class="evidence" style="margin-top:14px">
+        <a href="Images/EC2.png" class="lightbox-link" aria-label="View larger: AWS EC2 console showing the LogCollector processing instance">
+          <img src="Images/EC2.png" alt="AWS EC2 console showing the running LogCollector instance, its IAM role, and security group inbound rules">
+        </a>
+      </div>
+    </div>
+    <div class="module">
+      <h3><span class="led teal"></span>Why Wazuh?</h3>
+      <p>Already the on-prem SOC's SIEM, with a mature decoder and rule ecosystem that already understands MariaDB, PAM, and sudo logs out of the box &mdash; no second platform to learn.</p>
+      <div class="trade"><b>trade-off</b>Ties the design to Wazuh's rule/decoder model rather than a cloud-native alternative.</div>
+      <div class="evidence" style="margin-top:14px">
+        <a href="Images/Failed_login_alert.png" class="lightbox-link" aria-label="View larger: Wazuh's decoded rule output for a MariaDB event">
+          <img src="Images/Failed_login_alert.png" alt="Wazuh's decoded rule metadata for a MariaDB authentication event, generated automatically without custom parsing">
+        </a>
+      </div>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Why Preprocess Before Ingestion?</h3>
+      <p>Cuts storage and alert fatigue &mdash; the SOC sees "port scan," not fourteen raw connection records to piece together by hand.</p>
+      <div class="trade"><b>trade-off</b>A bug in detection logic happens before Wazuh ever sees the event. Early builds ran with temporary synthetic test events specifically to validate that logic before trusting it against real traffic.</div>
+    </div>
+  </div>
+</section>
+
+<section id="value">
+  <div class="section-tag">cat business-value.md</div>
+  <h2 class="section-title">Business Value</h2>
+  <p class="section-sub">From an engineering manager's read, not a feature list.</p>
+
+  <div class="grid">
+    <div class="module">
+      <h3><span class="led teal"></span>Centralized AWS Visibility</h3>
+      <p>One SOC sees both environments instead of running cloud security blind between two disconnected tools.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Reduced Alert Fatigue</h3>
+      <p>Analysts see behavioral events, not thousands of raw ACCEPT/REJECT flow records to sift through by hand.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led teal"></span>Hybrid SOC Architecture</h3>
+      <p>Extends what already exists instead of standing up parallel tooling that has to be maintained twice.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Scalable Telemetry Pipeline</h3>
+      <p>New detections plug into the same processing layer without a pipeline redesign each time.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led teal"></span>Lower Operational Cost</h3>
+      <p>No second SIEM license, no per-GB cloud ingestion fees for a lab-scale or small-team environment.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Reusable Detection Framework</h3>
+      <p>Today it's port scans and brute force &mdash; the same shape extends to CloudTrail, GuardDuty, and beyond.</p>
+    </div>
+  </div>
+</section>
+
+
+<section id="operations">
+<div class="section-tag">show soc-dashboard</div>
+<h2 class="section-title">Operational Security Operations Center</h2>
+<p class="section-sub">
+The platform is no longer just an architecture demonstration—it is an operational hybrid SOC ingesting AWS telemetry,
+running custom behavioral detections, and presenting correlated security events inside Wazuh.
+</p>
+
+<div class="grid">
+
+<div class="module">
+<h3><span class="led teal"></span>Threat Hunting Dashboard</h3>
+<p>Provides analysts with a single pane of glass for cloud telemetry, authentication events,
+behavioral detections, and rule trends.</p>
+
+<div class="evidence">
+<a href="Images/Threat_hunting.png" class="lightbox-link">
+<img src="Images/Threat_hunting.png" alt="Threat Hunting Dashboard">
+</a>
+<div class="ev-note">
+<div class="ev-row"><b>Highlights</b><span>~7,000 collected events, behavioral detections, authentication statistics and rule distribution.</span></div>
+</div>
+</div>
+</div>
+
+<div class="module">
+<h3><span class="led red"></span>Behavioral Detection Engine</h3>
+<p>Instead of forwarding raw flow logs, the EC2 processing engine emits structured security events with confidence scores, detector names and attack metadata.</p>
+
+<div class="evidence">
+<a href="Images/SSH_bruteforce.png" class="lightbox-link">
+<img src="Images/SSH_bruteforce.png" alt="SSH Brute Force Detection">
+</a>
+<div class="ev-note">
+<div class="ev-row"><b>Detector</b><span>BruteForceDetector</span></div>
+<div class="ev-row"><b>Confidence</b><span>100</span></div>
+<div class="ev-row"><b>Behavior</b><span>SSH brute force</span></div>
+</div>
+</div>
+</div>
+
+<div class="module">
+<h3><span class="led"></span>Vulnerability Management</h3>
+<p>Wazuh continuously evaluates managed hosts for CVEs and vulnerable packages, extending the platform beyond network telemetry.</p>
+<div class="evidence">
+<a href="Images/vulnerability_detection.png" class="lightbox-link">
+<img src="Images/vulnerability_detection.png" alt="Vulnerability Dashboard">
+</a>
+</div>
+</div>
+
+<div class="module">
+<h3><span class="led teal"></span>Managed Infrastructure</h3>
+<p>The SOC monitors Windows endpoints, Windows Server, public cloud workloads and the AWS Log Collector from one centralized manager.</p>
+<div class="evidence">
+<a href="Images/Wazuh.png" class="lightbox-link">
+<img src="Images/Wazuh.png" alt="Managed Agents">
+</a>
+</div>
+</div>
+
 </div>
 </section>
-<section id="screenshots"><div class="section-tag">ls Images/</div><h2 class="section-title">Implementation Walkthrough</h2><p class="section-sub">Screenshots captured from the live deployment showing telemetry flow from AWS into the on-premises Wazuh SIEM.</p><div class="gallery"><div class="shot"><a href="Images/EC2.png"><img alt="EC2 Processing Layer" src="Images/EC2.png"/></a><div class="cap"><h3>EC2 Processing Layer</h3><p>AWS EC2 instance acting as the log collection and processing server.</p></div></div><div class="shot"><a href="Images/VPC_flog_logs.png"><img alt="CloudWatch VPC Flow Logs" src="Images/VPC_flog_logs.png"/></a><div class="cap"><h3>CloudWatch VPC Flow Logs</h3><p>VPC Flow Logs generated by AWS and stored in CloudWatch.</p></div></div><div class="shot"><a href="Images/VPC_logs_ingested.png"><img alt="Flow Logs Ingested" src="Images/VPC_logs_ingested.png"/></a><div class="cap"><h3>Flow Logs Ingested</h3><p>Normalized VPC Flow Logs successfully ingested into Wazuh archives.</p></div></div><div class="shot"><a href="Images/Wazuh.png"><img alt="Wazuh Agents" src="Images/Wazuh.png"/></a><div class="cap"><h3>Wazuh Agents</h3><p>Hybrid environment with AWS and on-prem agents connected.</p></div></div><div class="shot"><a href="Images/wazuh_detection.png"><img alt="Threat Detections" src="Images/wazuh_detection.png"/></a><div class="cap"><h3>Threat Detections</h3><p>Custom detections including port scans and brute-force attempts.</p></div></div><div class="shot"><a href="Images/MariaDB_detection.png"><img alt="MariaDB Correlation" src="Images/MariaDB_detection.png"/></a><div class="cap"><h3>MariaDB Correlation</h3><p>Database authentication events correlated with network telemetry.</p></div></div><div class="shot"><a href="Images/Threat_hunting.png"><img alt="Threat Hunting Dashboard" src="Images/Threat_hunting.png"/></a><div class="cap"><h3>Threat Hunting Dashboard</h3><p>Security analytics dashboard showing detections and alert trends.</p></div></div><div class="shot"><a href="Images/vulnerability_detection.png"><img alt="Vulnerability Detection" src="Images/vulnerability_detection.png"/></a><div class="cap"><h3>Vulnerability Detection</h3><p>Wazuh vulnerability dashboard for the AWS collector instance.</p></div></div></div></section><section id="roadmap">
-<div class="section-tag">git diff --stat</div>
-<h2 class="section-title">Current State &amp; What's Next</h2>
-<div class="diff-grid">
-<div class="diff-col committed">
-<div class="dc-hdr">committed — current state (mvp)</div>
-<div class="diff-line"><span class="mark">+</span><span class="val">Production telemetry ingestion via Flow Logs</span></div>
-<div class="diff-line"><span class="mark">+</span><span class="val">Modular behavioral detection framework</span></div>
-<div class="diff-line"><span class="mark">+</span><span class="val">Live Wazuh integration, on-prem</span></div>
-<div class="diff-line"><span class="mark">+</span><span class="val">MITRE-ready alerting</span></div>
-<div class="diff-line"><span class="mark">+</span><span class="val">OpenSearch dashboard visualization</span></div>
-<div class="diff-line"><span class="mark">+</span><span class="val">Port scan &amp; brute force detection</span></div>
-</div>
-<div class="diff-col pending">
-<div class="dc-hdr">candidate-config — roadmap</div>
-<div class="diff-line"><span class="mark">~</span><span class="val">CloudTrail integration</span></div>
-<div class="diff-line"><span class="mark">~</span><span class="val">GuardDuty &amp; Security Hub correlation</span></div>
-<div class="diff-line"><span class="mark">~</span><span class="val">AWS WAF log ingestion</span></div>
-<div class="diff-line"><span class="mark">~</span><span class="val">GeoIP / ASN enrichment</span></div>
-<div class="diff-line"><span class="mark">~</span><span class="val">Threat intelligence feeds</span></div>
-<div class="diff-line"><span class="mark">~</span><span class="val">Lateral movement &amp; exfil analytics</span></div>
-<div class="diff-line"><span class="mark">~</span><span class="val">Terraform + CI/CD</span></div>
-</div>
-</div>
+
+
+<section id="roadmap">
+  <div class="section-tag">show maturity-model</div>
+  <h2 class="section-title">Enterprise Roadmap</h2>
+  <p class="section-sub">Framed as maturity phases rather than a flat feature backlog &mdash; each phase builds on the last.</p>
+
+  <div class="ladder">
+    <div class="phase current">
+      <div class="ph-num">PHASE 0</div>
+      <div class="phase-body">
+        <h4>MVP <span class="phase-tag">current</span></h4>
+        <p>Production telemetry ingestion, modular behavioral detection, live Wazuh integration, MITRE-ready alerting, OpenSearch dashboards.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 1</div>
+      <div class="phase-body">
+        <h4>CloudTrail / GuardDuty / Security Hub <span class="phase-tag">next</span></h4>
+        <p>Broaden beyond network flow into API-level activity and AWS's own managed detections.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 2</div>
+      <div class="phase-body">
+        <h4>Threat Intelligence &amp; GeoIP <span class="phase-tag">planned</span></h4>
+        <p>Enrich source IPs with reputation and geolocation context before they reach an analyst.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 3</div>
+      <div class="phase-body">
+        <h4>AWS Organizations &amp; Central Logging Account <span class="phase-tag">planned</span></h4>
+        <p>Consolidate telemetry from multiple AWS accounts into one dedicated logging account.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 4</div>
+      <div class="phase-body">
+        <h4>Terraform &amp; CI/CD <span class="phase-tag">planned</span></h4>
+        <p>Move from manually configured infrastructure to versioned, repeatable deployments.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 5</div>
+      <div class="phase-body">
+        <h4>Multi-Account AWS Environment <span class="phase-tag">planned</span></h4>
+        <p>Extend the same pattern across a full multi-account landing zone.</p>
+      </div>
+    </div>
+  </div>
 </section>
+
 <section id="lessons">
-<div class="section-tag">show notes</div>
-<h2 class="section-title">Lessons Learned</h2>
-<div class="lessons">
-<div class="lesson-line"><span class="hash">#</span>Designing a hybrid telemetry pipeline end to end</div>
-<div class="lesson-line"><span class="hash">#</span>Reducing signal-to-noise before SIEM ingestion</div>
-<div class="lesson-line"><span class="hash">#</span>Structuring network events for behavioral analysis</div>
-<div class="lesson-line"><span class="hash">#</span>Extending on-prem SOC tooling into the cloud</div>
-<div class="lesson-line"><span class="hash">#</span>Correlating network detections with auth logs</div>
-<div class="lesson-line"><span class="hash">#</span>Counting connection attempts, not just log records</div>
-<div class="lesson-line"><span class="hash">#</span>Least-privilege IAM for telemetry pipelines</div>
-<div class="lesson-line"><span class="hash">#</span>Designing for modular growth, not a rebuild</div>
-</div>
+  <div class="section-tag">show notes</div>
+  <h2 class="section-title">Lessons Learned</h2>
+  <div class="lessons">
+    <div class="lesson-line"><span class="hash">#</span>Designing a hybrid telemetry pipeline end to end</div>
+    <div class="lesson-line"><span class="hash">#</span>Reducing signal-to-noise before SIEM ingestion</div>
+    <div class="lesson-line"><span class="hash">#</span>Structuring network events for behavioral analysis</div>
+    <div class="lesson-line"><span class="hash">#</span>Extending on-prem SOC tooling into the cloud</div>
+    <div class="lesson-line"><span class="hash">#</span>Correlating network detections with auth logs</div>
+    <div class="lesson-line"><span class="hash">#</span>Counting connection attempts, not just log records</div>
+    <div class="lesson-line"><span class="hash">#</span>Least-privilege IAM for telemetry pipelines</div>
+    <div class="lesson-line"><span class="hash">#</span>Designing for modular growth, not a rebuild</div>
+  </div>
 </section>
+
 <footer>
-  end · <a href="/">← back to portfolio</a> · <a href="https://github.com/laxamanasr-blip" target="_blank">view repository</a> · © 2026 Sid Laxamana
+  end &middot; <a href="/">&larr; back to portfolio</a> &middot; <a href="https://github.com/laxamanasr-blip" target="_blank">view repository</a> &middot; &copy; 2026 Sid Laxamana
 </footer>
+
 <div class="diagram-lightbox" id="diagramLightbox">
-<div class="dl-inner">
-<div class="dl-close" id="dlClose">×</div>
-<div id="dlContent"></div>
+  <div class="dl-inner">
+    <div class="dl-close" id="dlClose">&times;</div>
+    <div id="dlContent"></div>
+  </div>
 </div>
+
+<div class="gallery-lightbox" id="galleryLightbox">
+  <span class="gallery-close" id="galleryClose">&times;</span>
+  <img id="galleryImage" src="" alt="">
 </div>
-<button aria-label="Back to top" class="to-top" id="toTop">
-<svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
+
 <script>
 // ---- click-to-enlarge on the pipeline diagram ----
 const diagramLightbox=document.getElementById('diagramLightbox');
@@ -665,6 +1029,26 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape' && diagramLightbox.style.display==='flex') closeDiagramLightbox();
 });
 
+// ---- screenshot lightbox (evidence + stage + gallery images) ----
+(function(){
+  const lb=document.getElementById('galleryLightbox');
+  const img=lb.querySelector('#galleryImage');
+  const close=document.getElementById('galleryClose');
+
+  document.querySelectorAll('.lightbox-link').forEach(link=>{
+    link.addEventListener('click', e=>{
+      e.preventDefault();
+      img.src=link.getAttribute('href');
+      img.alt=link.querySelector('img')?link.querySelector('img').alt:'';
+      lb.classList.add('open');
+    });
+  });
+  function hide(){ lb.classList.remove('open'); img.src=''; }
+  close.addEventListener('click', hide);
+  lb.addEventListener('click', e=>{ if(e.target===lb) hide(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') hide(); });
+})();
+
 // ---- nav scroll state + progress bar + back-to-top ----
 const navEl=document.querySelector('nav');
 const progressEl=document.getElementById('scrollProgress');
@@ -693,7 +1077,7 @@ if(headerEl){
 
 // ---- reveal on scroll ----
 const revealTargets=document.querySelectorAll(
-  '.module, .hoppanel, .alert-card, .diff-col, .lessons, .sfp-grid'
+  '.module, .hoppanel, .alert-card, .diff-col, .lessons, .sfp-grid, .stage, .evidence, .correlate-grid, .phase, .decision-strip'
 );
 revealTargets.forEach(el=>el.classList.add('reveal'));
 const io=new IntersectionObserver((entries)=>{
@@ -711,36 +1095,7 @@ document.querySelectorAll('.grid').forEach(grid=>{
     child.style.transitionDelay=Math.min(i*70,280)+'ms';
   });
 });
-
-
-// Screenshot lightbox
-(function(){
-const lb=document.getElementById('galleryLightbox');
-const img=lb.querySelector('#galleryImage');
-const close=lb.querySelector('#galleryClose');
-
-document.querySelectorAll('.shot a').forEach(link=>{
-  link.onclick=function(e){
-    e.preventDefault();
-    img.src=this.getAttribute('href');
-    lb.classList.add('open');
-    return false;
-  };
-});
-
-function hide(){
-  lb.classList.remove('open');
-  img.src='';
-}
-close.onclick=hide;
-lb.onclick=function(e){ if(e.target===lb) hide(); };
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
-})();
 </script>
 
-<div class="gallery-lightbox" id="galleryLightbox">
-<span class="gallery-close" id="galleryClose">×</span>
-<img alt="" id="galleryImage" src=""/>
-</div>
 </body>
 </html>
