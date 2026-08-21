@@ -503,6 +503,190 @@ section::before{
 .iface p{flex-grow:1}
 .tech{margin-top:auto}
 </style>
+<style id="aws-infrastructure-css">
+/* ---------- Live AWS Infrastructure ---------- */
+.aws-panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:4px;
+  overflow:hidden;
+}
+.aws-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  padding:18px 20px;
+  border-bottom:1px solid var(--line);
+  background:var(--panel-2);
+}
+.aws-status{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-family:var(--mono);
+  font-size:.76rem;
+  color:var(--muted);
+}
+.aws-status strong{color:var(--text);font-weight:600}
+.aws-status.error strong{color:var(--red)}
+.aws-refresh{
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  padding:8px 13px;
+  border-radius:3px;
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:.74rem;
+  transition:.2s ease;
+}
+.aws-refresh:hover{
+  border-color:var(--amber);
+  color:var(--amber);
+}
+.aws-refresh:disabled{opacity:.55;cursor:wait}
+
+.aws-content{padding:20px}
+.aws-loading,.aws-error{
+  min-height:170px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:12px;
+  font-family:var(--mono);
+  color:var(--muted);
+  text-align:center;
+}
+.aws-error strong{color:var(--red)}
+.aws-error button{
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--amber);
+  padding:7px 12px;
+  border-radius:3px;
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:.75rem;
+}
+
+.aws-accounts{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+.aws-account{
+  border:1px solid var(--line);
+  background:rgba(10,13,16,.32);
+  border-radius:4px;
+  overflow:hidden;
+  transition:.25s ease;
+}
+.aws-account:hover{
+  border-color:var(--amber-dim);
+  box-shadow:0 8px 24px rgba(255,176,32,.08);
+}
+.aws-account-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:15px;
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--line-soft);
+}
+.aws-account-name{
+  font-family:var(--mono);
+  font-size:.9rem;
+  font-weight:700;
+  color:var(--text);
+}
+.aws-account-id{
+  font-family:var(--mono);
+  font-size:.68rem;
+  color:var(--muted-dim);
+  margin-top:4px;
+}
+.aws-badge{
+  font-family:var(--mono);
+  font-size:.62rem;
+  color:var(--green);
+  border:1px solid var(--green-dim);
+  border-radius:20px;
+  padding:3px 8px;
+  white-space:nowrap;
+}
+.aws-metrics{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1px;
+  background:var(--line-soft);
+}
+.aws-metric{
+  background:var(--panel);
+  padding:15px 16px;
+}
+.aws-metric-value{
+  font-family:var(--mono);
+  color:var(--amber);
+  font-size:1.3rem;
+  font-weight:700;
+  line-height:1.2;
+}
+.aws-metric-label{
+  color:var(--muted-dim);
+  font-family:var(--mono);
+  font-size:.65rem;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  margin-top:5px;
+}
+.aws-footer{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid var(--line-soft);
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  color:var(--muted-dim);
+  font-family:var(--mono);
+  font-size:.66rem;
+}
+.aws-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--line-soft);
+  border:1px solid var(--line-soft);
+  margin-bottom:18px;
+}
+.aws-summary-cell{
+  background:var(--panel);
+  padding:14px 16px;
+}
+.aws-summary-value{
+  font-family:var(--mono);
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:700;
+}
+.aws-summary-label{
+  font-family:var(--mono);
+  color:var(--muted-dim);
+  font-size:.63rem;
+  text-transform:uppercase;
+  margin-top:3px;
+}
+@media(max-width:700px){
+  .aws-accounts{grid-template-columns:1fr}
+  .aws-summary{grid-template-columns:repeat(2,1fr)}
+  .aws-toolbar{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:480px){
+  .aws-content{padding:12px}
+  .aws-summary{grid-template-columns:1fr 1fr}
+}
+</style>
 </head>
 <body>
 <div aria-hidden="true" class="aurora"><span></span><span></span><span></span></div>
@@ -512,6 +696,7 @@ section::before{
 <div class="links">
 <a href="#projects">projects</a>
 <a href="#homelab">homelab</a>
+    <a href="#aws">aws</a>
 <a href="#stack">stack</a>
 <a href="#certifications">certs</a>
 <a href="#timeline">journey</a>
@@ -655,6 +840,33 @@ My homelab is a continuously evolving enterprise test environment where I protot
 </div>
 </div>
 </section>
+
+<section id="aws">
+  <div class="section-tag">curl /api/infrastructure</div>
+  <h2 class="section-title">Live AWS Infrastructure</h2>
+  <p class="section-sub">
+    A live inventory pulled from the LaxStack AWS accounts through API Gateway and Lambda.
+    The dashboard intentionally shows infrastructure state rather than billing data.
+  </p>
+
+  <div class="aws-panel reveal">
+    <div class="aws-toolbar">
+      <div class="aws-status" id="awsStatus">
+        <span class="led amber"></span>
+        <span><strong>Connecting</strong> to AWS infrastructure API...</span>
+      </div>
+      <button class="aws-refresh" id="awsRefresh" type="button">↻ Refresh</button>
+    </div>
+
+    <div class="aws-content" id="awsContent">
+      <div class="aws-loading">
+        <span class="led amber"></span>
+        Loading infrastructure inventory...
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="stack">
 <div class="section-tag">show inventory</div>
 <h2 class="section-title">Technology Stack</h2>
@@ -853,6 +1065,157 @@ if(typedEl){
     }
   }
 }
+
+// ---- live AWS infrastructure dashboard ----
+const AWS_API = '/api/infrastructure';
+const awsContent = document.getElementById('awsContent');
+const awsStatus = document.getElementById('awsStatus');
+const awsRefresh = document.getElementById('awsRefresh');
+
+function awsMetric(label, value){
+  return `
+    <div class="aws-metric">
+      <div class="aws-metric-value">${Number(value || 0).toLocaleString()}</div>
+      <div class="aws-metric-label">${label}</div>
+    </div>`;
+}
+
+function awsAccountCard(key, account){
+  const metrics = [];
+
+  if (Object.prototype.hasOwnProperty.call(account, 'ec2_singapore'))
+    metrics.push(['EC2 · Singapore', account.ec2_singapore]);
+
+  if (Object.prototype.hasOwnProperty.call(account, 'vpc_singapore'))
+    metrics.push(['VPCs · Singapore', account.vpc_singapore]);
+
+  if (Object.prototype.hasOwnProperty.call(account, 's3_buckets'))
+    metrics.push(['S3 Buckets', account.s3_buckets]);
+
+  if (Object.prototype.hasOwnProperty.call(account, 'lambda_functions'))
+    metrics.push(['Lambda Functions', account.lambda_functions]);
+
+  if (Object.prototype.hasOwnProperty.call(account, 'cloudfront_distributions'))
+    metrics.push(['CloudFront', account.cloudfront_distributions]);
+
+  if (Object.prototype.hasOwnProperty.call(account, 'route53_hosted_zones'))
+    metrics.push(['Route 53 Zones', account.route53_hosted_zones]);
+
+  if (Object.prototype.hasOwnProperty.call(account, 'acm_certificates_us_east_1'))
+    metrics.push(['ACM · us-east-1', account.acm_certificates_us_east_1]);
+
+  return `
+    <article class="aws-account">
+      <div class="aws-account-head">
+        <div>
+          <div class="aws-account-name">${account.account || key}</div>
+          <div class="aws-account-id">${account.account_id || 'Account ID unavailable'}</div>
+        </div>
+        <span class="aws-badge"><span class="led"></span> live</span>
+      </div>
+      <div class="aws-metrics">
+        ${metrics.map(([label,value]) => awsMetric(label,value)).join('')}
+      </div>
+    </article>`;
+}
+
+function setAwsStatus(text, ok=true){
+  awsStatus.classList.toggle('error', !ok);
+  awsStatus.innerHTML = ok
+    ? `<span class="led"></span><span><strong>Live</strong> · ${text}</span>`
+    : `<span class="led amber"></span><span><strong>API error</strong> · ${text}</span>`;
+}
+
+async function loadAwsInfrastructure(){
+  awsRefresh.disabled = true;
+  awsRefresh.textContent = '↻ Loading...';
+
+  if(!awsContent.dataset.loaded){
+    awsContent.innerHTML = `
+      <div class="aws-loading">
+        <span class="led amber"></span>
+        Loading infrastructure inventory...
+      </div>`;
+  }
+
+  try{
+    const response = await fetch(AWS_API, {
+      method:'GET',
+      cache:'no-store',
+      headers:{'Accept':'application/json'}
+    });
+
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const accounts = Object.values(data).filter(Boolean);
+
+    if(!accounts.length){
+      throw new Error('No account data returned');
+    }
+
+    let totalResources = 0;
+    accounts.forEach(account=>{
+      Object.entries(account).forEach(([key,value])=>{
+        if(key !== 'account' && key !== 'account_id' && typeof value === 'number'){
+          totalResources += value;
+        }
+      });
+    });
+
+    const accountCards = Object.entries(data)
+      .map(([key,account]) => awsAccountCard(key,account))
+      .join('');
+
+    awsContent.innerHTML = `
+      <div class="aws-summary">
+        <div class="aws-summary-cell">
+          <div class="aws-summary-value">${accounts.length}</div>
+          <div class="aws-summary-label">AWS Accounts</div>
+        </div>
+        <div class="aws-summary-cell">
+          <div class="aws-summary-value">${totalResources.toLocaleString()}</div>
+          <div class="aws-summary-label">Tracked Resources</div>
+        </div>
+        <div class="aws-summary-cell">
+          <div class="aws-summary-value">${accounts.reduce((n,a)=>n + (a.lambda_functions || 0),0)}</div>
+          <div class="aws-summary-label">Lambda Functions</div>
+        </div>
+        <div class="aws-summary-cell">
+          <div class="aws-summary-value">${accounts.reduce((n,a)=>n + (a.vpc_singapore || 0),0)}</div>
+          <div class="aws-summary-label">VPCs · Singapore</div>
+        </div>
+      </div>
+
+      <div class="aws-accounts">${accountCards}</div>
+
+      <div class="aws-footer">
+        <span>source: API Gateway → Lambda → AWS APIs</span>
+        <span>updated: ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+      </div>`;
+
+    awsContent.dataset.loaded = 'true';
+    setAwsStatus('inventory loaded');
+  }catch(error){
+    console.error('AWS infrastructure API error:', error);
+    awsContent.innerHTML = `
+      <div class="aws-error">
+        <strong>Unable to retrieve infrastructure inventory</strong>
+        <span>${error.message}</span>
+        <button type="button" onclick="loadAwsInfrastructure()">Try again</button>
+      </div>`;
+    setAwsStatus(error.message, false);
+  }finally{
+    awsRefresh.disabled = false;
+    awsRefresh.textContent = '↻ Refresh';
+  }
+}
+
+awsRefresh?.addEventListener('click', loadAwsInfrastructure);
+loadAwsInfrastructure();
+
 </script>
 </body>
 </html>
