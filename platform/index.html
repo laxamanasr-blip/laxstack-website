@@ -404,12 +404,49 @@ footer{
 </footer>
 
 <script>
+// APIs live on the main LAXSTACK CloudFront distribution.
+// The platform site is served from platform.laxstack.com, so these are
+// intentionally absolute URLs (cross-origin). The API responses must allow
+// https://platform.laxstack.com via CORS.
 const API = {
   infra: 'https://laxstack.com/api/infrastructure',
   proxmox: 'https://laxstack.com/api/proxmox',
   opnsense: 'https://laxstack.com/api/opnsense'
 };
+
 const REFRESH_MS = 30000;
+const FETCH_TIMEOUT_MS = 10000;
+
+async function fetchJSON(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'omit',
+      cache: 'no-store',
+      headers: {
+        'Accept': 'application/json'
+      },
+      signal: controller.signal
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error('request timed out');
+    }
+    if (e instanceof TypeError) {
+      throw new Error('CORS or network error');
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 let lastNetMbps = 2;
 
 /* ---------- helpers ---------- */
@@ -520,8 +557,7 @@ requestAnimationFrame(drawPulse);
 /* ================= CLOUD ================= */
 async function loadCloud(){
   try{
-    const res = await fetch(API.infra); if(!res.ok) throw new Error('HTTP '+res.status);
-    const data = await res.json();
+    const data = await fetchJSON(API.infra);
     const a = data.account_a, b = data.account_b;
     const totalMtd = (a?.cost?.mtd_net_unblended_cost_usd||0) + (b?.cost?.mtd_net_unblended_cost_usd||0);
     document.getElementById('kpi-cost').innerHTML = fmtMoney(totalMtd) + '<small>USD MTD</small>';
@@ -580,8 +616,7 @@ async function loadCloud(){
 /* ================= COMPUTE ================= */
 async function loadCompute(){
   try{
-    const res = await fetch(API.proxmox); if(!res.ok) throw new Error('HTTP '+res.status);
-    const data = await res.json();
+    const data = await fetchJSON(API.proxmox);
     const p = data.proxmox, host = p.host, vms = p.virtual_machines, cts = p.containers;
     const running = (vms?.running||0) + (cts?.running||0);
     document.getElementById('kpi-vms').innerHTML = running + '<small>/ ' + ((vms?.total||0)+(cts?.total||0)) + ' guests</small>';
@@ -644,8 +679,7 @@ async function loadCompute(){
 /* ================= NETWORK ================= */
 async function loadNetwork(){
   try{
-    const res = await fetch(API.opnsense); if(!res.ok) throw new Error('HTTP '+res.status);
-    const data = await res.json();
+    const data = await fetchJSON(API.opnsense);
     const n = data.opnsense;
     const totalMbps = n.interfaces.reduce((s,i)=>s+(i.traffic.total_mbps||0),0) || (n.busiest_interface?.total_mbps||0);
     lastNetMbps = Math.max(totalMbps, n.busiest_interface?.total_mbps||0, 0.5);
