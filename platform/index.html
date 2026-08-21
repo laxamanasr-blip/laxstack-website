@@ -501,6 +501,354 @@ footer{
   font-size:10px;
 }
 
+
+/* ============================================================
+   LAXSTACK NOC — IMPACT / LARGE TILE PRESENTATION
+   ============================================================ */
+
+body{
+  font-size:13px;
+  letter-spacing:.15px;
+}
+
+.topbar{
+  min-height:72px;
+  padding:12px 26px;
+  border-bottom:1px solid rgba(255,255,255,.055);
+  background:
+    linear-gradient(90deg,rgba(0,217,255,.025),transparent 35%,rgba(140,126,255,.025)),
+    rgba(5,8,14,.96);
+}
+
+.brand-mark{
+  width:42px;height:42px;border-radius:11px;
+  font-size:20px;
+  box-shadow:
+    0 0 18px rgba(0,217,255,.28),
+    0 0 42px rgba(140,126,255,.12);
+}
+
+.brand-text b{
+  font-size:18px;
+  letter-spacing:1.8px;
+}
+
+.brand-text span{
+  font-size:9px;
+  letter-spacing:2.5px;
+}
+
+.section-nav{
+  gap:4px;
+}
+
+.section-nav a{
+  font-size:11px;
+  padding:9px 12px;
+  border-radius:5px;
+  letter-spacing:.8px;
+}
+
+.section-nav .dot{
+  width:7px;height:7px;
+}
+
+.refresh-btn{
+  min-height:38px;
+  padding:9px 15px;
+  font-size:11px;
+  letter-spacing:.8px;
+}
+
+.refresh-icon{
+  font-size:19px;
+}
+
+.status-pill{
+  min-height:38px;
+  padding:0 12px;
+  font-size:11px;
+}
+
+.clock{
+  font-size:12px;
+  letter-spacing:.7px;
+}
+
+.pulse-strip{
+  height:190px;
+  border-bottom:1px solid rgba(255,255,255,.045);
+  background:
+    radial-gradient(ellipse 600px 160px at 80% 50%,rgba(0,217,255,.07),transparent 70%),
+    radial-gradient(ellipse 500px 180px at 25% 40%,rgba(140,126,255,.055),transparent 70%),
+    #080c13;
+}
+
+.noc-banner{
+  left:34px;
+  top:30px;
+}
+
+.noc-eyebrow{
+  font-size:10px;
+  letter-spacing:2.2px;
+}
+
+.noc-title{
+  font-size:38px;
+  letter-spacing:1.5px;
+}
+
+.noc-sub{
+  font-size:10px;
+  letter-spacing:1.7px;
+}
+
+.pulse-kpis{
+  padding:0 34px 28px;
+  gap:30px;
+}
+
+.pulse-kpi{
+  min-width:145px;
+}
+
+.pulse-kpi .val{
+  font-size:31px;
+  font-weight:700;
+}
+
+.pulse-kpi .val small{
+  font-size:10px;
+}
+
+.pulse-kpi .lbl{
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+.domain{
+  padding-top:42px;
+}
+
+.domain-head{
+  min-height:48px;
+  padding-bottom:13px;
+  margin-bottom:16px;
+}
+
+.domain-head h2{
+  font-size:25px;
+  letter-spacing:.5px;
+}
+
+.domain-head .domain-tag{
+  font-size:10px;
+  padding:5px 9px;
+  letter-spacing:1px;
+}
+
+.domain-head .endpoint{
+  font-size:10px;
+}
+
+/* Larger dashboard cards */
+.stat-tile{
+  min-height:145px;
+  padding:18px;
+}
+
+.stat-tile .stat-label{
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+.stat-tile .stat-value{
+  font-size:28px;
+  line-height:1.05;
+}
+
+.stat-tile .stat-sub{
+  font-size:11px;
+}
+
+.panel{
+  border-radius:11px;
+  padding:18px;
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.panel-title{
+  font-size:14px;
+  letter-spacing:.7px;
+}
+
+.panel-sub{
+  font-size:10px;
+}
+
+/* Network interface tiles */
+.iface-card{
+  min-height:176px;
+  padding:18px;
+  border-radius:10px;
+}
+
+.iface-card .iface-name{
+  font-size:16px;
+  font-weight:700;
+}
+
+.iface-card .iface-device{
+  font-size:10px;
+}
+
+.iface-card .iface-value{
+  font-size:25px;
+  font-weight:700;
+}
+
+.iface-card .iface-unit{
+  font-size:10px;
+}
+
+.iface-card .iface-meta{
+  font-size:10px;
+}
+
+/* Gateway rows */
+.gw-row{
+  min-height:54px;
+  font-size:12px;
+}
+
+.gw-row .gw-name{
+  font-size:13px;
+  font-weight:700;
+}
+
+.gw-row .gw-address{
+  font-size:11px;
+}
+
+.gw-row .gw-latency,
+.gw-row .gw-loss{
+  font-size:11px;
+}
+
+/* Proxmox guest tiles */
+.guest-card{
+  min-height:145px;
+  padding:18px;
+  border-radius:10px;
+}
+
+.guest-card .guest-name{
+  font-size:15px;
+  font-weight:700;
+}
+
+.guest-card .guest-meta{
+  font-size:10px;
+}
+
+.guest-card .guest-stat{
+  font-size:12px;
+}
+
+.guest-card .guest-value{
+  font-size:22px;
+}
+
+/* AWS tiles */
+.cost-block{
+  min-height:145px;
+  padding:18px;
+  border-radius:10px;
+}
+
+.cost-block .cost-value{
+  font-size:27px;
+}
+
+.cost-block .cost-label{
+  font-size:11px;
+}
+
+.cost-block .cost-meta{
+  font-size:10px;
+}
+
+/* Strong section identity */
+#network .domain-head{
+  border-color:rgba(0,217,255,.22);
+}
+#network .panel{
+  border-color:rgba(0,217,255,.12);
+}
+#compute .domain-head{
+  border-color:rgba(255,145,32,.22);
+}
+#compute .panel{
+  border-color:rgba(255,145,32,.12);
+}
+#cloud .domain-head{
+  border-color:rgba(140,126,255,.22);
+}
+#cloud .panel{
+  border-color:rgba(140,126,255,.12);
+}
+
+/* Standby banner */
+.operator-prompt{
+  min-height:58px;
+  padding:15px 18px;
+  border-radius:10px;
+}
+.operator-prompt-icon{
+  width:34px;height:34px;
+  font-size:14px;
+}
+.operator-prompt-title{
+  font-size:11px;
+  letter-spacing:1.7px;
+}
+.operator-prompt-text{
+  font-size:12px;
+}
+
+/* Footer */
+footer{
+  padding:18px 26px;
+  font-size:10px;
+  letter-spacing:.6px;
+}
+
+@media (max-width:1100px){
+  .noc-title{font-size:31px}
+  .pulse-kpis{gap:18px}
+  .pulse-kpi{min-width:120px}
+  .pulse-kpi .val{font-size:26px}
+}
+
+@media (max-width:760px){
+  .topbar{padding:10px 14px}
+  .brand-text span{display:none}
+  .section-nav{display:none}
+  .pulse-strip{height:235px}
+  .noc-banner{left:20px;top:22px}
+  .noc-title{font-size:27px}
+  .pulse-kpis{
+    padding:0 20px 20px;
+    gap:12px;
+  }
+  .pulse-kpi{min-width:100px}
+  .pulse-kpi .val{font-size:23px}
+  .stat-tile,.iface-card,.guest-card,.cost-block{min-height:130px}
+}
+
 @media (max-width:980px){
   .grid-2,.grid-3{grid-template-columns:1fr;}
   .section-nav{display:none;}
@@ -519,9 +867,9 @@ footer{
     <div class="brand-text"><b>LAXSTACK</b><span>NOC · Platform Operations</span></div>
   </div>
   <nav class="section-nav">
-    <a href="#network"><span class="dot" style="background:var(--cyan)"></span>OPNsense</a>
-    <a href="#compute"><span class="dot" style="background:var(--orange)"></span>Proxmox</a>
-    <a href="#cloud"><span class="dot" style="background:var(--violet)"></span>AWS Infra</a>
+    <a href="#network"><span class="dot" style="background:var(--cyan)"></span>Network</a>
+    <a href="#compute"><span class="dot" style="background:var(--orange)"></span>Compute</a>
+    <a href="#cloud"><span class="dot" style="background:var(--violet)"></span>Cloud</a>
   </nav>
   <div class="topbar-right">
     <div class="refresh-state"><span class="led" id="refresh-led"></span><span id="refresh-state-text">READY</span></div>
@@ -538,8 +886,8 @@ footer{
   <div class="pulse-overlay"></div>
   <div class="noc-banner">
     <div class="noc-eyebrow"><span class="live-dot"></span> LAXSTACK NETWORK OPERATIONS CENTER</div>
-    <div class="noc-title">PLATFORM TELEMETRY</div>
-    <div class="noc-sub">OPNsense <span>•</span> Proxmox <span>•</span> AWS Infrastructure <span>•</span> LIVE TELEMETRY</div>
+    <div class="noc-title">NETWORK OPERATIONS CENTER</div>
+    <div class="noc-sub">OPNSENSE <span>•</span> PROXMOX <span>•</span> AWS INFRASTRUCTURE <span>•</span> LIVE TELEMETRY</div>
   </div>
   <div class="pulse-kpis">
     <div class="pulse-kpi violet">
