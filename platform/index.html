@@ -441,9 +441,9 @@ footer{background:rgba(8,11,17,.55)}
     <div class="brand-text"><b>LAXSTACK</b><span>NOC · Platform Operations</span></div>
   </div>
   <nav class="section-nav">
-    <a href="#cloud"><span class="dot" style="background:var(--violet)"></span>Cloud</a>
-    <a href="#compute"><span class="dot" style="background:var(--orange)"></span>Compute</a>
-    <a href="#network"><span class="dot" style="background:var(--cyan)"></span>Network</a>
+    <a href="#network"><span class="dot" style="background:var(--cyan)"></span>OPNsense</a>
+    <a href="#compute"><span class="dot" style="background:var(--orange)"></span>Proxmox</a>
+    <a href="#cloud"><span class="dot" style="background:var(--violet)"></span>AWS Infra</a>
   </nav>
   <div class="topbar-right">
     <div class="refresh-state"><span class="led" id="refresh-led"></span><span id="refresh-state-text">READY</span></div>
@@ -461,7 +461,7 @@ footer{background:rgba(8,11,17,.55)}
   <div class="noc-banner">
     <div class="noc-eyebrow"><span class="live-dot"></span> LAXSTACK NETWORK OPERATIONS CENTER</div>
     <div class="noc-title">PLATFORM TELEMETRY</div>
-    <div class="noc-sub">AWS <span>•</span> PROXMOX <span>•</span> OPNsense <span>•</span> ON-DEMAND OBSERVABILITY</div>
+    <div class="noc-sub">OPNsense <span>•</span> Proxmox <span>•</span> AWS Infrastructure <span>•</span> LIVE TELEMETRY</div>
   </div>
   <div class="pulse-kpis">
     <div class="pulse-kpi violet">
@@ -491,35 +491,6 @@ footer{background:rgba(8,11,17,.55)}
   </div>
 
   <!-- ================= CLOUD ================= -->
-  <section class="domain domain-cloud" id="cloud">
-    <div class="domain-head">
-      <span class="idx">01</span>
-      <h2>Cloud Infrastructure</h2>
-      <span class="tag">AWS</span>
-      <span class="sub" id="cloud-sub">/api/infrastructure</span>
-    </div>
-    <div class="grid-2" id="cloud-grid">
-      <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
-      <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
-    </div>
-  </section>
-
-  <!-- ================= COMPUTE ================= -->
-  <section class="domain domain-compute" id="compute">
-    <div class="domain-head">
-      <span class="idx">02</span>
-      <h2>Compute</h2>
-      <span class="tag">Proxmox</span>
-      <span class="sub" id="compute-sub">/api/proxmox</span>
-    </div>
-    <div id="compute-host" class="panel" style="margin-bottom:18px;">
-      <div class="skeleton sk-block" style="width:30%"></div><div class="skeleton sk-block" style="width:80%"></div>
-    </div>
-    <div class="panel-title" style="margin-bottom:12px;"><h3 style="color:var(--text-dim);font-weight:500;">Guests</h3><span class="id-badge" id="guest-count">--</span></div>
-    <div class="grid-auto" id="guests-grid"></div>
-  </section>
-
-  <!-- ================= NETWORK ================= -->
   <section class="domain domain-network" id="network">
     <div class="domain-head">
       <span class="idx">03</span>
@@ -539,7 +510,36 @@ footer{background:rgba(8,11,17,.55)}
     </div>
   </section>
 
-</main>
+<section class="domain domain-compute" id="compute">
+    <div class="domain-head">
+      <span class="idx">02</span>
+      <h2>Compute</h2>
+      <span class="tag">Proxmox</span>
+      <span class="sub" id="compute-sub">/api/proxmox</span>
+    </div>
+    <div id="compute-host" class="panel" style="margin-bottom:18px;">
+      <div class="skeleton sk-block" style="width:30%"></div><div class="skeleton sk-block" style="width:80%"></div>
+    </div>
+    <div class="panel-title" style="margin-bottom:12px;"><h3 style="color:var(--text-dim);font-weight:500;">Guests</h3><span class="id-badge" id="guest-count">--</span></div>
+    <div class="grid-auto" id="guests-grid"></div>
+  </section>
+
+  <!-- ================= NETWORK ================= -->
+  <section class="domain domain-cloud" id="cloud">
+    <div class="domain-head">
+      <span class="idx">01</span>
+      <h2>Cloud Infrastructure</h2>
+      <span class="tag">AWS</span>
+      <span class="sub" id="cloud-sub">/api/infrastructure</span>
+    </div>
+    <div class="grid-2" id="cloud-grid">
+      <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
+      <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= COMPUTE ================= -->
+  </main>
 
 <footer>
   <span>LAXSTACK PLATFORM · live telemetry</span>
