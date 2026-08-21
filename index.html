@@ -616,6 +616,39 @@ section::before{
   padding:3px 8px;
   white-space:nowrap;
 }
+
+.aws-costs{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1px;
+  background:var(--line-soft);
+}
+.aws-cost{
+  background:var(--panel-2);
+  padding:16px;
+}
+.aws-cost-value{
+  font-family:var(--mono);
+  color:var(--amber);
+  font-size:1.45rem;
+  font-weight:700;
+  line-height:1.2;
+}
+.aws-cost-label{
+  color:var(--muted-dim);
+  font-family:var(--mono);
+  font-size:.65rem;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  margin-top:5px;
+}
+.aws-cost-sub{
+  color:var(--muted-dim);
+  font-family:var(--mono);
+  font-size:.6rem;
+  margin-top:3px;
+}
+
 .aws-metrics{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -641,6 +674,7 @@ section::before{
   letter-spacing:.03em;
   margin-top:5px;
 }
+
 .aws-footer{
   margin-top:16px;
   padding-top:14px;
@@ -652,6 +686,7 @@ section::before{
   font-family:var(--mono);
   font-size:.66rem;
 }
+
 .aws-summary{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -670,6 +705,7 @@ section::before{
   font-size:1.05rem;
   font-weight:700;
 }
+.aws-summary-value.cost{color:var(--amber)}
 .aws-summary-label{
   font-family:var(--mono);
   color:var(--muted-dim);
@@ -677,6 +713,7 @@ section::before{
   text-transform:uppercase;
   margin-top:3px;
 }
+
 @media(max-width:700px){
   .aws-accounts{grid-template-columns:1fr}
   .aws-summary{grid-template-columns:repeat(2,1fr)}
@@ -846,7 +883,7 @@ My homelab is a continuously evolving enterprise test environment where I protot
   <h2 class="section-title">Live AWS Infrastructure</h2>
   <p class="section-sub">
     A live inventory pulled from the LaxStack AWS accounts through API Gateway and Lambda.
-    The dashboard intentionally shows infrastructure state rather than billing data.
+    Infrastructure resources and current AWS cost data are displayed per account.
   </p>
 
   <div class="aws-panel">
@@ -1081,6 +1118,15 @@ function awsMetric(label, value){
     </div>`;
 }
 
+function awsMoney(value){
+  const number = Number(value);
+  if(!Number.isFinite(number)) return '$0.00';
+  return `$${number.toLocaleString(undefined, {
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  })}`;
+}
+
 function awsAccountCard(key, account){
   const metrics = [];
 
@@ -1105,6 +1151,10 @@ function awsAccountCard(key, account){
   if (Object.prototype.hasOwnProperty.call(account, 'acm_certificates_us_east_1'))
     metrics.push(['ACM · us-east-1', account.acm_certificates_us_east_1]);
 
+  const cost = account.cost || {};
+  const mtdCost = Number(cost.mtd_net_unblended_cost_usd || 0);
+  const lastMonthCost = Number(cost.last_month_net_unblended_cost_usd || 0);
+
   return `
     <article class="aws-account">
       <div class="aws-account-head">
@@ -1114,6 +1164,20 @@ function awsAccountCard(key, account){
         </div>
         <span class="aws-badge"><span class="led"></span> live</span>
       </div>
+
+      <div class="aws-costs">
+        <div class="aws-cost">
+          <div class="aws-cost-value">${awsMoney(mtdCost)}</div>
+          <div class="aws-cost-label">MTD Cost</div>
+          <div class="aws-cost-sub">net unblended · USD</div>
+        </div>
+        <div class="aws-cost">
+          <div class="aws-cost-value">${awsMoney(lastMonthCost)}</div>
+          <div class="aws-cost-label">Last Month</div>
+          <div class="aws-cost-sub">net unblended · USD</div>
+        </div>
+      </div>
+
       <div class="aws-metrics">
         ${metrics.map(([label,value]) => awsMetric(label,value)).join('')}
       </div>
@@ -1158,12 +1222,26 @@ async function loadAwsInfrastructure(){
     }
 
     let totalResources = 0;
+    let totalMtdCost = 0;
+    let totalLambdaFunctions = 0;
+    let totalVpcSingapore = 0;
+
     accounts.forEach(account=>{
       Object.entries(account).forEach(([key,value])=>{
-        if(key !== 'account' && key !== 'account_id' && typeof value === 'number'){
+        if(
+          key !== 'account' &&
+          key !== 'account_id' &&
+          key !== 'cost' &&
+          typeof value === 'number'
+        ){
           totalResources += value;
         }
       });
+
+      const cost = account.cost || {};
+      totalMtdCost += Number(cost.mtd_net_unblended_cost_usd || 0);
+      totalLambdaFunctions += Number(account.lambda_functions || 0);
+      totalVpcSingapore += Number(account.vpc_singapore || 0);
     });
 
     const accountCards = Object.entries(data)
@@ -1177,15 +1255,15 @@ async function loadAwsInfrastructure(){
           <div class="aws-summary-label">AWS Accounts</div>
         </div>
         <div class="aws-summary-cell">
-          <div class="aws-summary-value">${totalResources.toLocaleString()}</div>
-          <div class="aws-summary-label">Tracked Resources</div>
+          <div class="aws-summary-value cost">${awsMoney(totalMtdCost)}</div>
+          <div class="aws-summary-label">Combined MTD Cost</div>
         </div>
         <div class="aws-summary-cell">
-          <div class="aws-summary-value">${accounts.reduce((n,a)=>n + (a.lambda_functions || 0),0)}</div>
+          <div class="aws-summary-value">${totalLambdaFunctions.toLocaleString()}</div>
           <div class="aws-summary-label">Lambda Functions</div>
         </div>
         <div class="aws-summary-cell">
-          <div class="aws-summary-value">${accounts.reduce((n,a)=>n + (a.vpc_singapore || 0),0)}</div>
+          <div class="aws-summary-value">${totalVpcSingapore.toLocaleString()}</div>
           <div class="aws-summary-label">VPCs · Singapore</div>
         </div>
       </div>
@@ -1194,11 +1272,11 @@ async function loadAwsInfrastructure(){
 
       <div class="aws-footer">
         <span>source: API Gateway → Lambda → AWS APIs</span>
-        <span>updated: ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+        <span>${totalResources.toLocaleString()} tracked resources · updated: ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
       </div>`;
 
     awsContent.dataset.loaded = 'true';
-    setAwsStatus('inventory loaded');
+    setAwsStatus('inventory and cost data loaded');
   }catch(error){
     console.error('AWS infrastructure API error:', error);
     awsContent.innerHTML = `
@@ -1215,7 +1293,6 @@ async function loadAwsInfrastructure(){
 }
 
 awsRefresh?.addEventListener('click', loadAwsInfrastructure);
-
 </script>
 </body>
 </html>
