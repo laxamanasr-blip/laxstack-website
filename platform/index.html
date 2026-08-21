@@ -855,6 +855,143 @@ footer{
   .pulse-kpis{gap:22px;padding:0 18px;}
   .pulse-kpi .val{font-size:20px;}
 }
+
+/* ============================================================
+   NOC — LARGER PROXMOX CARDS + TYPOGRAPHY
+   ============================================================ */
+
+/* Proxmox host summary */
+#compute .host-card{
+  min-height:235px !important;
+  padding:22px !important;
+}
+
+#compute .host-card .host-name,
+#compute .host-card h3{
+  font-size:18px !important;
+}
+
+#compute .host-card .host-meta,
+#compute .host-card .meta{
+  font-size:11px !important;
+}
+
+/* Make the circular host gauges larger */
+#compute .gauge{
+  transform:scale(1.12);
+  transform-origin:center;
+}
+
+#compute .gauge-value{
+  font-size:21px !important;
+}
+
+#compute .gauge-label{
+  font-size:11px !important;
+}
+
+/* Host telemetry text */
+#compute .host-card .metric-label,
+#compute .host-card .label{
+  font-size:11px !important;
+}
+
+#compute .host-card .metric-value,
+#compute .host-card .value{
+  font-size:14px !important;
+}
+
+/* Proxmox guest cards */
+#compute .guest-card{
+  min-height:165px !important;
+  padding:20px !important;
+  border-radius:11px !important;
+}
+
+#compute .guest-card .guest-name{
+  font-size:16px !important;
+  line-height:1.2;
+}
+
+#compute .guest-card .guest-meta{
+  font-size:11px !important;
+}
+
+#compute .guest-card .guest-stat{
+  font-size:12px !important;
+}
+
+#compute .guest-card .guest-value{
+  font-size:23px !important;
+}
+
+/* Guest CPU/MEM labels and percentages */
+#compute .guest-card .label,
+#compute .guest-card .metric-label{
+  font-size:10px !important;
+  letter-spacing:.8px;
+}
+
+#compute .guest-card .percentage,
+#compute .guest-card .percent{
+  font-size:11px !important;
+}
+
+/* Increase guest grid spacing */
+#compute .guest-grid{
+  gap:14px !important;
+}
+
+/* Section title */
+#compute .domain-head h2{
+  font-size:27px !important;
+}
+
+#compute .domain-head{
+  min-height:52px;
+}
+
+/* Guest summary heading */
+#compute .guests-title,
+#compute .guest-summary-title{
+  font-size:13px !important;
+}
+
+/* Slightly increase all compute panel typography */
+#compute .panel-title{
+  font-size:15px !important;
+}
+
+#compute .panel-sub{
+  font-size:11px !important;
+}
+
+/* Give the compute area a little more breathing room */
+#compute .panel{
+  padding:20px !important;
+}
+
+/* Preserve compact layout on smaller screens */
+@media (max-width:1100px){
+  #compute .guest-card{
+    min-height:150px !important;
+  }
+}
+
+@media (max-width:760px){
+  #compute .host-card{
+    min-height:200px !important;
+  }
+
+  #compute .guest-card{
+    min-height:145px !important;
+  }
+
+  #compute .domain-head h2{
+    font-size:23px !important;
+  }
+}
+
 </style>
 </head>
 <body>
