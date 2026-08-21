@@ -297,6 +297,132 @@ footer{
   font-family:var(--mono);font-size:10.5px;color:var(--text-faint);max-width:1520px;margin-left:auto;margin-right:auto;
 }
 
+
+/* ===== NOC COMMAND CENTER ===== */
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 8% -5%,rgba(140,126,255,.12),transparent 70%),
+    radial-gradient(ellipse 900px 500px at 92% 5%,rgba(0,217,255,.10),transparent 70%),
+    linear-gradient(180deg,#080b11 0%,#0a0d14 55%,#080b11 100%);
+}
+.topbar{
+  min-height:64px;
+  padding:10px 24px;
+  background:rgba(7,10,16,.92);
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;
+  box-shadow:0 0 25px rgba(0,217,255,.28),0 0 45px rgba(140,126,255,.15);
+}
+.brand-text b{font-size:16px;letter-spacing:1.2px}
+.brand-text span{letter-spacing:2.3px}
+.section-nav a{border:1px solid transparent}
+.section-nav a:hover{border-color:var(--border-bright)}
+.refresh-state{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:1px
+}
+.refresh-state .led{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 7px var(--green)
+}
+.refresh-state.busy .led{
+  background:var(--cyan);box-shadow:0 0 9px var(--cyan);
+  animation:ledpulse .7s ease-in-out infinite
+}
+.refresh-btn{
+  border:1px solid var(--cyan-dim);
+  background:rgba(0,217,255,.055);
+  color:var(--cyan);border-radius:7px;padding:8px 12px;
+  display:flex;align-items:center;gap:7px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.5px;
+  transition:all .18s ease
+}
+.refresh-btn:hover{
+  background:rgba(0,217,255,.12);border-color:var(--cyan);
+  box-shadow:0 0 18px rgba(0,217,255,.13)
+}
+.refresh-btn:active{transform:translateY(1px)}
+.refresh-btn:disabled{opacity:.55;cursor:wait}
+.refresh-icon{font-size:16px;line-height:10px}
+.pulse-strip{
+  height:168px;
+  background:linear-gradient(180deg,rgba(0,217,255,.055),rgba(140,126,255,.025) 55%,transparent),#090c13
+}
+.pulse-overlay{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:100% 24px;opacity:.35
+}
+.noc-banner{position:absolute;left:32px;top:27px;z-index:3}
+.noc-eyebrow{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--cyan);margin-bottom:7px
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 9px var(--green);animation:ledpulse 1.7s ease-in-out infinite
+}
+.noc-title{
+  font-family:var(--display);font-size:29px;font-weight:700;letter-spacing:1px;line-height:1
+}
+.noc-sub{
+  margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:1.5px
+}
+.noc-sub span{color:var(--border-bright);margin:0 5px}
+.pulse-kpis{justify-content:flex-end;align-items:flex-end;padding:0 32px 25px;gap:24px}
+.pulse-kpi{min-width:118px}
+.pulse-kpi .val{font-size:23px}
+.domain{padding-top:38px}
+.domain-head{
+  margin-bottom:14px;
+  background:linear-gradient(90deg,rgba(255,255,255,.018),transparent 70%)
+}
+.domain-head h2{font-size:20px}
+.panel{
+  background:linear-gradient(135deg,rgba(255,255,255,.018),transparent 45%),rgba(16,20,31,.88);
+  box-shadow:0 10px 35px rgba(0,0,0,.12)
+}
+.panel:before{
+  content:"";position:absolute;top:0;left:18px;right:18px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)
+}
+.stat-tile,.guest-card,.iface-card,.cost-block{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)
+}
+.stat-tile:hover,.guest-card:hover,.iface-card:hover{
+  border-color:var(--border-bright);transform:translateY(-1px);transition:all .15s ease
+}
+.callout{box-shadow:0 0 25px rgba(0,217,255,.045)}
+.guest-card{min-height:128px}
+.iface-card{min-height:155px}
+.gw-row{transition:background .15s ease}
+.gw-row:hover{background:rgba(255,255,255,.018)}
+.operator-prompt{
+  display:flex;align-items:center;gap:14px;margin-top:26px;padding:13px 16px;
+  border:1px solid var(--border);border-radius:9px;background:rgba(16,20,31,.62);color:var(--text-dim)
+}
+.operator-prompt-icon{
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--cyan-dim);color:var(--cyan);font-family:var(--mono);font-size:12px
+}
+.operator-prompt-title{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--cyan)}
+.operator-prompt-text{margin-top:3px;font-size:11px}
+.operator-prompt-text b{color:var(--text)}
+footer{background:rgba(8,11,17,.55)}
+@media (max-width:1180px){
+  .noc-title{font-size:24px}.pulse-kpis{gap:15px}.topbar-right{gap:9px}.status-pill{display:none}
+}
+@media (max-width:760px){
+  .topbar{padding:10px 14px}.refresh-state{display:none}
+  .refresh-btn span:last-child{display:none}.refresh-btn{padding:8px 10px}
+  .clock{min-width:auto}.pulse-strip{height:210px}
+  .noc-banner{left:18px;top:22px}.noc-title{font-size:22px}
+  .pulse-kpis{justify-content:flex-start;padding:0 18px 22px;gap:12px;flex-wrap:wrap}
+  .pulse-divider{display:none}
+}
+
 @media (max-width:980px){
   .grid-2,.grid-3{grid-template-columns:1fr;}
   .section-nav{display:none;}
@@ -312,7 +438,7 @@ footer{
 <header class="topbar">
   <div class="brand">
     <div class="brand-mark">L</div>
-    <div class="brand-text"><b>LAXSTACK</b><span>Platform</span></div>
+    <div class="brand-text"><b>LAXSTACK</b><span>NOC · Platform Operations</span></div>
   </div>
   <nav class="section-nav">
     <a href="#cloud"><span class="dot" style="background:var(--violet)"></span>Cloud</a>
@@ -320,32 +446,49 @@ footer{
     <a href="#network"><span class="dot" style="background:var(--cyan)"></span>Network</a>
   </nav>
   <div class="topbar-right">
-    <div class="status-pill"><span class="led pulse" id="overall-led"></span><span id="overall-text">Checking systems…</span></div>
+    <div class="refresh-state"><span class="led" id="refresh-led"></span><span id="refresh-state-text">READY</span></div>
+    <button class="refresh-btn" id="refresh-btn" onclick="syncAll(true)">
+      <span class="refresh-icon">↻</span><span>REFRESH TELEMETRY</span>
+    </button>
+    <div class="status-pill"><span class="led" id="overall-led"></span><span id="overall-text">Awaiting telemetry</span></div>
     <div class="clock" id="clock">--:--:--</div>
   </div>
 </header>
 
 <div class="pulse-strip">
   <canvas id="pulse-canvas"></canvas>
+  <div class="pulse-overlay"></div>
+  <div class="noc-banner">
+    <div class="noc-eyebrow"><span class="live-dot"></span> LAXSTACK NETWORK OPERATIONS CENTER</div>
+    <div class="noc-title">PLATFORM TELEMETRY</div>
+    <div class="noc-sub">AWS <span>•</span> PROXMOX <span>•</span> OPNsense <span>•</span> ON-DEMAND OBSERVABILITY</div>
+  </div>
   <div class="pulse-kpis">
     <div class="pulse-kpi violet">
-      <div class="val" id="kpi-cost">--<small>USD MTD</small></div>
+      <div class="val" id="kpi-cost">—<small>USD MTD</small></div>
       <div class="lbl">Cloud spend</div>
     </div>
     <div class="pulse-divider"></div>
     <div class="pulse-kpi orange">
-      <div class="val" id="kpi-vms">--<small>running</small></div>
+      <div class="val" id="kpi-vms">—<small>running</small></div>
       <div class="lbl">Compute guests</div>
     </div>
     <div class="pulse-divider"></div>
     <div class="pulse-kpi cyan">
-      <div class="val" id="kpi-net">--<small>Mbps</small></div>
+      <div class="val" id="kpi-net">—<small>Mbps</small></div>
       <div class="lbl">Network throughput</div>
     </div>
   </div>
 </div>
 
 <main>
+  <div id="operator-prompt" class="operator-prompt">
+    <div class="operator-prompt-icon">◉</div>
+    <div>
+      <div class="operator-prompt-title">TELEMETRY STANDBY</div>
+      <div class="operator-prompt-text">Telemetry polls automatically every <b>3 minutes</b>. Use <b>REFRESH TELEMETRY</b> for an immediate poll.</div>
+    </div>
+  </div>
 
   <!-- ================= CLOUD ================= -->
   <section class="domain domain-cloud" id="cloud">
@@ -414,7 +557,6 @@ const API = {
   opnsense: 'https://laxstack.com/api/opnsense'
 };
 
-const REFRESH_MS = 30000;
 const FETCH_TIMEOUT_MS = 10000;
 
 async function fetchJSON(url) {
@@ -752,13 +894,55 @@ function setLed(key, ok){
   }
 }
 
-/* ---------- refresh loop ---------- */
-function syncAll(){
-  loadCloud(); loadCompute(); loadNetwork();
-  document.getElementById('last-sync').textContent = 'last sync ' + new Date().toLocaleTimeString('en-US',{hour12:false});
+/* ---------- operator-controlled refresh ---------- */
+const REFRESH_MS = 180000; // 3 minutes
+let refreshInProgress = false;
+
+async function syncAll(manual = false){
+  if(refreshInProgress) return;
+  refreshInProgress = true;
+
+  const prompt = document.getElementById('operator-prompt');
+  if(prompt) prompt.style.display = 'none';
+
+  const btn = document.getElementById('refresh-btn');
+  const state = document.getElementById('refresh-state-text');
+  const stateWrap = document.querySelector('.refresh-state');
+
+  if(btn){
+    btn.disabled = true;
+    btn.querySelector('.refresh-icon').textContent = '⟳';
+  }
+  if(state) state.textContent = 'POLLING';
+  if(stateWrap) stateWrap.classList.add('busy');
+
+  document.getElementById('last-sync').textContent = 'polling telemetry…';
+
+  try{
+    await Promise.all([
+      loadCloud(),
+      loadCompute(),
+      loadNetwork()
+    ]);
+
+    document.getElementById('last-sync').textContent =
+      'last sync ' + new Date().toLocaleTimeString('en-US',{hour12:false});
+  }catch(e){
+    document.getElementById('last-sync').textContent = 'telemetry poll failed';
+  }finally{
+    refreshInProgress = false;
+    if(btn){
+      btn.disabled = false;
+      btn.querySelector('.refresh-icon').textContent = '↻';
+    }
+    if(state) state.textContent = 'READY';
+    if(stateWrap) stateWrap.classList.remove('busy');
+  }
 }
-syncAll();
-setInterval(syncAll, REFRESH_MS);
+
+/* Initial load, then refresh automatically every 3 minutes. */
+syncAll(false);
+setInterval(() => syncAll(false), REFRESH_MS);
 </script>
 </body>
 </html>
