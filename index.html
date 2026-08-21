@@ -849,19 +849,20 @@ My homelab is a continuously evolving enterprise test environment where I protot
     The dashboard intentionally shows infrastructure state rather than billing data.
   </p>
 
-  <div class="aws-panel reveal">
+  <div class="aws-panel">
     <div class="aws-toolbar">
       <div class="aws-status" id="awsStatus">
         <span class="led amber"></span>
         <span><strong>Connecting</strong> to AWS infrastructure API...</span>
       </div>
-      <button class="aws-refresh" id="awsRefresh" type="button">↻ Refresh</button>
+      <button class="aws-refresh" id="awsRefresh" type="button">▶ Load AWS Infrastructure</button>
     </div>
 
     <div class="aws-content" id="awsContent">
       <div class="aws-loading">
         <span class="led amber"></span>
-        Loading infrastructure inventory...
+        <strong>Infrastructure inventory is ready.</strong>
+        <span>Press the button above to invoke the API.</span>
       </div>
     </div>
   </div>
@@ -1134,7 +1135,7 @@ async function loadAwsInfrastructure(){
     awsContent.innerHTML = `
       <div class="aws-loading">
         <span class="led amber"></span>
-        Loading infrastructure inventory...
+        Invoking API Gateway → Lambda...
       </div>`;
   }
 
@@ -1209,12 +1210,11 @@ async function loadAwsInfrastructure(){
     setAwsStatus(error.message, false);
   }finally{
     awsRefresh.disabled = false;
-    awsRefresh.textContent = '↻ Refresh';
+    awsRefresh.textContent = '↻ Refresh Infrastructure';
   }
 }
 
 awsRefresh?.addEventListener('click', loadAwsInfrastructure);
-loadAwsInfrastructure();
 
 </script>
 </body>
