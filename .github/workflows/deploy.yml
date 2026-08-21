@@ -45,9 +45,16 @@ jobs:
           role-chaining: true
           role-skip-session-tagging: true
 
-      # Invalidate the CloudFront cache
-      - name: Invalidate CloudFront Cache
+      # Invalidate existing laxstack.com CloudFront distribution
+      - name: Invalidate Main Website CloudFront Cache
         run: |
           aws cloudfront create-invalidation \
             --distribution-id E1NDU11OOWXLM8 \
+            --paths "/*"
+
+      # Invalidate platform.laxstack.com CloudFront distribution
+      - name: Invalidate Platform CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E3QRT0ZQSC16I7 \
             --paths "/*"
