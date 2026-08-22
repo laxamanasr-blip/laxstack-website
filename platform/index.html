@@ -555,13 +555,14 @@ const API = {
 
 const COGNITO = {
   domain: 'https://ap-southeast-17tz3ek9ea.auth.ap-southeast-1.amazoncognito.com',
-  clientId: '4f3c2i69riu0r2j2ea16cdev23',
+  clientId: '4f3c2i69riuo2rj2ea16cdev23',
   redirectUri: 'https://platform.laxstack.com/',
   scope: 'openid email'
 };
 
 const AUTH_STORAGE_KEY = 'laxstack_cognito_session';
 const PKCE_STORAGE_KEY = 'laxstack_cognito_pkce';
+const PKCE_FALLBACK_KEY = 'laxstack_cognito_pkce_fallback';
 const ANON_MANUAL_LIMIT = 3;
 
 const LOCAL_REFRESH_MS = 180000;   // compute + network — unchanged
@@ -1012,11 +1013,40 @@ async function sha256Base64Url(value){
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
   return base64UrlEncode(new Uint8Array(digest));
 }
-function saveAuthSession(tokens){sessionStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(tokens))}
+function saveAuthSession(tokens){
+  sessionStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(tokens));
+}
 function getAuthSession(){
   try{return JSON.parse(sessionStorage.getItem(AUTH_STORAGE_KEY)||'null')}catch(_){return null}
 }
 function clearAuthSession(){sessionStorage.removeItem(AUTH_STORAGE_KEY)}
+function savePkceTransaction(tx){
+  const value=JSON.stringify(tx);
+  // sessionStorage is the primary store. localStorage is a short-lived
+  // fallback for browsers/extensions that unexpectedly clear sessionStorage
+  // during a cross-site managed-login redirect.
+  sessionStorage.setItem(PKCE_STORAGE_KEY,value);
+  localStorage.setItem(PKCE_FALLBACK_KEY,value);
+}
+function getPkceTransaction(){
+  let raw=sessionStorage.getItem(PKCE_STORAGE_KEY);
+  if(!raw) raw=localStorage.getItem(PKCE_FALLBACK_KEY);
+  try{
+    const tx=raw?JSON.parse(raw):null;
+    if(!tx || !tx.created_at || (Date.now()-tx.created_at)>10*60*1000){
+      clearPkceTransaction();
+      return null;
+    }
+    return tx;
+  }catch(_){
+    clearPkceTransaction();
+    return null;
+  }
+}
+function clearPkceTransaction(){
+  sessionStorage.removeItem(PKCE_STORAGE_KEY);
+  localStorage.removeItem(PKCE_FALLBACK_KEY);
+}
 function getAccessToken(){
   const s=getAuthSession();
   if(!s?.access_token)return null;
@@ -1039,11 +1069,11 @@ async function beginSignIn(){
   // Start the OAuth authorization-code flow at /oauth2/authorize.
   // Cognito then redirects the browser to Managed Login. This is the
   // documented entry point for browser applications and supports PKCE.
-  sessionStorage.removeItem(PKCE_STORAGE_KEY);
+  clearPkceTransaction();
   const verifier=randomString(64);
   const challenge=await sha256Base64Url(verifier);
   const state=randomString(48);
-  sessionStorage.setItem(PKCE_STORAGE_KEY,JSON.stringify({verifier,state,created_at:Date.now()}));
+  savePkceTransaction({verifier,state,created_at:Date.now()});
   const params=new URLSearchParams({
     response_type:'code',
     client_id:COGNITO.clientId,
@@ -1060,15 +1090,15 @@ async function handleAuthCallback(){
   if(q.get('error')){
     const err=q.get('error');
     const desc=q.get('error_description');
-    sessionStorage.removeItem(PKCE_STORAGE_KEY);
+    clearPkceTransaction();
     history.replaceState({},document.title,COGNITO.redirectUri);
     throw new Error('Cognito sign-in failed: '+(desc||err));
   }
   if(!code)return false;
 
-  let saved=null;
-  try{saved=JSON.parse(sessionStorage.getItem(PKCE_STORAGE_KEY)||'null')}catch(_){saved=null}
-  if(!saved?.verifier || !saved.state || saved.state!==returnedState){
+  const saved=getPkceTransaction();
+  if(!saved?.verifier || !saved.state || !returnedState || saved.state!==returnedState){
+    clearPkceTransaction();
     history.replaceState({},document.title,COGNITO.redirectUri);
     throw new Error('Invalid Cognito sign-in state — please start Sign in again.');
   }
@@ -1089,12 +1119,12 @@ async function handleAuthCallback(){
   tokens.expires_at=Date.now()+((tokens.expires_in||3600)*1000)-30000;
   tokens.email=p.email||'';
   saveAuthSession(tokens);
-  sessionStorage.removeItem(PKCE_STORAGE_KEY);
+  clearPkceTransaction();
   history.replaceState({},document.title,COGNITO.redirectUri);
   return true;
 }
 function signOut(){
-  clearAuthSession();sessionStorage.removeItem(PKCE_STORAGE_KEY);updateAuthUI();
+  clearAuthSession();clearPkceTransaction();updateAuthUI();
   const q=new URLSearchParams({client_id:COGNITO.clientId,logout_uri:COGNITO.redirectUri});
   location.assign(COGNITO.domain+'/logout?'+q.toString());
 }
