@@ -1024,13 +1024,16 @@ function getSignedInEmail(){
   return s?.email||p.email||p['cognito:username']||'Authenticated';
 }
 async function beginSignIn(){
+  // Direct Managed Login entry point. The Cognito /login endpoint accepts the
+  // same authorization parameters, including PKCE, and is working for this
+  // app client.
   const verifier=randomString(96), challenge=await sha256Base64Url(verifier), state=randomString(48);
   sessionStorage.setItem(PKCE_STORAGE_KEY,JSON.stringify({verifier,state}));
   const params=new URLSearchParams({
     response_type:'code',client_id:COGNITO.clientId,redirect_uri:COGNITO.redirectUri,
     scope:COGNITO.scope,state,code_challenge_method:'S256',code_challenge:challenge
   });
-  location.assign(COGNITO.domain+'/oauth2/authorize?'+params.toString());
+  location.assign(COGNITO.domain+'/login?'+params.toString());
 }
 async function handleAuthCallback(){
   const q=new URLSearchParams(location.search), code=q.get('code'), returnedState=q.get('state');
