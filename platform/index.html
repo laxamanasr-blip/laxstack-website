@@ -563,7 +563,7 @@ body.authenticated .auth-dashboard{display:block;}
 .auth-guest-meta{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);}
 .auth-guest-bars{margin-top:9px;}
 
-.auth-iface-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px;}
+.auth-iface-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
 .auth-iface-tile{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:13px 14px;transition:border-color .15s ease;}
 .auth-iface-tile:hover{border-color:var(--border-bright);}
 .auth-iface-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
@@ -1220,14 +1220,20 @@ function renderAuthNetwork(data){
     const line=parseFloat(i.line_rate)||1e10;
     const rxPct=Math.min((rxBps/line)*100*400,100);
     const txPct=Math.min((txBps/line)*100*400,100);
-    return `<div class="auth-iface-tile">
-      <div class="auth-iface-top">
-        <span class="dot" style="background:${up?'var(--green)':'var(--red)'};box-shadow:0 0 6px ${up?'var(--green)':'var(--red)'}"></span>
-        <span class="auth-iface-name">${i.name}</span>
-        <span class="auth-iface-dev">${i.device}</span>
+    pushHist('auth-if-'+i.id, i.traffic?.total_mbps||0);
+    return `<div class="iface-card">
+      <div class="iface-top">
+        <div><div class="iface-name">${i.name}</div><div class="iface-dev">${i.device}</div></div>
+        <span class="status-dot" style="background:${up?'var(--green)':'var(--red)'};box-shadow:0 0 6px ${up?'var(--green)':'var(--red)'};"></span>
       </div>
-      ${authBar('RX',rxPct,'var(--cyan)',rx.toFixed(2)+' Mbps')}
-      ${authBar('TX',txPct,'var(--violet)',tx.toFixed(2)+' Mbps')}
+      <div class="iface-throughput">
+        <div class="t-item rx"><span class="t-val">${rx.toFixed(2)}</span><span class="t-lbl">Mbps ↓ IN</span></div>
+        <div class="t-item tx"><span class="t-val">${tx.toFixed(2)}</span><span class="t-lbl">Mbps ↑ OUT</span></div>
+        ${sparklineSVG(hist['auth-if-'+i.id]||[], 'var(--cyan)', 64, 26)}
+      </div>
+      <div class="iface-bar-track"><div class="iface-bar-rx" style="width:${rxPct}%"></div></div>
+      <div class="iface-bar-track"><div class="iface-bar-tx" style="width:${txPct}%"></div></div>
+      <div class="iface-counters"><span>${fmtBytes(i.counters?.rx_bytes||0)} rx</span><span>${fmtBytes(i.counters?.tx_bytes||0)} tx</span></div>
     </div>`;
   }).join('') || '<div class="auth-empty">No interfaces returned.</div>'}</div>`;
 
