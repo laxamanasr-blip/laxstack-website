@@ -940,10 +940,9 @@ function setLed(key, ok){
   }
 }
 
-/* ---------- polling: split cadence + visibility aware ---------- */
+/* ---------- polling: split cadence + pause while tab is hidden ---------- */
 let localTimer = null, infraTimer = null, lastCloudSync = null;
-let dashboardVisible = !document.hidden;
-let pollingBusy = false;
+let pollingInProgress = false;
 
 function setBusy(busy){
   const btn = document.getElementById('refresh-btn');
@@ -962,7 +961,7 @@ function setBusy(busy){
   if(stateWrap) stateWrap.classList.toggle('busy', busy);
 }
 
-function stopPolling(){
+function stopTelemetryTimers(){
   if(localTimer){
     clearInterval(localTimer);
     localTimer = null;
@@ -972,23 +971,27 @@ function stopPolling(){
     clearInterval(infraTimer);
     infraTimer = null;
   }
+}
 
-  setBusy(false);
+async function refreshLocal(){
+  await Promise.all([loadCompute(), loadNetwork()]);
+  document.getElementById('sync-local').textContent =
+    'local: ' + fmtClock(new Date()) + ' (3m)';
+}
+
+async function refreshInfra(){
+  await loadCloud();
 }
 
 function scheduleLocal(){
   if(localTimer) clearInterval(localTimer);
   localTimer = null;
 
-  if(!dashboardVisible) return;
+  if(document.hidden) return;
 
-  localTimer = setInterval(async ()=>{
-    if(!dashboardVisible || pollingBusy) return;
-
-    try{
-      await refreshLocal();
-    }catch(e){
-      console.error('Local telemetry refresh failed:', e);
+  localTimer = setInterval(()=>{
+    if(!document.hidden && !pollingInProgress){
+      refreshLocal().catch(e => console.error('Local refresh failed:', e));
     }
   }, LOCAL_REFRESH_MS);
 }
@@ -997,62 +1000,53 @@ function scheduleInfra(){
   if(infraTimer) clearInterval(infraTimer);
   infraTimer = null;
 
-  if(!dashboardVisible) return;
+  if(document.hidden) return;
 
-  infraTimer = setInterval(async ()=>{
-    if(!dashboardVisible || pollingBusy) return;
-
-    try{
-      await refreshInfra();
-    }catch(e){
-      console.error('Cloud infrastructure refresh failed:', e);
+  infraTimer = setInterval(()=>{
+    if(!document.hidden && !pollingInProgress){
+      refreshInfra().catch(e => console.error('Cloud refresh failed:', e));
     }
   }, INFRA_REFRESH_MS);
 }
 
+/* Manual refresh always works when the page is visible. */
 async function syncAll(manual){
-  // Never generate API traffic while the tab is hidden.
-  if(document.hidden) return;
-
   const prompt = document.getElementById('operator-prompt');
   if(prompt) prompt.style.display = 'none';
 
-  if(pollingBusy) return;
+  if(pollingInProgress) return;
 
-  pollingBusy = true;
+  pollingInProgress = true;
   setBusy(true);
 
   try{
-    await Promise.all([
-      refreshLocal(),
-      refreshInfra()
-    ]);
+    await Promise.all([refreshLocal(), refreshInfra()]);
   }finally{
-    pollingBusy = false;
+    pollingInProgress = false;
     setBusy(false);
 
-    // Restart countdowns only while the dashboard is visible.
+    // Only keep API timers alive while the dashboard is visible.
     scheduleLocal();
     scheduleInfra();
   }
 }
 
-document.addEventListener('visibilitychange', async ()=>{
-  dashboardVisible = !document.hidden;
-
-  if(!dashboardVisible){
-    // Background tab: stop all API polling.
-    stopPolling();
+/*
+ * Page Visibility API:
+ * - Hidden tab: stop all recurring API timers.
+ * - Visible again: immediately fetch fresh telemetry, then restart timers.
+ */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    stopTelemetryTimers();
+    setBusy(false);
     return;
   }
 
-  // User returned to the dashboard:
-  // immediately fetch fresh telemetry, then resume normal cadence.
-  await syncAll(true);
+  syncAll(true);
 });
 
-/* Initial load hits all three once, then each domain follows its cadence.
-   Background/hidden tabs automatically pause API polling. */
+/* Initial load remains unchanged: fetch immediately, then schedule polling. */
 syncAll(false);
 </script>
 </body>
