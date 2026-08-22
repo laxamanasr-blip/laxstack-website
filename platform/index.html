@@ -456,7 +456,7 @@ footer .sync-times{display:flex;gap:16px;}
         <div class="operator-prompt-icon">◉</div>
         <div>
           <div class="operator-prompt-title">TELEMETRY STANDBY</div>
-          <div class="operator-prompt-text">Network and compute poll every <b>3 minutes</b>. Cloud infrastructure polls every <b>1 hour</b>. Use <b>Refresh telemetry</b> for an immediate poll of all three.</div>
+          <div class="operator-prompt-text">Network and compute poll every <b>3 minutes</b>. Cloud infrastructure polls every <b>1 hour</b>. Polling pauses when this tab is hidden and resumes with a fresh poll when you return.</div>
         </div>
       </div>
 
@@ -499,7 +499,7 @@ footer .sync-times{display:flex;gap:16px;}
           <span class="idx">03</span>
           <h2>Cloud Infrastructure</h2>
           <span class="tag">AWS</span>
-          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 1h</span>/api/infrastructure</span>
+          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 1h · pause hidden</span>/api/infrastructure</span>
         </div>
         <div class="grid-2" id="cloud-grid">
           <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
@@ -940,51 +940,119 @@ function setLed(key, ok){
   }
 }
 
-/* ---------- polling: split cadence, shared manual refresh ---------- */
+/* ---------- polling: split cadence + visibility aware ---------- */
 let localTimer = null, infraTimer = null, lastCloudSync = null;
+let dashboardVisible = !document.hidden;
+let pollingBusy = false;
 
 function setBusy(busy){
   const btn = document.getElementById('refresh-btn');
   const state = document.getElementById('refresh-state-text');
   const stateWrap = document.getElementById('refresh-state-wrap');
-  if(btn){ btn.disabled = busy; btn.classList.toggle('spinning', busy); }
-  if(state) state.textContent = busy ? 'POLLING' : 'READY';
+
+  if(btn){
+    btn.disabled = busy;
+    btn.classList.toggle('spinning', busy);
+  }
+
+  if(state){
+    state.textContent = busy ? 'POLLING' : (document.hidden ? 'PAUSED' : 'READY');
+  }
+
   if(stateWrap) stateWrap.classList.toggle('busy', busy);
 }
 
-async function refreshLocal(){
-  await Promise.all([loadCompute(), loadNetwork()]);
-  document.getElementById('sync-local').textContent = 'local: ' + fmtClock(new Date()) + ' (3m)';
-}
-async function refreshInfra(){
-  await loadCloud();
+function stopPolling(){
+  if(localTimer){
+    clearInterval(localTimer);
+    localTimer = null;
+  }
+
+  if(infraTimer){
+    clearInterval(infraTimer);
+    infraTimer = null;
+  }
+
+  setBusy(false);
 }
 
 function scheduleLocal(){
   if(localTimer) clearInterval(localTimer);
-  localTimer = setInterval(refreshLocal, LOCAL_REFRESH_MS);
-}
-function scheduleInfra(){
-  if(infraTimer) clearInterval(infraTimer);
-  infraTimer = setInterval(refreshInfra, INFRA_REFRESH_MS);
+  localTimer = null;
+
+  if(!dashboardVisible) return;
+
+  localTimer = setInterval(async ()=>{
+    if(!dashboardVisible || pollingBusy) return;
+
+    try{
+      await refreshLocal();
+    }catch(e){
+      console.error('Local telemetry refresh failed:', e);
+    }
+  }, LOCAL_REFRESH_MS);
 }
 
-/* Manual refresh always polls all three immediately, then both
-   auto-poll timers restart their own countdown from that moment. */
+function scheduleInfra(){
+  if(infraTimer) clearInterval(infraTimer);
+  infraTimer = null;
+
+  if(!dashboardVisible) return;
+
+  infraTimer = setInterval(async ()=>{
+    if(!dashboardVisible || pollingBusy) return;
+
+    try{
+      await refreshInfra();
+    }catch(e){
+      console.error('Cloud infrastructure refresh failed:', e);
+    }
+  }, INFRA_REFRESH_MS);
+}
+
 async function syncAll(manual){
+  // Never generate API traffic while the tab is hidden.
+  if(document.hidden) return;
+
   const prompt = document.getElementById('operator-prompt');
   if(prompt) prompt.style.display = 'none';
+
+  if(pollingBusy) return;
+
+  pollingBusy = true;
   setBusy(true);
+
   try{
-    await Promise.all([refreshLocal(), refreshInfra()]);
+    await Promise.all([
+      refreshLocal(),
+      refreshInfra()
+    ]);
   }finally{
+    pollingBusy = false;
     setBusy(false);
+
+    // Restart countdowns only while the dashboard is visible.
     scheduleLocal();
     scheduleInfra();
   }
 }
 
-/* Initial load hits all three once, then each domain settles into its own cadence. */
+document.addEventListener('visibilitychange', async ()=>{
+  dashboardVisible = !document.hidden;
+
+  if(!dashboardVisible){
+    // Background tab: stop all API polling.
+    stopPolling();
+    return;
+  }
+
+  // User returned to the dashboard:
+  // immediately fetch fresh telemetry, then resume normal cadence.
+  await syncAll(true);
+});
+
+/* Initial load hits all three once, then each domain follows its cadence.
+   Background/hidden tabs automatically pause API polling. */
 syncAll(false);
 </script>
 </body>
