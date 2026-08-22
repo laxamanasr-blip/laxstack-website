@@ -402,31 +402,35 @@ footer .sync-times{display:flex;gap:16px;}
 .manual-limit{display:none;font-family:var(--mono);font-size:9px;color:var(--amber);margin-left:2px}
 
 
-/* ===== AUTHENTICATED OPERATIONS DASHBOARD ===== */
-.auth-dashboard{display:none;max-width:1480px;margin:0 auto;padding:18px 24px 70px;}
+/* ===== AUTHENTICATED OPERATIONS DASHBOARD (NOC) ===== */
+.auth-dashboard{display:none;max-width:1560px;margin:0 auto;padding:20px 24px 70px;}
 body.authenticated .auth-dashboard{border-top:1px solid rgba(157,140,255,.08);}
 body.authenticated main{display:none;}
-body.authenticated .pulse-strip{display:block;}
+body.authenticated .pulse-strip{display:none;}
 body.authenticated .auth-dashboard{display:block;}
 
-.auth-hero{
-  position:relative;overflow:hidden;min-height:112px;border:1px solid var(--border);
-  border-radius:9px;background:
-    linear-gradient(90deg,rgba(157,140,255,.065),transparent 48%),
-    linear-gradient(160deg,rgba(255,255,255,.018),transparent 42%),var(--panel);
-  padding:18px 20px;box-shadow:0 12px 34px rgba(0,0,0,.14);
+/* ---- signature element: live topology + ticker ---- */
+.noc-hero{
+  position:relative;overflow:hidden;border:1px solid var(--border);border-radius:11px;
+  background:
+    radial-gradient(ellipse 640px 260px at 10% 0%, rgba(157,140,255,.11), transparent 60%),
+    radial-gradient(ellipse 520px 220px at 90% 100%, rgba(51,210,240,.08), transparent 65%),
+    linear-gradient(160deg, rgba(255,255,255,.02), transparent 45%), #0d0e12;
+  box-shadow:0 18px 44px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.03);
+  padding:20px 24px 0;
 }
-.auth-hero:after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(90deg,rgba(157,140,255,.08),transparent 25%,transparent 75%,rgba(51,210,240,.035));
+.noc-hero:before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(ellipse 90% 100% at 50% 0%, black, transparent 85%);
 }
-.auth-hero-content{position:relative;z-index:2;}
-.auth-eyebrow{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:1.8px;color:var(--violet);margin-bottom:6px;}
-.auth-eyebrow .auth-live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:ledpulse 1.6s ease-in-out infinite;}
-.auth-title{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:.1px;}
-.auth-title span{color:var(--violet);}
-.auth-subtitle{margin-top:5px;color:var(--text-faint);font-size:10px;}
-.auth-meta-row{position:absolute;right:20px;top:20px;display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;max-width:52%;}
+.noc-hero-top{position:relative;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.noc-eyebrow{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--violet);}
+.noc-eyebrow .auth-live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:ledpulse 1.6s ease-in-out infinite;}
+.noc-title{margin-top:7px;font-family:var(--display);font-size:25px;font-weight:700;letter-spacing:.1px;}
+.noc-title span{color:var(--violet);}
+.noc-meta-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px;}
 .auth-meta{
   display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--border);
   background:rgba(0,0,0,.16);border-radius:5px;font-family:var(--mono);font-size:8px;color:var(--text-faint);
@@ -434,18 +438,72 @@ body.authenticated .auth-dashboard{display:block;}
 .auth-meta strong{color:var(--text-dim);font-weight:600;}
 .auth-meta.green{border-color:var(--green-dim);color:var(--green);background:rgba(79,214,140,.035);}
 
-.auth-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;}
-.auth-kpi{box-shadow:inset 0 1px 0 rgba(255,255,255,.018);
-  border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:15px 16px;
-  position:relative;overflow:hidden;
+.noc-topology-wrap{position:relative;z-index:2;height:172px;margin:6px -4px 0;}
+.noc-topology-wrap svg{width:100%;height:100%;overflow:visible;display:block;}
+.topo-link{fill:none;stroke:var(--border-bright);stroke-width:1.5;transition:stroke .35s ease;}
+.topo-link.up{stroke:var(--cyan);}
+.topo-link.up.violet{stroke:var(--violet);}
+.topo-link.down{stroke:var(--red-dim);stroke-dasharray:3 4;}
+.topo-pulse{fill:var(--cyan);filter:drop-shadow(0 0 4px var(--cyan));}
+.topo-pulse.violet{fill:var(--violet);filter:drop-shadow(0 0 4px var(--violet));}
+.topo-node-ring{fill:var(--panel);stroke:var(--border-bright);stroke-width:1.5;transition:stroke .35s ease, filter .35s ease;}
+.topo-node-ring.ok{stroke:var(--green);filter:drop-shadow(0 0 6px rgba(79,214,140,.55));}
+.topo-node-ring.warn{stroke:var(--amber);filter:drop-shadow(0 0 6px rgba(255,178,56,.5));}
+.topo-node-ring.bad{stroke:var(--red);filter:drop-shadow(0 0 6px rgba(242,73,92,.5));}
+.topo-node-icon{stroke:var(--text-dim);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.topo-label{font-family:var(--mono);font-size:10px;font-weight:600;fill:var(--text);}
+.topo-metric{font-family:var(--mono);font-size:9.5px;fill:var(--text-faint);}
+.topo-metric.ok{fill:var(--green);}
+.topo-metric.warn{fill:var(--amber);}
+.topo-metric.bad{fill:var(--red);}
+
+.noc-ticker{
+  position:relative;z-index:2;display:flex;align-items:stretch;flex-wrap:wrap;
+  margin:8px -24px 0;padding:16px 24px 18px;border-top:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(255,255,255,.012), transparent);
 }
-.auth-kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--cyan);}
-.auth-kpi:nth-child(2):before{background:var(--orange);}
-.auth-kpi:nth-child(3):before{background:var(--violet);}
-.auth-kpi:nth-child(4):before{background:var(--green);}
-.auth-kpi .ak-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;}
-.auth-kpi .ak-value{font-family:var(--mono);font-size:21px;font-weight:700;margin-top:6px;letter-spacing:-.3px;}
-.auth-kpi .ak-detail{font-size:9.5px;color:var(--text-faint);margin-top:3px;}
+.noc-ticker-item{flex:1;min-width:130px;display:flex;flex-direction:column;gap:3px;padding:0 20px;position:relative;}
+.noc-ticker-item + .noc-ticker-item{border-left:1px solid var(--border);}
+.noc-ticker .nt-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:var(--text-faint);}
+.noc-ticker .nt-val{font-family:var(--mono);font-size:27px;font-weight:700;letter-spacing:-.5px;display:flex;align-items:baseline;gap:6px;}
+.noc-ticker .nt-val small{font-size:11px;font-weight:500;color:var(--text-dim);}
+.noc-ticker-item.cyan .nt-val{color:var(--cyan);}
+.noc-ticker-item.orange .nt-val{color:var(--orange);}
+.noc-ticker-item.violet .nt-val{color:var(--violet);}
+.noc-ticker-item.green .nt-val{color:var(--green);}
+.noc-ticker-item .nt-detail{font-family:var(--mono);font-size:8.5px;color:var(--text-faint);margin-top:1px;}
+
+/* ---- lower grid: telemetry column + persistent live-feed column ---- */
+.noc-lower-grid{display:grid;grid-template-columns:1fr 296px;gap:16px;align-items:start;margin-top:26px;}
+.noc-main-col{min-width:0;}
+.noc-side-col{position:sticky;top:66px;}
+.noc-feed-card .auth-card-title{margin-bottom:9px;}
+.noc-feed{max-height:640px;overflow-y:auto;display:flex;flex-direction:column;margin:0 -16px;padding:0 16px;}
+.noc-feed-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.noc-feed-item:last-child{border-bottom:none;}
+.noc-feed-item .nf-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0;background:var(--text-faint);}
+.noc-feed-item.ok .nf-dot{background:var(--green);box-shadow:0 0 5px var(--green);}
+.noc-feed-item.warn .nf-dot{background:var(--amber);box-shadow:0 0 5px var(--amber);}
+.noc-feed-item.bad .nf-dot{background:var(--red);box-shadow:0 0 5px var(--red);}
+.noc-feed-item .nf-body{flex:1;min-width:0;}
+.noc-feed-item .nf-text{font-size:10.5px;color:var(--text-dim);line-height:1.4;}
+.noc-feed-item .nf-time{font-family:var(--mono);font-size:8px;color:var(--text-faint);margin-top:2px;}
+
+.noc-trend-card{margin-top:12px;}
+.noc-trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.noc-trend-head .trend-legend{display:flex;gap:11px;}
+.noc-trend-head .trend-legend span{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--text-dim);}
+.noc-trend-head .trend-legend .ld{width:7px;height:2px;border-radius:1px;}
+
+@media(max-width:1200px){
+  .noc-lower-grid{grid-template-columns:1fr;}
+  .noc-side-col{position:static;}
+  .noc-feed{max-height:340px;}
+}
+@media(max-width:900px){
+  .noc-ticker-item{flex:1 1 45%;border-left:none !important;padding:8px 10px;}
+  .noc-topology-wrap{display:none;}
+}
 
 .auth-section{margin-top:28px;}
 .auth-section-head{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
@@ -510,17 +568,16 @@ body.authenticated .auth-dashboard{display:block;}
 .auth-dashboard-footer{margin-top:25px;padding-top:15px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:9px;color:var(--text-faint);}
 
 @media(max-width:1050px){
-  .auth-overview{grid-template-columns:repeat(2,1fr);}
   .auth-grid-2{grid-template-columns:1fr;}
 }
 @media(max-width:760px){
   .auth-dashboard{padding:16px 14px 50px;}
-  .auth-title{font-size:24px;}
-  .auth-overview,.auth-grid-3{grid-template-columns:1fr 1fr;}
+  .noc-title{font-size:20px;}
+  .auth-grid-3{grid-template-columns:1fr 1fr;}
   .auth-metric-grid{grid-template-columns:1fr 1fr;}
 }
 @media(max-width:500px){
-  .auth-overview,.auth-grid-3,.auth-metric-grid{grid-template-columns:1fr;}
+  .auth-grid-3,.auth-metric-grid{grid-template-columns:1fr;}
 }
 
 </style>
@@ -594,74 +651,137 @@ body.authenticated .auth-dashboard{display:block;}
 
     <!-- ================= AUTHENTICATED OPERATIONS DASHBOARD ================= -->
     <section id="auth-dashboard" class="auth-dashboard">
-      <div class="auth-hero">
-        <div class="auth-hero-content">
-          <div class="auth-eyebrow"><span class="auth-live"></span>PRIVATE PLATFORM OPERATIONS</div>
-          <div class="auth-title">Welcome, <span id="auth-welcome-name">Operator</span></div>
-          <div class="auth-subtitle">Authenticated operations view · expanded telemetry · live infrastructure posture</div>
-          <div class="auth-meta-row">
+      <div class="noc-hero">
+        <div class="noc-hero-top">
+          <div>
+            <div class="noc-eyebrow"><span class="auth-live"></span>PRIVATE OPERATIONS FLOOR</div>
+            <div class="noc-title">Welcome back, <span id="auth-welcome-name">Operator</span></div>
+          </div>
+          <div class="noc-meta-row">
             <span class="auth-meta green">● AUTHENTICATED</span>
             <span class="auth-meta"><strong>SESSION</strong> Cognito / PKCE</span>
-            <span class="auth-meta"><strong>POLLING</strong> Network + Compute 3m · Cloud 1h</span>
+            <span class="auth-meta"><strong>POLLING</strong> Net+Compute 3m · Cloud 1h</span>
           </div>
+        </div>
+
+        <div class="noc-topology-wrap">
+          <svg viewBox="0 0 1000 180" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <path id="topo-path-wan-net" class="topo-link" d="M80,90 Q205,72 330,55"/>
+            <path id="topo-path-wan-cloud" class="topo-link violet" d="M80,90 Q205,108 330,130"/>
+            <path id="topo-path-net-compute" class="topo-link" d="M358,55 L622,55"/>
+            <path id="topo-path-compute-guests" class="topo-link" d="M678,55 L896,55"/>
+
+            <circle class="topo-pulse" r="3"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#topo-path-wan-net"/></animateMotion></circle>
+            <circle class="topo-pulse violet" r="3"><animateMotion dur="2.9s" repeatCount="indefinite"><mpath href="#topo-path-wan-cloud"/></animateMotion></circle>
+            <circle class="topo-pulse" r="3"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#topo-path-net-compute"/></animateMotion></circle>
+            <circle class="topo-pulse" r="3"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#topo-path-compute-guests"/></animateMotion></circle>
+
+            <g transform="translate(80,90)">
+              <circle class="topo-node-ring ok" id="topo-node-wan" r="24"/>
+              <g class="topo-node-icon" transform="translate(-9,-9)"><circle cx="9" cy="9" r="8"/><path d="M1 9h16M9 1a12 12 0 0 1 0 16 12 12 0 0 1 0-16z"/></g>
+              <text class="topo-label" x="0" y="42" text-anchor="middle">WAN</text>
+            </g>
+            <g transform="translate(330,55)">
+              <circle class="topo-node-ring" id="topo-node-net" r="24"/>
+              <g class="topo-node-icon" transform="translate(-9,-9)"><path d="M9 1l8 3v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V4l8-3z"/></g>
+              <text class="topo-label" x="0" y="42" text-anchor="middle">OPNsense</text>
+              <text class="topo-metric" id="topo-metric-net" x="0" y="55" text-anchor="middle">— Mbps</text>
+            </g>
+            <g transform="translate(330,130)">
+              <circle class="topo-node-ring" id="topo-node-cloud" r="24"/>
+              <g class="topo-node-icon" transform="translate(-10,-8)"><path d="M4.5 15a4.5 4.5 0 0 1-.4-9 5.5 5.5 0 0 1 10.7-1.8A4 4 0 0 1 15.5 12H4.5z"/></g>
+              <text class="topo-label" x="0" y="42" text-anchor="middle">AWS</text>
+            </g>
+            <g transform="translate(650,55)">
+              <circle class="topo-node-ring" id="topo-node-compute" r="24"/>
+              <g class="topo-node-icon" transform="translate(-9,-9)"><path d="M1 2h16v7H1zM1 11h16v7H1z"/><circle cx="4" cy="5.5" r=".6" fill="currentColor" stroke="none"/><circle cx="4" cy="14.5" r=".6" fill="currentColor" stroke="none"/></g>
+              <text class="topo-label" x="0" y="42" text-anchor="middle">Proxmox</text>
+              <text class="topo-metric" id="topo-metric-compute" x="0" y="55" text-anchor="middle">—% cpu</text>
+            </g>
+            <g transform="translate(920,55)">
+              <circle class="topo-node-ring" id="topo-node-guests" r="24"/>
+              <g class="topo-node-icon" transform="translate(-9,-9)"><path d="M9 1l8 4-8 4-8-4 8-4zM1 9v8l8 4 8-4V9"/></g>
+              <text class="topo-label" x="0" y="42" text-anchor="middle">Guests</text>
+              <text class="topo-metric" id="topo-metric-guests" x="0" y="55" text-anchor="middle">—/—</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="noc-ticker">
+          <div class="noc-ticker-item green"><span class="nt-lbl">Platform health</span><span class="nt-val" id="auth-kpi-health">—</span><span class="nt-detail" id="auth-kpi-health-detail">Waiting for telemetry</span></div>
+          <div class="noc-ticker-item cyan"><span class="nt-lbl">Network throughput</span><span class="nt-val" id="auth-kpi-network">—</span><span class="nt-detail" id="auth-kpi-network-detail">—</span></div>
+          <div class="noc-ticker-item orange"><span class="nt-lbl">Compute guests</span><span class="nt-val" id="auth-kpi-guests">—</span><span class="nt-detail" id="auth-kpi-guests-detail">—</span></div>
+          <div class="noc-ticker-item violet"><span class="nt-lbl">Proxmox uptime</span><span class="nt-val" id="auth-kpi-uptime">—</span><span class="nt-detail" id="auth-kpi-uptime-detail">Host</span></div>
+          <div class="noc-ticker-item violet"><span class="nt-lbl">Cloud MTD cost</span><span class="nt-val" id="auth-kpi-cost">—</span><span class="nt-detail" id="auth-kpi-cost-detail">2 accounts</span></div>
         </div>
       </div>
 
-      <div class="auth-overview">
-        <div class="auth-kpi"><div class="ak-label">Platform health</div><div class="ak-value" id="auth-kpi-health">—</div><div class="ak-detail" id="auth-kpi-health-detail">Waiting for telemetry</div></div>
-        <div class="auth-kpi"><div class="ak-label">Compute guests</div><div class="ak-value" id="auth-kpi-guests">—</div><div class="ak-detail" id="auth-kpi-guests-detail">—</div></div>
-        <div class="auth-kpi"><div class="ak-label">Network throughput</div><div class="ak-value" id="auth-kpi-network">—</div><div class="ak-detail" id="auth-kpi-network-detail">—</div></div>
-        <div class="auth-kpi"><div class="ak-label">Proxmox uptime</div><div class="ak-value" id="auth-kpi-uptime">—</div><div class="ak-detail" id="auth-kpi-uptime-detail">Host</div></div>
-      </div>
-
-      <div class="auth-alert">
+      <div class="auth-alert" style="margin-top:14px;">
         <span class="big-dot"></span>
         <div><b id="auth-posture">Operational telemetry is healthy.</b> <span id="auth-posture-detail">Authenticated dashboard is receiving protected telemetry.</span></div>
       </div>
 
-      <section class="auth-section">
-        <div class="auth-section-head"><span class="num">01</span><h2>Network Operations</h2><span class="tag">OPNsense</span><span class="section-note" id="auth-network-sync">syncing…</span></div>
-        <div class="auth-grid-2">
-          <div class="auth-card">
-            <div class="auth-card-title"><span class="auth-status" id="auth-net-status"></span><h3>Interface telemetry</h3><span class="minor" id="auth-net-count">—</span></div>
-            <div id="auth-ifaces"><div class="auth-empty">Waiting for protected telemetry…</div></div>
-          </div>
-          <div class="auth-card">
-            <div class="auth-card-title"><span class="auth-status"></span><h3>Gateways</h3><span class="minor">reachability</span></div>
-            <div id="auth-gateways"><div class="auth-empty">Waiting…</div></div>
-          </div>
-        </div>
-      </section>
+      <div class="noc-lower-grid">
+        <div class="noc-main-col">
+          <section class="auth-section" style="margin-top:0;">
+            <div class="auth-section-head"><span class="num">01</span><h2>Network Operations</h2><span class="tag">OPNsense</span><span class="section-note" id="auth-network-sync">syncing…</span></div>
+            <div class="auth-grid-2">
+              <div class="auth-card">
+                <div class="auth-card-title"><span class="auth-status" id="auth-net-status"></span><h3>Interface telemetry</h3><span class="minor" id="auth-net-count">—</span></div>
+                <div id="auth-ifaces"><div class="auth-empty">Waiting for protected telemetry…</div></div>
+              </div>
+              <div class="auth-card">
+                <div class="auth-card-title"><span class="auth-status"></span><h3>Gateways</h3><span class="minor">reachability</span></div>
+                <div id="auth-gateways"><div class="auth-empty">Waiting…</div></div>
+              </div>
+            </div>
+            <div class="auth-card noc-trend-card">
+              <div class="noc-trend-head">
+                <div class="auth-card-title" style="margin-bottom:0;"><h3>Total throughput trend</h3></div>
+                <span class="minor" id="auth-net-trend-note">this session</span>
+              </div>
+              <div style="width:100%;height:32px;" id="auth-net-trend"></div>
+            </div>
+          </section>
 
-      <section class="auth-section">
-        <div class="auth-section-head"><span class="num">02</span><h2>Compute Operations</h2><span class="tag">Proxmox</span><span class="section-note" id="auth-compute-sync">syncing…</span></div>
-        <div class="auth-grid-2">
-          <div class="auth-card">
-            <div class="auth-card-title"><span class="auth-status" id="auth-compute-status"></span><h3 id="auth-host-name">Host</h3><span class="minor" id="auth-host-uptime">—</span></div>
-            <div class="auth-metric-grid" id="auth-host-metrics"></div>
-            <div style="margin-top:12px" id="auth-host-bars"></div>
-          </div>
-          <div class="auth-card">
-            <div class="auth-card-title"><span class="auth-status"></span><h3>Capacity posture</h3><span class="minor">current</span></div>
-            <div id="auth-capacity"></div>
-          </div>
-        </div>
-        <div class="auth-card" style="margin-top:12px;">
-          <div class="auth-card-title"><span class="auth-status"></span><h3>Guest inventory</h3><span class="minor" id="auth-guest-count">—</span></div>
-          <div class="auth-guest-grid" id="auth-guests"><div class="auth-empty">Waiting…</div></div>
-        </div>
-      </section>
+          <section class="auth-section">
+            <div class="auth-section-head"><span class="num">02</span><h2>Compute Operations</h2><span class="tag">Proxmox</span><span class="section-note" id="auth-compute-sync">syncing…</span></div>
+            <div class="auth-grid-2">
+              <div class="auth-card">
+                <div class="auth-card-title"><span class="auth-status" id="auth-compute-status"></span><h3 id="auth-host-name">Host</h3><span class="minor" id="auth-host-uptime">—</span></div>
+                <div class="gauge-row" id="auth-compute-gauges" style="margin-bottom:12px;"></div>
+                <div id="auth-host-bars"></div>
+              </div>
+              <div class="auth-card">
+                <div class="auth-card-title"><span class="auth-status"></span><h3>Capacity posture</h3><span class="minor">current</span></div>
+                <div id="auth-capacity"></div>
+              </div>
+            </div>
+            <div class="auth-card" style="margin-top:12px;">
+              <div class="auth-card-title"><span class="auth-status"></span><h3>Guest inventory</h3><span class="minor" id="auth-guest-count">—</span></div>
+              <div class="auth-guest-grid" id="auth-guests"><div class="auth-empty">Waiting…</div></div>
+            </div>
+          </section>
 
-      <section class="auth-section">
-        <div class="auth-section-head"><span class="num">03</span><h2>Cloud Infrastructure</h2><span class="tag">AWS</span><span class="section-note" id="auth-cloud-sync">syncing…</span></div>
-        <div class="auth-grid-3" id="auth-cloud-grid">
-          <div class="auth-card"><div class="auth-empty">Waiting for protected AWS telemetry…</div></div>
-        </div>
-      </section>
+          <section class="auth-section">
+            <div class="auth-section-head"><span class="num">03</span><h2>Cloud Infrastructure</h2><span class="tag">AWS</span><span class="section-note" id="auth-cloud-sync">syncing…</span></div>
+            <div class="auth-grid-3" id="auth-cloud-grid">
+              <div class="auth-card"><div class="auth-empty">Waiting for protected AWS telemetry…</div></div>
+            </div>
+          </section>
 
-      <div class="auth-dashboard-footer">
-        <span>LAXSTACK PRIVATE OPERATIONS · protected telemetry</span>
-        <span id="auth-footer-session">authenticated session active</span>
+          <div class="auth-dashboard-footer">
+            <span>LAXSTACK PRIVATE OPERATIONS · protected telemetry</span>
+            <span id="auth-footer-session">authenticated session active</span>
+          </div>
+        </div>
+
+        <div class="noc-side-col">
+          <div class="auth-card noc-feed-card">
+            <div class="auth-card-title"><span class="auth-status" style="background:var(--violet);box-shadow:0 0 7px var(--violet);"></span><h3>Live Ops Feed</h3><span class="minor" id="noc-feed-count">0 events</span></div>
+            <div class="noc-feed" id="noc-feed-list"><div class="auth-empty">Monitoring session — events appear as telemetry changes.</div></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1012,6 +1132,59 @@ function authHealthClass(status){
   const s=String(status||'').toLowerCase();
   return ['online','running','up'].includes(s)?'ok':(['stopped','offline','down'].includes(s)?'bad':'warn');
 }
+function levelFromPct(pct){
+  const p=Number(pct)||0;
+  if(p>=85) return 'bad';
+  if(p>=60) return 'warn';
+  return 'ok';
+}
+
+/* ---- live ops feed: real event log built from telemetry deltas ---- */
+const authEvents=[];
+const authPrevGateways={}, authPrevIfaces={}, authPrevGuests={};
+const authCrit={pressure:false};
+function pushAuthEvent(text, level){
+  authEvents.unshift({ts:Date.now(), text, level:level||'info'});
+  if(authEvents.length>40) authEvents.length=40;
+  renderAuthEvents();
+}
+function renderAuthEvents(){
+  const el=document.getElementById('noc-feed-list');
+  if(!el) return;
+  authSetText('noc-feed-count', authEvents.length+' event'+(authEvents.length===1?'':'s'));
+  el.innerHTML = authEvents.length ? authEvents.map(e=>`
+    <div class="noc-feed-item ${e.level==='info'?'':e.level}">
+      <span class="nf-dot"></span>
+      <div class="nf-body"><div class="nf-text">${e.text}</div><div class="nf-time">${fmtClock(new Date(e.ts))}</div></div>
+    </div>`).join('') : '<div class="auth-empty">Monitoring session — events appear as telemetry changes.</div>';
+}
+
+/* ---- live topology: node/link health reflects real ledState + load ---- */
+let lastComputePressure=0;
+function setTopoNode(id, level){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.classList.remove('ok','warn','bad');
+  if(level) el.classList.add(level);
+}
+function setTopoLink(pathId, up){
+  const el=document.getElementById(pathId);
+  if(!el) return;
+  el.classList.toggle('up', up===true);
+  el.classList.toggle('down', up===false);
+}
+function renderTopology(){
+  const netOk = ledState.network===true, computeOk = ledState.compute===true, cloudOk = ledState.cloud===true;
+  setTopoLink('topo-path-wan-net', ledState.network===null?null:netOk);
+  setTopoLink('topo-path-wan-cloud', ledState.cloud===null?null:cloudOk);
+  setTopoLink('topo-path-net-compute', (ledState.network===null||ledState.compute===null)?null:(netOk&&computeOk));
+  setTopoLink('topo-path-compute-guests', ledState.compute===null?null:computeOk);
+  setTopoNode('topo-node-net', ledState.network===null?'':(netOk?'ok':'bad'));
+  setTopoNode('topo-node-cloud', ledState.cloud===null?'':(cloudOk?'ok':'bad'));
+  setTopoNode('topo-node-compute', ledState.compute===null?'':(!computeOk?'bad':levelFromPct(lastComputePressure)));
+  setTopoNode('topo-node-guests', ledState.compute===null?'':(computeOk?'ok':'bad'));
+}
+
 function renderAuthNetwork(data){
   const n=data.opnsense;
   if(!n)return;
@@ -1020,6 +1193,11 @@ function renderAuthNetwork(data){
   authSetText('auth-kpi-network-detail',`${(n.interfaces||[]).length} interfaces · ${n.gateways?.length||0} gateways`);
   authSetText('auth-net-count',`${(n.interfaces||[]).length} interfaces`);
   authSetText('auth-network-sync','updated '+fmtClock(new Date()));
+  authSetText('topo-metric-net', total.toFixed(1)+' Mbps');
+
+  pushHist('auth-net-total', total);
+  const trendEl=document.getElementById('auth-net-trend');
+  if(trendEl) trendEl.innerHTML = sparklineSVG(hist['auth-net-total']||[], 'var(--cyan)', 900, 32).replace('width="900" height="32"','width="100%" height="100%"');
 
   document.getElementById('auth-ifaces').innerHTML=(n.interfaces||[]).map(i=>{
     const up=i.link_state==='2';
@@ -1042,7 +1220,22 @@ function renderAuthNetwork(data){
       <td class="name"><span class="${authHealthClass(g.status)}">●</span> ${g.name}</td>
       <td>${g.address}</td><td class="r">${g.delay_ms} ms</td><td class="r">${g.loss}</td>
     </tr>`).join('')}</tbody></table>`;
+
+  (n.gateways||[]).forEach(g=>{
+    const curLevel=authHealthClass(g.status), prev=authPrevGateways[g.name];
+    if(prev!==undefined && prev!==curLevel){
+      pushAuthEvent(curLevel==='ok' ? `Gateway ${g.name} recovered — ${g.delay_ms}ms, ${g.loss} loss` : `Gateway ${g.name} degraded — status ${g.status}`, curLevel);
+    }
+    authPrevGateways[g.name]=curLevel;
+  });
+  (n.interfaces||[]).forEach(i=>{
+    const up=i.link_state==='2', prev=authPrevIfaces[i.id];
+    if(prev!==undefined && prev!==up) pushAuthEvent(`Interface ${i.name} (${i.device}) link ${up?'restored':'down'}`, up?'ok':'bad');
+    authPrevIfaces[i.id]=up;
+  });
+  renderTopology();
 }
+
 function renderAuthCompute(data){
   const p=data.proxmox,host=p?.host;
   if(!host)return;
@@ -1055,24 +1248,44 @@ function renderAuthCompute(data){
   authSetText('auth-host-name',host.name||'Proxmox host');
   authSetText('auth-host-uptime','up '+fmtUptime(host.uptime));
   authSetText('auth-compute-sync','updated '+fmtClock(new Date()));
+  authSetText('topo-metric-compute', (Number(host.cpu_percent)||0).toFixed(0)+'% cpu');
+  authSetText('topo-metric-guests', `${running}/${total}`);
   const temp=Number(host.temperature_c)||0;
-  document.getElementById('auth-host-metrics').innerHTML=[
-    ['CPU',(Number(host.cpu_percent)||0).toFixed(1)+'%'],
-    ['Memory',(Number(host.memory?.percent)||0).toFixed(0)+'%'],
-    ['Disk',(Number(host.rootfs?.percent)||0).toFixed(0)+'%']
-  ].map(x=>`<div class="auth-metric"><div class="m-label">${x[0]}</div><div class="m-value">${x[1]}</div></div>`).join('');
+
+  const gaugesEl=document.getElementById('auth-compute-gauges');
+  if(gaugesEl) gaugesEl.innerHTML =
+    gaugeArc('ag-cpu', Number(host.cpu_percent)||0, 'CPU', 92, 9) +
+    gaugeArc('ag-mem', Number(host.memory?.percent)||0, 'Memory', 92, 9) +
+    gaugeArc('ag-disk', Number(host.rootfs?.percent)||0, 'Disk', 92, 9);
+
   document.getElementById('auth-host-bars').innerHTML=
-    authBar('CPU',host.cpu_percent,'var(--orange)',(Number(host.cpu_percent)||0).toFixed(1)+'%')+
-    authBar('MEM',host.memory?.percent,'var(--violet)',(Number(host.memory?.percent)||0).toFixed(0)+'%')+
-    authBar('DISK',host.rootfs?.percent,'var(--cyan)',(Number(host.rootfs?.percent)||0).toFixed(0)+'%')+
-    authBar('TEMP',Math.min(temp/90*100,100),'var(--amber)',temp.toFixed(1)+'°C');
+    authBar('TEMP',Math.min(temp/90*100,100),'var(--amber)',temp.toFixed(1)+'°C')+
+    `<div class="trend-panel">
+      <div class="trend-head">
+        <div class="trend-legend">
+          <span><span class="ld" style="background:var(--orange)"></span>CPU</span>
+          <span><span class="ld" style="background:var(--violet)"></span>Memory</span>
+          <span><span class="ld" style="background:var(--cyan)"></span>Disk</span>
+        </div>
+        <span class="trend-note">last ${hist['h-cpu']?hist['h-cpu'].length:0} polls</span>
+      </div>
+      <div style="width:100%;height:30px;">${multiSparklineSVG([
+        {values:hist['h-cpu']||[], color:'var(--orange)'},
+        {values:hist['h-mem']||[], color:'var(--violet)'},
+        {values:hist['h-disk']||[], color:'var(--cyan)'}
+      ], 900, 30).replace('width="900" height="30"','width="100%" height="100%"')}</div>
+    </div>`;
 
   const pressure=Math.max(Number(host.cpu_percent)||0,Number(host.memory?.percent)||0,Number(host.rootfs?.percent)||0);
+  lastComputePressure=pressure;
   authSetText('auth-capacity',pressure>=85?'Capacity pressure is critical.':pressure>=60?'Capacity is elevated but within operating range.':'Capacity posture is healthy.');
   const cap=document.getElementById('auth-capacity');
-  cap.innerHTML+=authBar('CPU',host.cpu_percent,'var(--orange)',(Number(host.cpu_percent)||0).toFixed(1)+'%')+
+  cap.innerHTML=authBar('CPU',host.cpu_percent,'var(--orange)',(Number(host.cpu_percent)||0).toFixed(1)+'%')+
                   authBar('MEM',host.memory?.percent,'var(--violet)',(Number(host.memory?.percent)||0).toFixed(0)+'%')+
                   authBar('DISK',host.rootfs?.percent,'var(--cyan)',(Number(host.rootfs?.percent)||0).toFixed(0)+'%');
+
+  if(pressure>=85 && !authCrit.pressure){ pushAuthEvent(`Host ${host.name} capacity critical — ${pressure.toFixed(0)}% peak utilization`,'bad'); authCrit.pressure=true; }
+  else if(pressure<70 && authCrit.pressure){ pushAuthEvent(`Host ${host.name} capacity back to normal — ${pressure.toFixed(0)}%`,'ok'); authCrit.pressure=false; }
 
   authSetText('auth-guest-count',`${total} total · ${running} running`);
   document.getElementById('auth-guests').innerHTML=guests.map(g=>{
@@ -1087,6 +1300,13 @@ function renderAuthCompute(data){
       </div>
     </div>`;
   }).join('') || '<div class="auth-empty">No guests returned.</div>';
+
+  guests.forEach(g=>{
+    const running_=g.status==='running', prev=authPrevGuests[g.vmid];
+    if(prev!==undefined && prev!==running_) pushAuthEvent(`${String(g.type||'guest').toUpperCase()} ${g.name} ${running_?'started':'stopped'}`, running_?'ok':'warn');
+    authPrevGuests[g.vmid]=running_;
+  });
+  renderTopology();
 }
 function renderAuthCloud(data){
   const a=data.account_a,b=data.account_b;
@@ -1113,6 +1333,12 @@ function renderAuthCloud(data){
   ]);
   document.getElementById('auth-cloud-grid').innerHTML=cards.join('')||'<div class="auth-card"><div class="auth-empty">No AWS accounts returned.</div></div>';
   authSetText('auth-cloud-sync','updated '+fmtClock(new Date())+' · next poll 1h');
+
+  const mtdA=Number(a?.cost?.mtd_net_unblended_cost_usd)||0, mtdB=Number(b?.cost?.mtd_net_unblended_cost_usd)||0;
+  authSetText('auth-kpi-cost', fmtMoney(mtdA+mtdB));
+  authSetText('auth-kpi-cost-detail', fmtMoney(mtdA)+' + '+fmtMoney(mtdB));
+  pushAuthEvent(`Cloud cost sync — MTD ${fmtMoney(mtdA+mtdB)} across 2 accounts`,'info');
+  renderTopology();
 }
 
 /* ================= CLOUD (hourly) ================= */
@@ -1341,6 +1567,7 @@ function setLed(key, ok){
       posture.style.color=health==='OPERATIONAL'?'var(--green)':health==='DEGRADED'?'var(--amber)':'var(--red)';
     }
     if(detail)detail.textContent='Authenticated dashboard · '+new Date().toLocaleTimeString('en-US',{hour12:false});
+    renderTopology();
   }
   const vals = Object.values(ledState);
   const led = document.getElementById('overall-led');
