@@ -389,6 +389,18 @@ footer .sync-times{display:flex;gap:16px;}
   .pulse-strip{height:210px;}
   .pulse-kpis{flex-wrap:wrap;justify-content:flex-start;padding:0 18px 18px;}
 }
+
+/* ===== Cognito authentication ===== */
+.auth-area{display:flex;align-items:center;gap:8px}
+.auth-btn{display:flex;align-items:center;gap:7px;cursor:pointer;border:1px solid var(--violet-dim);background:rgba(157,140,255,.07);color:var(--violet);border-radius:6px;padding:7px 12px;font-family:var(--mono);font-size:10.5px;font-weight:600;transition:all .15s ease}
+.auth-btn:hover{background:rgba(157,140,255,.14);border-color:var(--violet)}
+.auth-btn.signout{border-color:var(--border);background:var(--panel);color:var(--text-dim)}
+.auth-user{display:none;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:6px 9px;border:1px solid var(--border);border-radius:6px;background:var(--panel);max-width:210px}
+.auth-user .auth-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
+.auth-user .auth-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auth-state{font-family:var(--mono);font-size:9px;letter-spacing:.5px;color:var(--text-faint)}
+.manual-limit{display:none;font-family:var(--mono);font-size:9px;color:var(--amber);margin-left:2px}
+
 </style>
 </head>
 <body>
@@ -421,7 +433,13 @@ footer .sync-times{display:flex;gap:16px;}
         <button class="refresh-btn" id="refresh-btn" onclick="syncAll(true)">
           <span class="refresh-icon">↻</span><span>Refresh telemetry</span>
         </button>
+        <span class="manual-limit" id="manual-limit"></span>
         <div class="status-pill"><span class="led" id="overall-led"></span><span id="overall-text">Awaiting telemetry</span></div>
+        <div class="auth-area">
+          <div class="auth-user" id="auth-user"><span class="auth-dot"></span><span class="auth-email" id="auth-email"></span></div>
+          <span class="auth-state" id="auth-state">PUBLIC</span>
+          <button class="auth-btn" id="auth-btn" onclick="handleAuthAction()">Sign in</button>
+        </div>
         <div class="clock" id="clock">--:--:--</div>
       </div>
     </header>
@@ -456,7 +474,7 @@ footer .sync-times{display:flex;gap:16px;}
         <div class="operator-prompt-icon">◉</div>
         <div>
           <div class="operator-prompt-title">TELEMETRY STANDBY</div>
-          <div class="operator-prompt-text">Network and compute poll every <b>3 minutes</b>. Cloud infrastructure polls every <b>1 hour</b>. Polling pauses when this tab is hidden and resumes with a fresh poll when you return.</div>
+          <div class="operator-prompt-text">Sign in to enable <b>automatic telemetry polling</b>. Anonymous viewers can manually refresh up to <b>3 times</b>. Signed-in sessions poll network and compute every <b>3 minutes</b> and cloud infrastructure every <b>1 hour</b>.</div>
         </div>
       </div>
 
@@ -524,10 +542,27 @@ footer .sync-times{display:flex;gap:16px;}
 // intentionally absolute URLs (cross-origin). The API responses must allow
 // https://platform.laxstack.com via CORS.
 const API = {
+  // Public endpoints for anonymous viewers.
   infra: 'https://laxstack.com/api/infrastructure',
   proxmox: 'https://laxstack.com/api/proxmox',
-  opnsense: 'https://laxstack.com/api/opnsense'
+  opnsense: 'https://laxstack.com/api/opnsense',
+
+  // JWT-protected endpoints for signed-in viewers.
+  authInfra: 'https://laxstack.com/api/auth/infrastructure',
+  authProxmox: 'https://laxstack.com/api/auth/proxmox',
+  authOpnsense: 'https://laxstack.com/api/auth/opnsense'
 };
+
+const COGNITO = {
+  domain: 'https://ap-southeast-17tz3ek9ea.auth.ap-southeast-1.amazoncognito.com',
+  clientId: '4f3c2i69riu0r2j2ea16cdev23',
+  redirectUri: 'https://platform.laxstack.com/',
+  scope: 'openid email phone'
+};
+
+const AUTH_STORAGE_KEY = 'laxstack_cognito_session';
+const PKCE_STORAGE_KEY = 'laxstack_cognito_pkce';
+const ANON_MANUAL_LIMIT = 3;
 
 const LOCAL_REFRESH_MS = 180000;   // compute + network — unchanged
 const INFRA_REFRESH_MS = 3600000;  // cloud infra — now hourly
@@ -536,15 +571,25 @@ const FETCH_TIMEOUT_MS = 10000;
 async function fetchJSON(url){
   const controller = new AbortController();
   const timeout = setTimeout(()=>controller.abort(), FETCH_TIMEOUT_MS);
+  const headers = {'Accept':'application/json'};
+  const token = getAccessToken();
+  const protectedRoute = url.includes('/api/auth/');
+  if(protectedRoute && token) headers.Authorization = 'Bearer ' + token;
+
   try{
-    const res = await fetch(url, { method:'GET', mode:'cors', credentials:'omit', cache:'no-store', headers:{'Accept':'application/json'}, signal:controller.signal });
+    const res = await fetch(url, {method:'GET',mode:'cors',credentials:'omit',cache:'no-store',headers,signal:controller.signal});
+    if(res.status===401 && protectedRoute){
+      clearAuthSession();
+      updateAuthUI();
+      throw new Error('session expired — please sign in again');
+    }
     if(!res.ok) throw new Error('HTTP '+res.status);
     return await res.json();
   }catch(e){
     if(e.name==='AbortError') throw new Error('request timed out');
     if(e instanceof TypeError) throw new Error('CORS or network error');
     throw e;
-  }finally{ clearTimeout(timeout); }
+  }finally{clearTimeout(timeout);}
 }
 let lastNetMbps = 2;
 
@@ -716,7 +761,7 @@ requestAnimationFrame(drawPulse);
 /* ================= CLOUD (hourly) ================= */
 async function loadCloud(){
   try{
-    const data = await fetchJSON(API.infra);
+    const data = await fetchJSON(isAuthenticated() ? API.authInfra : API.infra);
     const a = data.account_a, b = data.account_b;
 
     const accCard = (acc, tiles) => {
@@ -777,7 +822,7 @@ async function loadCloud(){
 /* ================= COMPUTE (3 min) ================= */
 async function loadCompute(){
   try{
-    const data = await fetchJSON(API.proxmox);
+    const data = await fetchJSON(isAuthenticated() ? API.authProxmox : API.proxmox);
     const p = data.proxmox, host = p.host, vms = p.virtual_machines, cts = p.containers;
     const running = (vms?.running||0) + (cts?.running||0);
     document.getElementById('kpi-vms').innerHTML = running + '<small>/ ' + ((vms?.total||0)+(cts?.total||0)) + ' guests</small>';
@@ -859,7 +904,7 @@ async function loadCompute(){
 /* ================= NETWORK (3 min) ================= */
 async function loadNetwork(){
   try{
-    const data = await fetchJSON(API.opnsense);
+    const data = await fetchJSON(isAuthenticated() ? API.authOpnsense : API.opnsense);
     const n = data.opnsense;
     const totalMbps = n.interfaces.reduce((s,i)=>s+(i.traffic.total_mbps||0),0) || (n.busiest_interface?.total_mbps||0);
     lastNetMbps = Math.max(totalMbps, n.busiest_interface?.total_mbps||0, 0.5);
@@ -940,114 +985,179 @@ function setLed(key, ok){
   }
 }
 
-/* ---------- polling: split cadence + pause while tab is hidden ---------- */
-let localTimer = null, infraTimer = null, lastCloudSync = null;
-let pollingInProgress = false;
-
-function setBusy(busy){
-  const btn = document.getElementById('refresh-btn');
-  const state = document.getElementById('refresh-state-text');
-  const stateWrap = document.getElementById('refresh-state-wrap');
-
-  if(btn){
-    btn.disabled = busy;
-    btn.classList.toggle('spinning', busy);
-  }
-
-  if(state){
-    state.textContent = busy ? 'POLLING' : (document.hidden ? 'PAUSED' : 'READY');
-  }
-
-  if(stateWrap) stateWrap.classList.toggle('busy', busy);
+/* ================= COGNITO / PKCE AUTH ================= */
+function base64UrlEncode(bytes){
+  let s='';
+  bytes.forEach(b=>s+=String.fromCharCode(b));
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
-
-function stopTelemetryTimers(){
-  if(localTimer){
-    clearInterval(localTimer);
-    localTimer = null;
-  }
-
-  if(infraTimer){
-    clearInterval(infraTimer);
-    infraTimer = null;
-  }
+function randomString(length=64){
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const bytes=new Uint8Array(length); crypto.getRandomValues(bytes);
+  return Array.from(bytes,b=>chars[b%chars.length]).join('');
 }
-
-async function refreshLocal(){
-  await Promise.all([loadCompute(), loadNetwork()]);
-  document.getElementById('sync-local').textContent =
-    'local: ' + fmtClock(new Date()) + ' (3m)';
+async function sha256Base64Url(value){
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
+  return base64UrlEncode(new Uint8Array(digest));
 }
-
-async function refreshInfra(){
-  await loadCloud();
+function saveAuthSession(tokens){sessionStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(tokens))}
+function getAuthSession(){
+  try{return JSON.parse(sessionStorage.getItem(AUTH_STORAGE_KEY)||'null')}catch(_){return null}
 }
-
-function scheduleLocal(){
-  if(localTimer) clearInterval(localTimer);
-  localTimer = null;
-
-  if(document.hidden) return;
-
-  localTimer = setInterval(()=>{
-    if(!document.hidden && !pollingInProgress){
-      refreshLocal().catch(e => console.error('Local refresh failed:', e));
-    }
-  }, LOCAL_REFRESH_MS);
+function clearAuthSession(){sessionStorage.removeItem(AUTH_STORAGE_KEY)}
+function getAccessToken(){
+  const s=getAuthSession();
+  if(!s?.access_token)return null;
+  if(s.expires_at && Date.now()>=s.expires_at){clearAuthSession();return null}
+  return s.access_token;
 }
-
-function scheduleInfra(){
-  if(infraTimer) clearInterval(infraTimer);
-  infraTimer = null;
-
-  if(document.hidden) return;
-
-  infraTimer = setInterval(()=>{
-    if(!document.hidden && !pollingInProgress){
-      refreshInfra().catch(e => console.error('Cloud refresh failed:', e));
-    }
-  }, INFRA_REFRESH_MS);
-}
-
-/* Manual refresh always works when the page is visible. */
-async function syncAll(manual){
-  const prompt = document.getElementById('operator-prompt');
-  if(prompt) prompt.style.display = 'none';
-
-  if(pollingInProgress) return;
-
-  pollingInProgress = true;
-  setBusy(true);
-
+function isAuthenticated(){return !!getAccessToken()}
+function decodeJwtPayload(token){
   try{
-    await Promise.all([refreshLocal(), refreshInfra()]);
-  }finally{
-    pollingInProgress = false;
-    setBusy(false);
+    const p=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const b=atob(p+'='.repeat((4-p.length%4)%4));
+    return JSON.parse(decodeURIComponent(Array.from(b).map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+  }catch(_){return {}}
+}
+function getSignedInEmail(){
+  const s=getAuthSession(), p=s?.id_token?decodeJwtPayload(s.id_token):{};
+  return s?.email||p.email||p['cognito:username']||'Authenticated';
+}
+async function beginSignIn(){
+  const verifier=randomString(96), challenge=await sha256Base64Url(verifier), state=randomString(48);
+  sessionStorage.setItem(PKCE_STORAGE_KEY,JSON.stringify({verifier,state}));
+  const params=new URLSearchParams({
+    response_type:'code',client_id:COGNITO.clientId,redirect_uri:COGNITO.redirectUri,
+    scope:COGNITO.scope,state,code_challenge_method:'S256',code_challenge:challenge
+  });
+  location.assign(COGNITO.domain+'/oauth2/authorize?'+params.toString());
+}
+async function handleAuthCallback(){
+  const q=new URLSearchParams(location.search), code=q.get('code'), returnedState=q.get('state');
+  if(q.get('error')) throw new Error('Cognito sign-in failed: '+(q.get('error_description')||q.get('error')));
+  if(!code)return false;
 
-    // Only keep API timers alive while the dashboard is visible.
-    scheduleLocal();
-    scheduleInfra();
+  const saved=JSON.parse(sessionStorage.getItem(PKCE_STORAGE_KEY)||'null');
+  if(!saved?.verifier || saved.state!==returnedState) throw new Error('Invalid Cognito sign-in state');
+
+  const body=new URLSearchParams({
+    grant_type:'authorization_code',client_id:COGNITO.clientId,code,
+    redirect_uri:COGNITO.redirectUri,code_verifier:saved.verifier
+  });
+  const res=await fetch(COGNITO.domain+'/oauth2/token',{
+    method:'POST',mode:'cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body
+  });
+  if(!res.ok){
+    let d='';try{const j=await res.json();d=j.error_description||j.error||''}catch(_){}
+    throw new Error('Token exchange failed'+(d?': '+d:''));
   }
+  const tokens=await res.json();
+  const p=tokens.id_token?decodeJwtPayload(tokens.id_token):{};
+  tokens.expires_at=Date.now()+((tokens.expires_in||3600)*1000)-30000;
+  tokens.email=p.email||'';
+  saveAuthSession(tokens);
+  sessionStorage.removeItem(PKCE_STORAGE_KEY);
+  history.replaceState({},document.title,COGNITO.redirectUri);
+  return true;
+}
+function signOut(){
+  clearAuthSession();sessionStorage.removeItem(PKCE_STORAGE_KEY);updateAuthUI();
+  const q=new URLSearchParams({client_id:COGNITO.clientId,logout_uri:COGNITO.redirectUri});
+  location.assign(COGNITO.domain+'/logout?'+q.toString());
+}
+function handleAuthAction(){
+  if(isAuthenticated())signOut();
+  else beginSignIn().catch(e=>{console.error(e);alert(e.message||'Unable to start sign-in.')});
+}
+function updateAuthUI(){
+  const signed=isAuthenticated(),btn=document.getElementById('auth-btn'),state=document.getElementById('auth-state');
+  const user=document.getElementById('auth-user'),email=document.getElementById('auth-email');
+  if(btn){btn.textContent=signed?'Sign out':'Sign in';btn.classList.toggle('signout',signed)}
+  if(state)state.textContent=signed?'AUTHENTICATED':'PUBLIC';
+  if(user)user.style.display=signed?'flex':'none';
+  if(email)email.textContent=signed?getSignedInEmail():'';
+  updateManualRefreshUI();
+}
+function updateManualRefreshUI(){
+  const limit=document.getElementById('manual-limit'),btn=document.getElementById('refresh-btn');
+  if(!limit||!btn)return;
+  if(isAuthenticated()){limit.style.display='none';btn.disabled=false;return}
+  const used=Number(sessionStorage.getItem('laxstack_anon_refreshes')||'0');
+  const left=Math.max(ANON_MANUAL_LIMIT-used,0);
+  limit.style.display='inline';
+  limit.textContent=left+' manual refresh'+(left===1?'':'es')+' left';
+  btn.disabled=left<=0;
+}
+function consumeAnonymousRefresh(){
+  if(isAuthenticated())return true;
+  const used=Number(sessionStorage.getItem('laxstack_anon_refreshes')||'0');
+  if(used>=ANON_MANUAL_LIMIT)return false;
+  sessionStorage.setItem('laxstack_anon_refreshes',String(used+1));
+  updateManualRefreshUI();return true;
 }
 
-/*
- * Page Visibility API:
- * - Hidden tab: stop all recurring API timers.
- * - Visible again: immediately fetch fresh telemetry, then restart timers.
- */
-document.addEventListener('visibilitychange', ()=>{
-  if(document.hidden){
-    stopTelemetryTimers();
-    setBusy(false);
-    return;
+/* ---------- polling: authenticated users only ---------- */
+let localTimer=null,infraTimer=null,lastCloudSync=null;
+let pollingInProgress=false;
+function setBusy(busy){
+  const btn=document.getElementById('refresh-btn'),state=document.getElementById('refresh-state-text'),wrap=document.getElementById('refresh-state-wrap');
+  if(btn)btn.classList.toggle('spinning',busy);
+  if(state)state.textContent=busy?'POLLING':(document.hidden?'PAUSED':'READY');
+  if(wrap)wrap.classList.toggle('busy',busy);
+}
+function stopTelemetryTimers(){
+  if(localTimer){clearInterval(localTimer);localTimer=null}
+  if(infraTimer){clearInterval(infraTimer);infraTimer=null}
+}
+async function refreshLocal(){
+  await Promise.all([loadCompute(),loadNetwork()]);
+  document.getElementById('sync-local').textContent='local: '+fmtClock(new Date())+(isAuthenticated()?' (3m)':' (manual)');
+}
+async function refreshInfra(){await loadCloud()}
+function scheduleLocal(){
+  if(localTimer)clearInterval(localTimer);localTimer=null;
+  if(document.hidden||!isAuthenticated())return;
+  localTimer=setInterval(()=>{if(!document.hidden&&!pollingInProgress&&isAuthenticated())refreshLocal().catch(console.error)},LOCAL_REFRESH_MS);
+}
+function scheduleInfra(){
+  if(infraTimer)clearInterval(infraTimer);infraTimer=null;
+  if(document.hidden||!isAuthenticated())return;
+  infraTimer=setInterval(()=>{if(!document.hidden&&!pollingInProgress&&isAuthenticated())refreshInfra().catch(console.error)},INFRA_REFRESH_MS);
+}
+async function syncAll(manual){
+  if(manual&&!consumeAnonymousRefresh()){updateManualRefreshUI();return}
+  const prompt=document.getElementById('operator-prompt');if(prompt)prompt.style.display='none';
+  if(pollingInProgress)return;
+  if(!manual&&!isAuthenticated())return;
+  pollingInProgress=true;setBusy(true);
+  try{await Promise.all([refreshLocal(),refreshInfra()])}
+  finally{
+    pollingInProgress=false;setBusy(false);scheduleLocal();scheduleInfra();updateManualRefreshUI();
   }
-
-  syncAll(true);
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){stopTelemetryTimers();setBusy(false);return}
+  if(isAuthenticated())syncAll(false);else updateManualRefreshUI();
 });
 
-/* Initial load remains unchanged: fetch immediately, then schedule polling. */
-syncAll(false);
+/* ---------- startup ---------- */
+(async function initApp(){
+  try{
+    const completed=await handleAuthCallback();
+    updateAuthUI();
+    if(completed||isAuthenticated())await syncAll(false);
+    else updateManualRefreshUI();
+  }catch(e){
+    console.error(e);clearAuthSession();updateAuthUI();
+    const prompt=document.getElementById('operator-prompt');
+    if(prompt){
+      prompt.style.display='flex';
+      prompt.querySelector('.operator-prompt-title').textContent='AUTHENTICATION ERROR';
+      prompt.querySelector('.operator-prompt-text').textContent=e.message||'Unable to complete Cognito sign-in.';
+    }
+    updateManualRefreshUI();
+  }
+})();
 </script>
 </body>
 </html>
