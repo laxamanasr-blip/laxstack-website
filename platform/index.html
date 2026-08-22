@@ -717,7 +717,8 @@ body.authenticated .auth-dashboard{display:block;}
           <div class="noc-meta-row">
             <span class="auth-meta green">● AUTHENTICATED</span>
             <span class="auth-meta"><strong>SESSION</strong> Cognito / PKCE</span>
-            <span class="auth-meta"><strong>NEXT SYNC</strong> net/compute <span id="next-local-countdown">—</span> · cloud <span id="next-infra-countdown">—</span></span>
+            <span class="auth-meta"><strong>NEXT SYNC</strong> net/compute <span id="next-local-countdown">—</span></span>
+            <span class="auth-meta"><strong>CLOUD</strong> manual refresh only</span>
           </div>
         </div>
 
@@ -938,7 +939,8 @@ const PKCE_FALLBACK_KEY = 'laxstack_cognito_pkce_fallback';
 const ANON_MANUAL_LIMIT = 3;
 
 const LOCAL_REFRESH_MS = 180000;   // compute + network — unchanged
-const INFRA_REFRESH_MS = 3600000;  // cloud infra — now hourly
+// Cloud infra has no interval — it's manual/on-demand only (sign-in load
+// or an explicit "Refresh telemetry" click). See syncAll's includeCloud.
 const FETCH_TIMEOUT_MS = 10000;
 
 async function fetchJSON(url){
@@ -1392,7 +1394,7 @@ function renderAuthCloud(data){
     [b.acm_certificates_us_east_1??0,'ACM certificates'],['us-e1','ACM region']
   ]);
   document.getElementById('auth-cloud-grid').innerHTML=cards.join('')||'<div class="auth-card"><div class="auth-empty">No AWS accounts returned.</div></div>';
-  authSetText('auth-cloud-sync','updated '+fmtClock(new Date())+' · next poll 1h');
+  authSetText('auth-cloud-sync','updated '+fmtClock(new Date())+' · manual refresh only');
 
   const accCount=(a?1:0)+(b?1:0);
   pushAuthEvent(`Cloud telemetry synced — ${accCount} account${accCount===1?'':'s'} checked`,'info');
@@ -1755,8 +1757,8 @@ function consumeAnonymousRefresh(){
 }
 
 /* ---------- polling: authenticated users only ---------- */
-let localTimer=null,infraTimer=null,lastCloudSync=null;
-let nextLocalAt=null,nextInfraAt=null;
+let localTimer=null,lastCloudSync=null;
+let nextLocalAt=null;
 let pollingInProgress=false;
 function setBusy(busy){
   const btn=document.getElementById('refresh-btn'),state=document.getElementById('refresh-state-text'),wrap=document.getElementById('refresh-state-wrap');
@@ -1766,7 +1768,6 @@ function setBusy(busy){
 }
 function stopTelemetryTimers(){
   if(localTimer){clearInterval(localTimer);localTimer=null}
-  if(infraTimer){clearInterval(infraTimer);infraTimer=null}
 }
 async function refreshLocal(){
   await Promise.all([loadCompute(),loadNetwork()]);
@@ -1779,12 +1780,9 @@ function scheduleLocal(){
   nextLocalAt=Date.now()+LOCAL_REFRESH_MS;
   localTimer=setInterval(()=>{if(!document.hidden&&!pollingInProgress&&isAuthenticated())refreshLocal().catch(console.error)},LOCAL_REFRESH_MS);
 }
-function scheduleInfra(){
-  if(infraTimer)clearInterval(infraTimer);infraTimer=null;
-  if(document.hidden||!isAuthenticated()){nextInfraAt=null;return}
-  nextInfraAt=Date.now()+INFRA_REFRESH_MS;
-  infraTimer=setInterval(()=>{if(!document.hidden&&!pollingInProgress&&isAuthenticated())refreshInfra().catch(console.error)},INFRA_REFRESH_MS);
-}
+// Cloud infrastructure has no auto-poll timer and no tab-visibility trigger —
+// it only ever refreshes on sign-in or an explicit manual "Refresh telemetry"
+// click (see includeCloud in syncAll below).
 function fmtCountdown(target){
   if(!isAuthenticated())return '—';
   if(document.hidden)return 'paused';
@@ -1796,17 +1794,20 @@ function fmtCountdown(target){
 }
 function tickCountdowns(){
   authSetText('next-local-countdown', fmtCountdown(nextLocalAt));
-  authSetText('next-infra-countdown', fmtCountdown(nextInfraAt));
 }
-async function syncAll(manual){
+async function syncAll(manual, includeCloud=true){
   if(manual&&!consumeAnonymousRefresh()){updateManualRefreshUI();return}
   const prompt=document.getElementById('operator-prompt');if(prompt)prompt.style.display='none';
   if(pollingInProgress)return;
   if(!manual&&!isAuthenticated())return;
   pollingInProgress=true;setBusy(true);
-  try{await Promise.all([refreshLocal(),refreshInfra()])}
+  try{
+    const tasks=[refreshLocal()];
+    if(includeCloud) tasks.push(refreshInfra());
+    await Promise.all(tasks);
+  }
   finally{
-    pollingInProgress=false;setBusy(false);scheduleLocal();scheduleInfra();updateManualRefreshUI();
+    pollingInProgress=false;setBusy(false);scheduleLocal();updateManualRefreshUI();
   }
 }
 
@@ -1838,7 +1839,10 @@ async function initialAnonymousLoad(){
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){stopTelemetryTimers();setBusy(false);return}
-  if(isAuthenticated())syncAll(false);else updateManualRefreshUI();
+  // Regaining tab focus resumes local (network+compute) polling only.
+  // Cloud infra is deliberately excluded here — it never auto-fetches on
+  // tab-return, only on sign-in or an explicit manual refresh click.
+  if(isAuthenticated())syncAll(false, false);else updateManualRefreshUI();
 });
 
 /* ---------- startup ---------- */
