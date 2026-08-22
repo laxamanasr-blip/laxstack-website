@@ -303,7 +303,34 @@ main{max-width:1480px;margin:0 auto;padding:0 24px 70px;}
 .vital-line .vl-val{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:60px;text-align:right;flex-shrink:0;}
 
 /* ===== public status-only cards ===== */
-.public-status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+ .public-status-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+@media(max-width:1100px){
+  .public-status-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:760px){
+  .public-status-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:480px){
+  .public-status-grid{grid-template-columns:1fr;}
+}
+.public-guest-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+@media(max-width:1100px){
+  .public-guest-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:760px){
+  .public-guest-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:480px){
+  .public-guest-grid{grid-template-columns:1fr;}
+}
 .public-status-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .public-status-card .ps-left{display:flex;align-items:center;gap:10px;min-width:0;}
 .public-status-card .ps-name{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -1431,7 +1458,7 @@ async function loadCompute(){
 
     document.getElementById('guest-count').textContent = `${vms.total+cts.total} total · ${vms.running+cts.running} running`;
     const guests = [...p.guests].sort((x,y)=> (y.status==='running') - (x.status==='running'));
-    document.getElementById('guests-grid').innerHTML = `<div class="public-status-grid">${guests.map(g=>`
+    document.getElementById('guests-grid').innerHTML = `<div class="public-guest-grid">${guests.map(g=>`
       <div class="public-status-card">
         <div class="ps-left">
           <span class="status-dot" style="background:${statusColor(g.status)};box-shadow:0 0 6px ${statusColor(g.status)};"></span>
