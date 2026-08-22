@@ -3,46 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LAXSTACK · Platform</title>
+<title>LaxStack · Platform Operations</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0d14;
-  --bg-alt:#0d111a;
-  --panel:#10141f;
-  --panel-hi:#141a28;
-  --border:#1c2333;
-  --border-bright:#2a3348;
-  --text:#e9ecf3;
-  --text-dim:#8891a5;
-  --text-faint:#4d5568;
-  --cyan:#00d9ff;
-  --cyan-dim:#0a5f75;
-  --green:#3adc8c;
-  --green-dim:#12452f;
+  --bg:#111217;
+  --bg-alt:#161719;
+  --panel:#181b1f;
+  --panel-hi:#1f2126;
+  --border:#26282e;
+  --border-bright:#34363d;
+  --text:#d4d7de;
+  --text-dim:#9198a3;
+  --text-faint:#5a616e;
+  --cyan:#33d2f0;
+  --cyan-dim:#123842;
+  --green:#4fd68c;
+  --green-dim:#123d2b;
   --amber:#ffb238;
-  --amber-dim:#5c3f10;
-  --red:#ff4d6a;
-  --red-dim:#5c1826;
-  --violet:#8c7eff;
-  --violet-dim:#332f66;
-  --orange:#ff8a3d;
-  --orange-dim:#5c3616;
+  --amber-dim:#4a350f;
+  --red:#f2495c;
+  --red-dim:#4a1420;
+  --violet:#9d8cff;
+  --violet-dim:#2c2757;
+  --orange:#ff9830;
+  --orange-dim:#4a2e0f;
   --mono:'JetBrains Mono', monospace;
   --display:'Space Grotesk', sans-serif;
   --sans:'Inter', sans-serif;
+  --rail-w:56px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{
-  background:
-    radial-gradient(ellipse 1200px 600px at 15% -10%, rgba(140,126,255,0.08), transparent),
-    radial-gradient(ellipse 1000px 500px at 85% 0%, rgba(0,217,255,0.06), transparent),
-    var(--bg);
+  background:var(--bg);
   color:var(--text);
   font-family:var(--sans);
+  font-size:13px;
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
 }
@@ -50,1064 +49,474 @@ body{
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:5px;}
-a{color:inherit;}
+a{color:inherit;text-decoration:none;}
+svg{display:block;}
 
-/* ===== scanline / grid texture ===== */
-.texture{
-  position:fixed;inset:0;pointer-events:none;z-index:0;
+/* ===== canvas grid texture (Grafana panel-canvas feel) ===== */
+.grid-canvas{
+  position:fixed;inset:0;left:var(--rail-w);pointer-events:none;z-index:0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-  background-size:48px 48px;
-  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%, black, transparent 85%);
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size:32px 32px;
+  mask-image:radial-gradient(ellipse 100% 60% at 50% 0%, black, transparent 90%);
 }
 
-/* ===== topbar ===== */
-.topbar{
-  position:sticky;top:0;z-index:50;
-  display:flex;align-items:center;gap:20px;
-  padding:14px 28px;
-  background:rgba(10,13,20,0.85);
-  backdrop-filter:blur(14px) saturate(140%);
-  border-bottom:1px solid var(--border);
+/* ===== shell / icon rail ===== */
+.shell{display:flex;min-height:100vh;}
+.rail{
+  width:var(--rail-w);flex-shrink:0;
+  background:#0c0d10;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:14px 0;gap:6px;position:sticky;top:0;height:100vh;z-index:60;
 }
-.brand{display:flex;align-items:center;gap:10px;}
-.brand-mark{
-  width:30px;height:30px;border-radius:7px;
+.rail-logo{
+  width:32px;height:32px;border-radius:8px;margin-bottom:10px;
   background:linear-gradient(135deg, var(--cyan), var(--violet));
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-weight:700;font-size:14px;color:#04070c;
-  box-shadow:0 0 20px rgba(0,217,255,0.35);
+  font-family:var(--display);font-weight:700;font-size:15px;color:#04070c;
+  box-shadow:0 0 18px rgba(51,210,240,0.3);
 }
-.brand-text{display:flex;flex-direction:column;line-height:1.05;}
-.brand-text b{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:0.5px;}
-.brand-text span{font-size:10px;color:var(--text-faint);letter-spacing:2px;text-transform:uppercase;}
-
-.section-nav{display:flex;gap:4px;margin-left:8px;}
-.section-nav a{
-  font-family:var(--mono);font-size:11.5px;letter-spacing:0.5px;
-  color:var(--text-dim);text-decoration:none;
-  padding:7px 13px;border-radius:7px;
+.rail-btn{
+  width:38px;height:38px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-faint);cursor:pointer;transition:all .15s ease;
+  background:transparent;
+}
+.rail-btn svg{width:17px;height:17px;stroke:currentColor;}
+.rail-btn:hover{color:var(--text);background:var(--panel-hi);}
+.rail-btn.active{color:var(--cyan);background:rgba(51,210,240,0.08);}
+.rail-spacer{flex:1;}
+.rail-divider{width:22px;height:1px;background:var(--border);margin:6px 0;}
+.rail-domain{
+  width:38px;height:38px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:11px;
+  border:1px solid var(--border);color:var(--text-faint);
   transition:all .15s ease;
-  display:flex;align-items:center;gap:7px;
 }
-.section-nav a:hover{color:var(--text);background:var(--panel-hi);}
-.section-nav a .dot{width:6px;height:6px;border-radius:50%;}
+.rail-domain:hover{border-color:var(--border-bright);color:var(--text);}
+.rail-domain.rd-network{color:var(--cyan);}
+.rail-domain.rd-compute{color:var(--orange);}
+.rail-domain.rd-cloud{color:var(--violet);}
 
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
-.status-pill{
-  display:flex;align-items:center;gap:8px;
-  font-family:var(--mono);font-size:11px;color:var(--text-dim);
-  padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:var(--panel);
-}
-.status-pill .led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
-.led.pulse{animation:ledpulse 2s ease-in-out infinite;}
-@keyframes ledpulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.clock{font-family:var(--mono);font-size:12px;color:var(--text-dim);min-width:78px;text-align:right;}
+.main{flex:1;min-width:0;position:relative;z-index:1;}
 
-/* ===== pulse strip (signature element) ===== */
-.pulse-strip{
-  position:relative;height:118px;
+/* ===== command bar ===== */
+.cmdbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:16px;
+  padding:0 22px;height:52px;
+  background:rgba(17,18,23,0.92);
+  backdrop-filter:blur(10px);
   border-bottom:1px solid var(--border);
-  background:linear-gradient(180deg, rgba(0,217,255,0.03), transparent);
-  overflow:hidden;
+}
+.crumb{display:flex;align-items:center;gap:6px;font-family:var(--display);font-size:13.5px;font-weight:600;white-space:nowrap;}
+.crumb-org{color:var(--text);}
+.crumb-sep{color:var(--text-faint);font-weight:400;}
+.crumb-dash{color:var(--text-dim);font-weight:500;}
+
+.var-pills{display:flex;gap:6px;}
+.var-pill{
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:10.5px;
+  padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--panel);
+}
+.var-pill .k{color:var(--text-faint);}
+.var-pill .v{color:var(--text-dim);}
+
+.cmdbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.time-pill{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:11px;color:var(--text-dim);
+  padding:6px 11px;border:1px solid var(--border);border-radius:6px;background:var(--panel);
+}
+.time-pill .rdot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:ledpulse 1.6s ease-in-out infinite;}
+.refresh-state{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:9.5px;color:var(--text-faint);letter-spacing:0.5px;
+}
+.refresh-state .led{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.refresh-state.busy .led{background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:ledpulse .7s ease-in-out infinite;}
+@keyframes ledpulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+.refresh-btn{
+  display:flex;align-items:center;gap:7px;cursor:pointer;
+  border:1px solid var(--cyan-dim);background:rgba(51,210,240,0.06);color:var(--cyan);
+  border-radius:6px;padding:7px 12px;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:0.4px;
+  transition:all .15s ease;
+}
+.refresh-btn:hover{background:rgba(51,210,240,0.13);border-color:var(--cyan);}
+.refresh-btn:active{transform:translateY(1px);}
+.refresh-btn:disabled{opacity:.5;cursor:wait;}
+.refresh-btn .refresh-icon{font-size:14px;line-height:1;display:inline-block;}
+.refresh-btn.spinning .refresh-icon{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.status-pill{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:11px;color:var(--text-dim);
+  padding:6px 11px;border:1px solid var(--border);border-radius:6px;background:var(--panel);
+}
+.status-pill .led{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.clock{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);min-width:66px;text-align:right;}
+
+/* ===== hero / pulse strip ===== */
+.pulse-strip{
+  position:relative;height:150px;overflow:hidden;
+  border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 700px 200px at 20% 40%, rgba(51,210,240,0.06), transparent 70%),#0d0e12;
 }
 .pulse-strip canvas{position:absolute;inset:0;width:100%;height:100%;}
-.pulse-kpis{
-  position:relative;z-index:2;height:100%;
-  display:flex;align-items:center;gap:44px;
-  padding:0 32px;
-}
-.pulse-kpi{display:flex;flex-direction:column;gap:2px;}
-.pulse-kpi .val{
-  font-family:var(--mono);font-weight:700;font-size:26px;letter-spacing:-0.5px;
-  display:flex;align-items:baseline;gap:5px;
-}
-.pulse-kpi .val small{font-size:12px;font-weight:500;color:var(--text-dim);}
-.pulse-kpi .lbl{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);}
+.hero-banner{position:absolute;left:24px;top:22px;z-index:3;}
+.hero-eyebrow{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:ledpulse 1.7s ease-in-out infinite;}
+.hero-title{font-family:var(--display);font-size:25px;font-weight:700;letter-spacing:0.3px;line-height:1;}
+.hero-sub{margin-top:8px;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);letter-spacing:1.2px;}
+.hero-sub span{color:var(--border-bright);margin:0 5px;}
+
+.pulse-kpis{position:relative;z-index:2;height:100%;display:flex;align-items:flex-end;justify-content:flex-end;gap:26px;padding:0 26px 22px;}
+.pulse-kpi{display:flex;flex-direction:column;gap:2px;min-width:110px;}
+.pulse-kpi .val{font-family:var(--mono);font-weight:700;font-size:23px;letter-spacing:-0.4px;display:flex;align-items:baseline;gap:5px;}
+.pulse-kpi .val small{font-size:10.5px;font-weight:500;color:var(--text-dim);}
+.pulse-kpi .lbl{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-faint);}
 .pulse-kpi.cyan .val{color:var(--cyan);}
 .pulse-kpi.violet .val{color:var(--violet);}
 .pulse-kpi.orange .val{color:var(--orange);}
-.pulse-divider{width:1px;height:34px;background:var(--border-bright);}
+.pulse-divider{width:1px;height:30px;background:var(--border-bright);align-self:flex-end;margin-bottom:3px;}
 
-/* ===== main layout ===== */
-main{position:relative;z-index:1;max-width:1520px;margin:0 auto;padding:0 28px 80px;}
-.domain{padding-top:46px;}
+/* ===== operator prompt ===== */
+main{max-width:1480px;margin:0 auto;padding:0 24px 70px;}
+.operator-prompt{
+  display:flex;align-items:center;gap:13px;margin-top:20px;padding:11px 15px;
+  border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--text-dim);
+}
+.operator-prompt-icon{
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--cyan-dim);color:var(--cyan);font-family:var(--mono);font-size:11px;flex-shrink:0;
+}
+.operator-prompt-title{font-family:var(--mono);font-size:9.5px;letter-spacing:1.4px;color:var(--cyan);}
+.operator-prompt-text{margin-top:2px;font-size:11.5px;}
+.operator-prompt-text b{color:var(--text);}
+
+/* ===== domain sections ===== */
+.domain{padding-top:36px;}
 .domain-head{
-  display:flex;align-items:baseline;gap:14px;margin-bottom:18px;
-  padding-bottom:12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:baseline;gap:12px;margin-bottom:16px;
+  padding-bottom:11px;border-bottom:1px solid var(--border);
 }
-.domain-head .idx{font-family:var(--mono);font-size:12px;color:var(--text-faint);}
-.domain-head h2{
-  font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:0.3px;
-}
+.domain-head .idx{font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+.domain-head h2{font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:0.2px;}
 .domain-head .tag{
-  font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
-  padding:3px 9px;border-radius:5px;border:1px solid;
+  font-family:var(--mono);font-size:10px;letter-spacing:0.8px;text-transform:uppercase;
+  padding:3px 8px;border-radius:5px;border:1px solid;
 }
-.domain-cloud .tag{color:var(--violet);border-color:var(--violet-dim);background:rgba(140,126,255,0.06);}
-.domain-compute .tag{color:var(--orange);border-color:var(--orange-dim);background:rgba(255,138,61,0.06);}
-.domain-network .tag{color:var(--cyan);border-color:var(--cyan-dim);background:rgba(0,217,255,0.06);}
-.domain-head .sub{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+.domain-network .tag{color:var(--cyan);border-color:var(--cyan-dim);background:rgba(51,210,240,0.06);}
+.domain-compute .tag{color:var(--orange);border-color:var(--orange-dim);background:rgba(255,152,48,0.06);}
+.domain-cloud .tag{color:var(--violet);border-color:var(--violet-dim);background:rgba(157,140,255,0.06);}
+.domain-head .sub{margin-left:auto;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+.refresh-badge{
+  display:flex;align-items:center;gap:5px;padding:2px 8px;border-radius:10px;
+  border:1px solid var(--border);background:var(--bg-alt);color:var(--text-faint);
+}
+.refresh-badge svg{width:10px;height:10px;stroke:currentColor;}
 
-/* ===== panels & grids ===== */
+/* ===== panels ===== */
 .panel{
-  background:var(--panel);
+  background:linear-gradient(160deg, rgba(255,255,255,0.015), transparent 40%), var(--panel);
   border:1px solid var(--border);
-  border-radius:12px;
-  padding:18px 20px;
+  border-radius:9px;
+  padding:15px 17px;
   position:relative;
   transition:border-color .2s ease;
 }
 .panel:hover{border-color:var(--border-bright);}
+.panel:before{
+  content:"";position:absolute;top:0;left:14px;right:14px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
+}
 .panel-flash{animation:flash 1s ease;}
 @keyframes flash{0%{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan-dim);}100%{border-color:var(--border);box-shadow:none;}}
 
-.panel-title{
-  display:flex;align-items:center;gap:9px;margin-bottom:14px;
-}
-.panel-title h3{font-family:var(--display);font-size:13.5px;font-weight:600;letter-spacing:0.3px;}
+.panel-title{display:flex;align-items:center;gap:8px;margin-bottom:13px;}
+.panel-title h3{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.2px;}
 .panel-title .id-badge{
-  font-family:var(--mono);font-size:10px;color:var(--text-faint);
-  padding:2px 7px;border:1px solid var(--border-bright);border-radius:4px;
+  font-family:var(--mono);font-size:9.5px;color:var(--text-faint);
+  padding:2px 6px;border:1px solid var(--border-bright);border-radius:4px;
 }
-.panel-title .status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.panel-title .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.kebab{margin-left:auto;display:flex;gap:2px;padding:4px;border-radius:4px;cursor:default;opacity:0.45;}
+.kebab span{width:3px;height:3px;border-radius:50%;background:var(--text-dim);}
 
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(226px,1fr));gap:12px;}
 
 /* ===== stat tiles ===== */
-.stat-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+.stat-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px;}
 .stat-tile{
-  background:var(--bg-alt);border:1px solid var(--border);border-radius:9px;
-  padding:12px 13px;display:flex;flex-direction:column;gap:6px;
+  background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;
+  padding:11px 12px;display:flex;flex-direction:column;gap:5px;
 }
 .stat-tile .icon-row{display:flex;align-items:center;justify-content:space-between;}
-.stat-tile svg{width:15px;height:15px;stroke:var(--text-faint);}
-.stat-tile .num{font-family:var(--mono);font-size:21px;font-weight:700;}
-.stat-tile .lbl{font-size:10.5px;color:var(--text-dim);letter-spacing:0.3px;}
+.stat-tile svg{width:14px;height:14px;stroke:var(--text-faint);}
+.stat-tile .num{font-family:var(--mono);font-size:19px;font-weight:700;}
+.stat-tile .lbl{font-size:10px;color:var(--text-dim);letter-spacing:0.2px;}
 
 /* ===== cost block ===== */
-.cost-block{background:var(--bg-alt);border:1px solid var(--border);border-radius:9px;padding:14px 15px;}
-.cost-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.cost-block{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:13px 14px;}
+.cost-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
 .cost-row:last-of-type{margin-bottom:0;}
-.cost-row .lbl{font-size:11px;color:var(--text-dim);}
-.cost-row .amt{font-family:var(--mono);font-weight:600;font-size:14px;}
-.cost-bars{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+.cost-row .lbl{font-size:10.5px;color:var(--text-dim);}
+.cost-row .amt{font-family:var(--mono);font-weight:600;font-size:13.5px;}
+.cost-bars{margin-top:9px;display:flex;flex-direction:column;gap:5px;}
 .cost-bar-track{height:6px;border-radius:3px;background:var(--border);overflow:hidden;}
-.cost-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--violet),#b3a9ff);}
+.cost-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--violet),#c2b6ff);}
 .cost-bar-fill.prev{background:var(--text-faint);}
-.cost-delta{font-family:var(--mono);font-size:10.5px;margin-top:8px;display:flex;align-items:center;gap:5px;}
+.cost-delta{font-family:var(--mono);font-size:10px;margin-top:7px;display:flex;align-items:center;gap:5px;}
 .cost-delta.down{color:var(--green);}
 .cost-delta.up{color:var(--amber);}
 
-/* ===== gauges ===== */
-.gauge-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.gauge-item{display:flex;flex-direction:column;align-items:center;gap:6px;}
-.gauge-wrap{position:relative;width:96px;height:96px;}
-.gauge-wrap svg{transform-origin:center;}
-.gauge-track{stroke:var(--border);}
-.gauge-value{transition:stroke-dashoffset 1s ease;}
-.gauge-center{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-}
+/* ===== threshold gauges (Grafana-style arc) ===== */
+.gauge-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.gauge-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.gauge-wrap{position:relative;}
+.gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .gauge-center .v{font-family:var(--mono);font-weight:700;font-size:16px;}
-.gauge-center .u{font-size:9px;color:var(--text-faint);}
-.gauge-lbl{font-size:10.5px;color:var(--text-dim);letter-spacing:0.3px;}
+.gauge-center .v .u{font-size:9px;font-weight:500;color:var(--text-faint);}
+.gauge-lbl{font-size:10px;color:var(--text-dim);letter-spacing:0.2px;}
+.threshold-legend{display:flex;gap:12px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border);}
+.threshold-legend .tl-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);}
+.threshold-legend .tl-dot{width:6px;height:6px;border-radius:2px;}
 
-/* ===== host vitals row ===== */
-.vitals-secondary{display:flex;flex-direction:column;gap:10px;flex:1;min-width:180px;}
-.vital-line{display:flex;align-items:center;gap:10px;}
-.vital-line .vl-lbl{font-size:10.5px;color:var(--text-dim);width:64px;flex-shrink:0;}
-.vital-line .vl-track{flex:1;height:6px;border-radius:3px;background:var(--border);overflow:hidden;}
+/* ===== trend panel ===== */
+.trend-panel{margin-top:13px;padding-top:12px;border-top:1px solid var(--border);}
+.trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.trend-legend{display:flex;gap:12px;}
+.trend-legend span{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;color:var(--text-dim);}
+.trend-legend .ld{width:7px;height:2px;border-radius:1px;}
+.trend-note{font-family:var(--mono);font-size:9px;color:var(--text-faint);}
+
+/* ===== host vitals ===== */
+.vitals-secondary{display:flex;flex-direction:column;gap:9px;flex:1;min-width:180px;}
+.vital-line{display:flex;align-items:center;gap:9px;}
+.vital-line .vl-lbl{font-size:10px;color:var(--text-dim);width:60px;flex-shrink:0;}
+.vital-line .vl-track{flex:1;height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
 .vital-line .vl-fill{height:100%;border-radius:3px;}
-.vital-line .vl-val{font-family:var(--mono);font-size:10.5px;color:var(--text-dim);width:44px;text-align:right;flex-shrink:0;}
+.vital-line .vl-val{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:60px;text-align:right;flex-shrink:0;}
 
 /* ===== guests grid ===== */
-.guest-card{
-  background:var(--bg-alt);border:1px solid var(--border);border-radius:9px;
-  padding:12px 13px;display:flex;flex-direction:column;gap:9px;
-}
-.guest-top{display:flex;align-items:center;gap:8px;}
-.guest-top .status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.guest-top .gname{font-family:var(--mono);font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.type-badge{
-  font-family:var(--mono);font-size:9px;letter-spacing:0.5px;
-  padding:2px 6px;border-radius:4px;border:1px solid var(--border-bright);color:var(--text-faint);
-}
-.guest-meta{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);display:flex;justify-content:space-between;}
+.guest-card{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:11px 12px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s ease,transform .15s ease;}
+.guest-card:hover{border-color:var(--border-bright);transform:translateY(-1px);}
+.guest-top{display:flex;align-items:center;gap:7px;}
+.guest-top .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.guest-top .gname{font-family:var(--mono);font-size:11.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.type-badge{font-family:var(--mono);font-size:8.5px;letter-spacing:0.4px;padding:2px 6px;border-radius:4px;border:1px solid var(--border-bright);color:var(--text-faint);}
+.guest-meta{font-family:var(--mono);font-size:9px;color:var(--text-faint);display:flex;justify-content:space-between;}
 .guest-bars{display:flex;flex-direction:column;gap:5px;}
 .mini-bar-row{display:flex;align-items:center;gap:6px;}
-.mini-bar-row span{font-size:9px;color:var(--text-faint);width:26px;flex-shrink:0;}
+.mini-bar-row span{font-size:8.5px;color:var(--text-faint);width:26px;flex-shrink:0;}
 .mini-bar-track{flex:1;height:4px;border-radius:2px;background:var(--border);overflow:hidden;}
 .mini-bar-fill{height:100%;border-radius:2px;}
 
 /* ===== network interfaces ===== */
-.iface-card{background:var(--bg-alt);border:1px solid var(--border);border-radius:9px;padding:14px 15px;}
-.iface-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.iface-name{font-family:var(--display);font-weight:600;font-size:13px;}
-.iface-dev{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);}
-.iface-throughput{display:flex;gap:16px;margin-bottom:10px;}
+.iface-card{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:13px 14px;transition:border-color .15s ease,transform .15s ease;}
+.iface-card:hover{border-color:var(--border-bright);transform:translateY(-1px);}
+.iface-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.iface-name{font-family:var(--display);font-weight:600;font-size:12.5px;}
+.iface-dev{font-family:var(--mono);font-size:9px;color:var(--text-faint);}
+.iface-throughput{display:flex;gap:14px;margin-bottom:8px;align-items:flex-end;justify-content:space-between;}
 .iface-throughput .t-item{display:flex;flex-direction:column;gap:2px;}
-.iface-throughput .t-val{font-family:var(--mono);font-weight:700;font-size:15px;}
-.iface-throughput .t-lbl{font-size:9.5px;color:var(--text-faint);letter-spacing:0.5px;}
+.iface-throughput .t-val{font-family:var(--mono);font-weight:700;font-size:14px;}
+.iface-throughput .t-lbl{font-size:9px;color:var(--text-faint);letter-spacing:0.4px;}
 .iface-throughput .t-item.rx .t-val{color:var(--cyan);}
 .iface-throughput .t-item.tx .t-val{color:var(--violet);}
-.iface-bar-track{height:5px;border-radius:3px;background:var(--border);overflow:hidden;display:flex;margin-bottom:8px;}
+.iface-spark{opacity:0.9;}
+.iface-bar-track{height:4px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:7px;}
 .iface-bar-rx{height:100%;background:var(--cyan);}
-.iface-bar-tx{height:100%;background:var(--violet);}
-.iface-counters{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);}
+.iface-bar-tx{height:100%;background:var(--violet);margin-top:2px;}
+.iface-counters{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--text-faint);}
 
-/* ===== gateways ===== */
-.gw-row{
-  display:flex;align-items:center;gap:12px;padding:10px 4px;
-  border-bottom:1px solid var(--border);
+/* ===== gateways table ===== */
+.gw-table{width:100%;border-collapse:collapse;}
+.gw-table thead th{
+  text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:0.6px;text-transform:uppercase;
+  color:var(--text-faint);font-weight:500;padding:0 8px 9px;border-bottom:1px solid var(--border);
 }
-.gw-row:last-child{border-bottom:none;}
-.gw-row .status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.gw-name{font-family:var(--mono);font-size:12px;font-weight:600;width:150px;flex-shrink:0;}
-.gw-addr{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);flex:1;}
-.gw-metric{font-family:var(--mono);font-size:10.5px;color:var(--text-dim);width:90px;text-align:right;}
+.gw-table thead th.num{text-align:right;}
+.gw-table tbody td{padding:10px 8px;font-family:var(--mono);font-size:11px;border-bottom:1px solid var(--border);}
+.gw-table tbody tr:last-child td{border-bottom:none;}
+.gw-table tbody tr{transition:background .15s ease;}
+.gw-table tbody tr:hover{background:rgba(255,255,255,0.02);}
+.gw-table .num{text-align:right;color:var(--text-dim);}
+.gw-name-cell{display:flex;align-items:center;gap:8px;font-weight:600;}
+.gw-addr-cell{color:var(--text-faint);}
 
 /* ===== busiest callout ===== */
 .callout{
-  display:flex;align-items:center;gap:14px;
-  background:linear-gradient(90deg, rgba(0,217,255,0.08), transparent);
-  border:1px solid var(--cyan-dim);border-radius:10px;padding:14px 18px;margin-bottom:18px;
+  display:flex;align-items:center;gap:13px;
+  background:linear-gradient(90deg, rgba(51,210,240,0.07), transparent);
+  border:1px solid var(--cyan-dim);border-radius:8px;padding:12px 16px;margin-bottom:16px;
 }
-.callout .cicon{
-  width:34px;height:34px;border-radius:8px;background:rgba(0,217,255,0.12);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.callout .cicon svg{width:17px;height:17px;stroke:var(--cyan);}
-.callout .ctext{font-size:12px;color:var(--text-dim);}
+.callout .cicon{width:30px;height:30px;border-radius:7px;background:rgba(51,210,240,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.callout .cicon svg{width:15px;height:15px;stroke:var(--cyan);}
+.callout .ctext{font-size:11.5px;color:var(--text-dim);}
 .callout .ctext b{color:var(--text);font-family:var(--mono);}
 
 /* ===== loading / error ===== */
-.skeleton{background:linear-gradient(90deg,var(--bg-alt) 25%,var(--panel-hi) 37%,var(--bg-alt) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+.skeleton{background:linear-gradient(90deg,var(--bg-alt) 25%,var(--panel-hi) 37%,var(--bg-alt) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:5px;}
 @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:0 0;}}
-.sk-block{height:14px;margin-bottom:8px;}
-.err-state{display:flex;align-items:center;gap:10px;padding:16px 4px;color:var(--red);font-family:var(--mono);font-size:12px;}
-.err-state svg{width:16px;height:16px;stroke:var(--red);flex-shrink:0;}
+.sk-block{height:13px;margin-bottom:8px;}
+.err-state{display:flex;align-items:center;gap:9px;padding:14px 4px;color:var(--red);font-family:var(--mono);font-size:11.5px;}
+.err-state svg{width:15px;height:15px;stroke:var(--red);flex-shrink:0;}
 
 footer{
-  border-top:1px solid var(--border);margin-top:40px;padding:20px 28px;
-  display:flex;justify-content:space-between;align-items:center;
-  font-family:var(--mono);font-size:10.5px;color:var(--text-faint);max-width:1520px;margin-left:auto;margin-right:auto;
-}
-
-
-/* ===== NOC COMMAND CENTER ===== */
-body{
-  background:
-    radial-gradient(ellipse 900px 500px at 8% -5%,rgba(140,126,255,.12),transparent 70%),
-    radial-gradient(ellipse 900px 500px at 92% 5%,rgba(0,217,255,.10),transparent 70%),
-    linear-gradient(180deg,#080b11 0%,#0a0d14 55%,#080b11 100%);
-}
-.topbar{
-  min-height:64px;
-  padding:10px 24px;
-  background:rgba(7,10,16,.92);
-  box-shadow:0 8px 30px rgba(0,0,0,.25);
-}
-.brand-mark{
-  width:34px;height:34px;border-radius:9px;
-  box-shadow:0 0 25px rgba(0,217,255,.28),0 0 45px rgba(140,126,255,.15);
-}
-.brand-text b{font-size:16px;letter-spacing:1.2px}
-.brand-text span{letter-spacing:2.3px}
-.section-nav a{border:1px solid transparent}
-.section-nav a:hover{border-color:var(--border-bright)}
-.refresh-state{
-  display:flex;align-items:center;gap:7px;
-  font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:1px
-}
-.refresh-state .led{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--green);box-shadow:0 0 7px var(--green)
-}
-.refresh-state.busy .led{
-  background:var(--cyan);box-shadow:0 0 9px var(--cyan);
-  animation:ledpulse .7s ease-in-out infinite
-}
-.refresh-btn{
-  border:1px solid var(--cyan-dim);
-  background:rgba(0,217,255,.055);
-  color:var(--cyan);border-radius:7px;padding:8px 12px;
-  display:flex;align-items:center;gap:7px;cursor:pointer;
-  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.5px;
-  transition:all .18s ease
-}
-.refresh-btn:hover{
-  background:rgba(0,217,255,.12);border-color:var(--cyan);
-  box-shadow:0 0 18px rgba(0,217,255,.13)
-}
-.refresh-btn:active{transform:translateY(1px)}
-.refresh-btn:disabled{opacity:.55;cursor:wait}
-.refresh-icon{font-size:16px;line-height:10px}
-.pulse-strip{
-  height:168px;
-  background:linear-gradient(180deg,rgba(0,217,255,.055),rgba(140,126,255,.025) 55%,transparent),#090c13
-}
-.pulse-overlay{
-  position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
-  background-size:100% 24px;opacity:.35
-}
-.noc-banner{position:absolute;left:32px;top:27px;z-index:3}
-.noc-eyebrow{
-  display:flex;align-items:center;gap:8px;
-  font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--cyan);margin-bottom:7px
-}
-.live-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 9px var(--green);animation:ledpulse 1.7s ease-in-out infinite
-}
-.noc-title{
-  font-family:var(--display);font-size:29px;font-weight:700;letter-spacing:1px;line-height:1
-}
-.noc-sub{
-  margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:1.5px
-}
-.noc-sub span{color:var(--border-bright);margin:0 5px}
-.pulse-kpis{justify-content:flex-end;align-items:flex-end;padding:0 32px 25px;gap:24px}
-.pulse-kpi{min-width:118px}
-.pulse-kpi .val{font-size:23px}
-.domain{padding-top:38px}
-.domain-head{
-  margin-bottom:14px;
-  background:linear-gradient(90deg,rgba(255,255,255,.018),transparent 70%)
-}
-.domain-head h2{font-size:20px}
-.panel{
-  background:linear-gradient(135deg,rgba(255,255,255,.018),transparent 45%),rgba(16,20,31,.88);
-  box-shadow:0 10px 35px rgba(0,0,0,.12)
-}
-.panel:before{
-  content:"";position:absolute;top:0;left:18px;right:18px;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)
-}
-.stat-tile,.guest-card,.iface-card,.cost-block{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)
-}
-.stat-tile:hover,.guest-card:hover,.iface-card:hover{
-  border-color:var(--border-bright);transform:translateY(-1px);transition:all .15s ease
-}
-.callout{box-shadow:0 0 25px rgba(0,217,255,.045)}
-.guest-card{min-height:128px}
-.iface-card{min-height:155px}
-.gw-row{transition:background .15s ease}
-.gw-row:hover{background:rgba(255,255,255,.018)}
-.operator-prompt{
-  display:flex;align-items:center;gap:14px;margin-top:26px;padding:13px 16px;
-  border:1px solid var(--border);border-radius:9px;background:rgba(16,20,31,.62);color:var(--text-dim)
-}
-.operator-prompt-icon{
-  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  border:1px solid var(--cyan-dim);color:var(--cyan);font-family:var(--mono);font-size:12px
-}
-.operator-prompt-title{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--cyan)}
-.operator-prompt-text{margin-top:3px;font-size:11px}
-.operator-prompt-text b{color:var(--text)}
-footer{background:rgba(8,11,17,.55)}
-@media (max-width:1180px){
-  .noc-title{font-size:24px}.pulse-kpis{gap:15px}.topbar-right{gap:9px}.status-pill{display:none}
-}
-@media (max-width:760px){
-  .topbar{padding:10px 14px}.refresh-state{display:none}
-  .refresh-btn span:last-child{display:none}.refresh-btn{padding:8px 10px}
-  .clock{min-width:auto}.pulse-strip{height:210px}
-  .noc-banner{left:18px;top:22px}.noc-title{font-size:22px}
-  .pulse-kpis{justify-content:flex-start;padding:0 18px 22px;gap:12px;flex-wrap:wrap}
-  .pulse-divider{display:none}
-}
-
-
-/* ===== NOC UI SCALE UP ===== */
-.section-nav a{
-  font-size:12px;
-  padding:7px 10px;
-}
-.section-nav .dot{
-  width:7px;
-  height:7px;
-}
-.status-pill{
-  font-size:11px;
-}
-.clock{
-  font-size:12px;
-}
-.refresh-btn{
-  font-size:11px;
-  padding:9px 13px;
-}
-.refresh-icon{
-  font-size:18px;
-}
-.noc-eyebrow{
-  font-size:10px;
-}
-.noc-title{
-  font-size:32px;
-}
-.noc-sub{
-  font-size:10px;
-}
-.pulse-kpi .val{
-  font-size:26px;
-}
-.pulse-kpi .lbl{
-  font-size:11px;
-}
-.domain-head h2{
-  font-size:22px;
-}
-.domain-head .domain-tag{
-  font-size:10px;
-}
-.panel-title{
-  font-size:12px;
-}
-.panel-sub{
-  font-size:10px;
-}
-.stat-tile .stat-value{
-  font-size:22px;
-}
-.stat-tile .stat-label{
-  font-size:11px;
-}
-.guest-name,.iface-name{
-  font-size:14px;
-}
-.guest-meta,.iface-meta{
-  font-size:10px;
-}
-.guest-stat,.iface-stat{
-  font-size:11px;
-}
-.callout{
-  font-size:11px;
-}
-.operator-prompt-title{
-  font-size:11px;
-}
-.operator-prompt-text{
-  font-size:12px;
-}
-footer{
-  font-size:10px;
-}
-
-
-/* ============================================================
-   LAXSTACK NOC — IMPACT / LARGE TILE PRESENTATION
-   ============================================================ */
-
-body{
-  font-size:13px;
-  letter-spacing:.15px;
-}
-
-.topbar{
-  min-height:72px;
-  padding:12px 26px;
-  border-bottom:1px solid rgba(255,255,255,.055);
-  background:
-    linear-gradient(90deg,rgba(0,217,255,.025),transparent 35%,rgba(140,126,255,.025)),
-    rgba(5,8,14,.96);
-}
-
-.brand-mark{
-  width:42px;height:42px;border-radius:11px;
-  font-size:20px;
-  box-shadow:
-    0 0 18px rgba(0,217,255,.28),
-    0 0 42px rgba(140,126,255,.12);
-}
-
-.brand-text b{
-  font-size:18px;
-  letter-spacing:1.8px;
-}
-
-.brand-text span{
-  font-size:9px;
-  letter-spacing:2.5px;
-}
-
-.section-nav{
-  gap:4px;
-}
-
-.section-nav a{
-  font-size:11px;
-  padding:9px 12px;
-  border-radius:5px;
-  letter-spacing:.8px;
-}
-
-.section-nav .dot{
-  width:7px;height:7px;
-}
-
-.refresh-btn{
-  min-height:38px;
-  padding:9px 15px;
-  font-size:11px;
-  letter-spacing:.8px;
-}
-
-.refresh-icon{
-  font-size:19px;
-}
-
-.status-pill{
-  min-height:38px;
-  padding:0 12px;
-  font-size:11px;
-}
-
-.clock{
-  font-size:12px;
-  letter-spacing:.7px;
-}
-
-.pulse-strip{
-  height:190px;
-  border-bottom:1px solid rgba(255,255,255,.045);
-  background:
-    radial-gradient(ellipse 600px 160px at 80% 50%,rgba(0,217,255,.07),transparent 70%),
-    radial-gradient(ellipse 500px 180px at 25% 40%,rgba(140,126,255,.055),transparent 70%),
-    #080c13;
-}
-
-.noc-banner{
-  left:34px;
-  top:30px;
-}
-
-.noc-eyebrow{
-  font-size:10px;
-  letter-spacing:2.2px;
-}
-
-.noc-title{
-  font-size:38px;
-  letter-spacing:1.5px;
-}
-
-.noc-sub{
-  font-size:10px;
-  letter-spacing:1.7px;
-}
-
-.pulse-kpis{
-  padding:0 34px 28px;
-  gap:30px;
-}
-
-.pulse-kpi{
-  min-width:145px;
-}
-
-.pulse-kpi .val{
-  font-size:31px;
-  font-weight:700;
-}
-
-.pulse-kpi .val small{
-  font-size:10px;
-}
-
-.pulse-kpi .lbl{
-  font-size:11px;
-  letter-spacing:1px;
-}
-
-.domain{
-  padding-top:42px;
-}
-
-.domain-head{
-  min-height:48px;
-  padding-bottom:13px;
-  margin-bottom:16px;
-}
-
-.domain-head h2{
-  font-size:25px;
-  letter-spacing:.5px;
-}
-
-.domain-head .domain-tag{
-  font-size:10px;
-  padding:5px 9px;
-  letter-spacing:1px;
-}
-
-.domain-head .endpoint{
-  font-size:10px;
-}
-
-/* Larger dashboard cards */
-.stat-tile{
-  min-height:145px;
-  padding:18px;
-}
-
-.stat-tile .stat-label{
-  font-size:11px;
-  letter-spacing:1px;
-}
-
-.stat-tile .stat-value{
-  font-size:28px;
-  line-height:1.05;
-}
-
-.stat-tile .stat-sub{
-  font-size:11px;
-}
-
-.panel{
-  border-radius:11px;
-  padding:18px;
-  box-shadow:
-    0 12px 35px rgba(0,0,0,.18),
-    inset 0 1px 0 rgba(255,255,255,.025);
-}
-
-.panel-title{
-  font-size:14px;
-  letter-spacing:.7px;
-}
-
-.panel-sub{
-  font-size:10px;
-}
-
-/* Network interface tiles */
-.iface-card{
-  min-height:176px;
-  padding:18px;
-  border-radius:10px;
-}
-
-.iface-card .iface-name{
-  font-size:16px;
-  font-weight:700;
-}
-
-.iface-card .iface-device{
-  font-size:10px;
-}
-
-.iface-card .iface-value{
-  font-size:25px;
-  font-weight:700;
-}
-
-.iface-card .iface-unit{
-  font-size:10px;
-}
-
-.iface-card .iface-meta{
-  font-size:10px;
-}
-
-/* Gateway rows */
-.gw-row{
-  min-height:54px;
-  font-size:12px;
-}
-
-.gw-row .gw-name{
-  font-size:13px;
-  font-weight:700;
-}
-
-.gw-row .gw-address{
-  font-size:11px;
-}
-
-.gw-row .gw-latency,
-.gw-row .gw-loss{
-  font-size:11px;
-}
-
-/* Proxmox guest tiles */
-.guest-card{
-  min-height:145px;
-  padding:18px;
-  border-radius:10px;
-}
-
-.guest-card .guest-name{
-  font-size:15px;
-  font-weight:700;
-}
-
-.guest-card .guest-meta{
-  font-size:10px;
-}
-
-.guest-card .guest-stat{
-  font-size:12px;
-}
-
-.guest-card .guest-value{
-  font-size:22px;
-}
-
-/* AWS tiles */
-.cost-block{
-  min-height:145px;
-  padding:18px;
-  border-radius:10px;
-}
-
-.cost-block .cost-value{
-  font-size:27px;
-}
-
-.cost-block .cost-label{
-  font-size:11px;
-}
-
-.cost-block .cost-meta{
-  font-size:10px;
-}
-
-/* Strong section identity */
-#network .domain-head{
-  border-color:rgba(0,217,255,.22);
-}
-#network .panel{
-  border-color:rgba(0,217,255,.12);
-}
-#compute .domain-head{
-  border-color:rgba(255,145,32,.22);
-}
-#compute .panel{
-  border-color:rgba(255,145,32,.12);
-}
-#cloud .domain-head{
-  border-color:rgba(140,126,255,.22);
-}
-#cloud .panel{
-  border-color:rgba(140,126,255,.12);
-}
-
-/* Standby banner */
-.operator-prompt{
-  min-height:58px;
-  padding:15px 18px;
-  border-radius:10px;
-}
-.operator-prompt-icon{
-  width:34px;height:34px;
-  font-size:14px;
-}
-.operator-prompt-title{
-  font-size:11px;
-  letter-spacing:1.7px;
-}
-.operator-prompt-text{
-  font-size:12px;
-}
-
-/* Footer */
-footer{
-  padding:18px 26px;
-  font-size:10px;
-  letter-spacing:.6px;
-}
-
-@media (max-width:1100px){
-  .noc-title{font-size:31px}
-  .pulse-kpis{gap:18px}
-  .pulse-kpi{min-width:120px}
-  .pulse-kpi .val{font-size:26px}
-}
-
-@media (max-width:760px){
-  .topbar{padding:10px 14px}
-  .brand-text span{display:none}
-  .section-nav{display:none}
-  .pulse-strip{height:235px}
-  .noc-banner{left:20px;top:22px}
-  .noc-title{font-size:27px}
-  .pulse-kpis{
-    padding:0 20px 20px;
-    gap:12px;
-  }
-  .pulse-kpi{min-width:100px}
-  .pulse-kpi .val{font-size:23px}
-  .stat-tile,.iface-card,.guest-card,.cost-block{min-height:130px}
-}
+  border-top:1px solid var(--border);margin-top:36px;padding:18px 24px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+  font-family:var(--mono);font-size:10px;color:var(--text-faint);max-width:1480px;margin-left:auto;margin-right:auto;
+}
+footer .sync-times{display:flex;gap:16px;}
 
 @media (max-width:980px){
-  .grid-2,.grid-3{grid-template-columns:1fr;}
-  .section-nav{display:none;}
-  .pulse-kpis{gap:22px;padding:0 18px;}
-  .pulse-kpi .val{font-size:20px;}
+  .grid-2{grid-template-columns:1fr;}
+  .var-pills{display:none;}
+  .pulse-kpi .val{font-size:19px;}
 }
-
-/* ============================================================
-   NOC — LARGER PROXMOX CARDS + TYPOGRAPHY
-   ============================================================ */
-
-/* Proxmox host summary */
-#compute .host-card{
-  min-height:235px !important;
-  padding:22px !important;
-}
-
-#compute .host-card .host-name,
-#compute .host-card h3{
-  font-size:18px !important;
-}
-
-#compute .host-card .host-meta,
-#compute .host-card .meta{
-  font-size:11px !important;
-}
-
-/* Make the circular host gauges larger */
-#compute .gauge{
-  transform:scale(1.12);
-  transform-origin:center;
-}
-
-#compute .gauge-value{
-  font-size:21px !important;
-}
-
-#compute .gauge-label{
-  font-size:11px !important;
-}
-
-/* Host telemetry text */
-#compute .host-card .metric-label,
-#compute .host-card .label{
-  font-size:11px !important;
-}
-
-#compute .host-card .metric-value,
-#compute .host-card .value{
-  font-size:14px !important;
-}
-
-/* Proxmox guest cards */
-#compute .guest-card{
-  min-height:165px !important;
-  padding:20px !important;
-  border-radius:11px !important;
-}
-
-#compute .guest-card .guest-name{
-  font-size:16px !important;
-  line-height:1.2;
-}
-
-#compute .guest-card .guest-meta{
-  font-size:11px !important;
-}
-
-#compute .guest-card .guest-stat{
-  font-size:12px !important;
-}
-
-#compute .guest-card .guest-value{
-  font-size:23px !important;
-}
-
-/* Guest CPU/MEM labels and percentages */
-#compute .guest-card .label,
-#compute .guest-card .metric-label{
-  font-size:10px !important;
-  letter-spacing:.8px;
-}
-
-#compute .guest-card .percentage,
-#compute .guest-card .percent{
-  font-size:11px !important;
-}
-
-/* Increase guest grid spacing */
-#compute .guest-grid{
-  gap:14px !important;
-}
-
-/* Section title */
-#compute .domain-head h2{
-  font-size:27px !important;
-}
-
-#compute .domain-head{
-  min-height:52px;
-}
-
-/* Guest summary heading */
-#compute .guests-title,
-#compute .guest-summary-title{
-  font-size:13px !important;
-}
-
-/* Slightly increase all compute panel typography */
-#compute .panel-title{
-  font-size:15px !important;
-}
-
-#compute .panel-sub{
-  font-size:11px !important;
-}
-
-/* Give the compute area a little more breathing room */
-#compute .panel{
-  padding:20px !important;
-}
-
-/* Preserve compact layout on smaller screens */
-@media (max-width:1100px){
-  #compute .guest-card{
-    min-height:150px !important;
-  }
-}
-
 @media (max-width:760px){
-  #compute .host-card{
-    min-height:200px !important;
-  }
-
-  #compute .guest-card{
-    min-height:145px !important;
-  }
-
-  #compute .domain-head h2{
-    font-size:23px !important;
-  }
+  .rail{display:none;}
+  .grid-canvas{left:0;}
+  .crumb-dash{display:none;}
+  .status-pill,.refresh-state{display:none;}
+  .refresh-btn span:last-child{display:none;}
+  .hero-title{font-size:19px;}
+  .pulse-strip{height:210px;}
+  .pulse-kpis{flex-wrap:wrap;justify-content:flex-start;padding:0 18px 18px;}
 }
-
 </style>
 </head>
 <body>
 
-<div class="texture"></div>
+<div class="grid-canvas"></div>
 
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-mark">L</div>
-    <div class="brand-text"><b>LAXSTACK</b><span>NOC · Platform Operations</span></div>
-  </div>
-  <nav class="section-nav">
-    <a href="#network"><span class="dot" style="background:var(--cyan)"></span>Network</a>
-    <a href="#compute"><span class="dot" style="background:var(--orange)"></span>Compute</a>
-    <a href="#cloud"><span class="dot" style="background:var(--violet)"></span>Cloud</a>
-  </nav>
-  <div class="topbar-right">
-    <div class="refresh-state"><span class="led" id="refresh-led"></span><span id="refresh-state-text">READY</span></div>
-    <button class="refresh-btn" id="refresh-btn" onclick="syncAll(true)">
-      <span class="refresh-icon">↻</span><span>REFRESH TELEMETRY</span>
-    </button>
-    <div class="status-pill"><span class="led" id="overall-led"></span><span id="overall-text">Awaiting telemetry</span></div>
-    <div class="clock" id="clock">--:--:--</div>
-  </div>
-</header>
+<div class="shell">
+  <aside class="rail">
+    <div class="rail-logo">L</div>
+    <div class="rail-btn active" title="Dashboards"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+    <div class="rail-btn" title="Explore"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-3 6-3-2 3-6z"/></svg></div>
+    <div class="rail-btn" title="Alerting"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div>
+    <div class="rail-spacer"></div>
+    <div class="rail-divider"></div>
+    <a class="rail-domain rd-network" href="#network" title="Network">N</a>
+    <a class="rail-domain rd-compute" href="#compute" title="Compute">C</a>
+    <a class="rail-domain rd-cloud" href="#cloud" title="Cloud">A</a>
+  </aside>
 
-<div class="pulse-strip">
-  <canvas id="pulse-canvas"></canvas>
-  <div class="pulse-overlay"></div>
-  <div class="noc-banner">
-    <div class="noc-eyebrow"><span class="live-dot"></span> LAXSTACK NETWORK OPERATIONS CENTER</div>
-    <div class="noc-title">NETWORK OPERATIONS CENTER</div>
-    <div class="noc-sub">OPNSENSE <span>•</span> PROXMOX <span>•</span> AWS INFRASTRUCTURE <span>•</span> LIVE TELEMETRY</div>
-  </div>
-  <div class="pulse-kpis">
-    <div class="pulse-kpi violet">
-      <div class="val" id="kpi-cost">—<small>USD MTD</small></div>
-      <div class="lbl">Cloud spend</div>
-    </div>
-    <div class="pulse-divider"></div>
-    <div class="pulse-kpi orange">
-      <div class="val" id="kpi-vms">—<small>running</small></div>
-      <div class="lbl">Compute guests</div>
-    </div>
-    <div class="pulse-divider"></div>
-    <div class="pulse-kpi cyan">
-      <div class="val" id="kpi-net">—<small>Mbps</small></div>
-      <div class="lbl">Network throughput</div>
-    </div>
-  </div>
-</div>
+  <div class="main">
+    <header class="cmdbar">
+      <div class="crumb"><span class="crumb-org">LaxStack</span><span class="crumb-sep">/</span><span class="crumb-dash">Platform Operations</span></div>
+      <div class="var-pills">
+        <div class="var-pill"><span class="k">env</span><span class="v">production</span></div>
+        <div class="var-pill"><span class="k">region</span><span class="v">ap-southeast-1, hq</span></div>
+      </div>
+      <div class="cmdbar-right">
+        <div class="time-pill"><span class="rdot"></span>Live</div>
+        <div class="refresh-state" id="refresh-state-wrap"><span class="led" id="refresh-led"></span><span id="refresh-state-text">READY</span></div>
+        <button class="refresh-btn" id="refresh-btn" onclick="syncAll(true)">
+          <span class="refresh-icon">↻</span><span>Refresh telemetry</span>
+        </button>
+        <div class="status-pill"><span class="led" id="overall-led"></span><span id="overall-text">Awaiting telemetry</span></div>
+        <div class="clock" id="clock">--:--:--</div>
+      </div>
+    </header>
 
-<main>
-  <div id="operator-prompt" class="operator-prompt">
-    <div class="operator-prompt-icon">◉</div>
-    <div>
-      <div class="operator-prompt-title">TELEMETRY STANDBY</div>
-      <div class="operator-prompt-text">Telemetry polls automatically every <b>3 minutes</b>. Use <b>REFRESH TELEMETRY</b> for an immediate poll.</div>
-    </div>
-  </div>
-
-  <!-- ================= CLOUD ================= -->
-  <section class="domain domain-network" id="network">
-    <div class="domain-head">
-      <span class="idx">03</span>
-      <h2>Network</h2>
-      <span class="tag">OPNsense</span>
-      <span class="sub" id="network-sub">/api/opnsense</span>
-    </div>
-    <div id="busiest-callout"></div>
-    <div class="grid-2" style="align-items:start;">
-      <div class="grid-auto" id="iface-grid" style="grid-column:1/-1;margin-bottom:18px;"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-title"><h3>Gateways</h3></div>
-      <div id="gw-list">
-        <div class="skeleton sk-block" style="width:90%"></div>
+    <div class="pulse-strip">
+      <canvas id="pulse-canvas"></canvas>
+      <div class="hero-banner">
+        <div class="hero-eyebrow"><span class="live-dot"></span>LAXSTACK NETWORK OPERATIONS CENTER</div>
+        <div class="hero-title">Network Operations Center</div>
+        <div class="hero-sub">OPNSENSE<span>·</span>PROXMOX<span>·</span>AWS INFRASTRUCTURE<span>·</span>LIVE TELEMETRY</div>
+      </div>
+      <div class="pulse-kpis">
+        <div class="pulse-kpi cyan">
+          <div class="val" id="kpi-net">—<small>Mbps</small></div>
+          <div class="lbl">Network throughput</div>
+        </div>
+        <div class="pulse-divider"></div>
+        <div class="pulse-kpi orange">
+          <div class="val" id="kpi-vms">—<small>running</small></div>
+          <div class="lbl">Compute guests</div>
+        </div>
+        <div class="pulse-divider"></div>
+        <div class="pulse-kpi violet">
+          <div class="val" id="kpi-cost">—<small>USD MTD</small></div>
+          <div class="lbl">Cloud spend</div>
+        </div>
       </div>
     </div>
-  </section>
 
-<section class="domain domain-compute" id="compute">
-    <div class="domain-head">
-      <span class="idx">02</span>
-      <h2>Compute</h2>
-      <span class="tag">Proxmox</span>
-      <span class="sub" id="compute-sub">/api/proxmox</span>
-    </div>
-    <div id="compute-host" class="panel" style="margin-bottom:18px;">
-      <div class="skeleton sk-block" style="width:30%"></div><div class="skeleton sk-block" style="width:80%"></div>
-    </div>
-    <div class="panel-title" style="margin-bottom:12px;"><h3 style="color:var(--text-dim);font-weight:500;">Guests</h3><span class="id-badge" id="guest-count">--</span></div>
-    <div class="grid-auto" id="guests-grid"></div>
-  </section>
+    <main>
+      <div id="operator-prompt" class="operator-prompt">
+        <div class="operator-prompt-icon">◉</div>
+        <div>
+          <div class="operator-prompt-title">TELEMETRY STANDBY</div>
+          <div class="operator-prompt-text">Network and compute poll every <b>3 minutes</b>. Cloud spend polls every <b>1 hour</b>. Use <b>Refresh telemetry</b> for an immediate poll of all three.</div>
+        </div>
+      </div>
 
-  <!-- ================= NETWORK ================= -->
-  <section class="domain domain-cloud" id="cloud">
-    <div class="domain-head">
-      <span class="idx">01</span>
-      <h2>Cloud Infrastructure</h2>
-      <span class="tag">AWS</span>
-      <span class="sub" id="cloud-sub">/api/infrastructure</span>
-    </div>
-    <div class="grid-2" id="cloud-grid">
-      <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
-      <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
-    </div>
-  </section>
+      <!-- ================= NETWORK ================= -->
+      <section class="domain domain-network" id="network">
+        <div class="domain-head">
+          <span class="idx">01</span>
+          <h2>Network</h2>
+          <span class="tag">OPNsense</span>
+          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 3m</span>/api/opnsense</span>
+        </div>
+        <div id="busiest-callout"></div>
+        <div class="grid-auto" id="iface-grid" style="margin-bottom:16px;">
+          <div class="panel"><div class="skeleton sk-block" style="width:50%"></div><div class="skeleton sk-block" style="width:80%"></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><h3>Gateways</h3><span class="kebab"><span></span><span></span><span></span></span></div>
+          <div id="gw-list"><div class="skeleton sk-block" style="width:90%"></div></div>
+        </div>
+      </section>
 
-  <!-- ================= COMPUTE ================= -->
-  </main>
+      <!-- ================= COMPUTE ================= -->
+      <section class="domain domain-compute" id="compute">
+        <div class="domain-head">
+          <span class="idx">02</span>
+          <h2>Compute</h2>
+          <span class="tag">Proxmox</span>
+          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 3m</span>/api/proxmox</span>
+        </div>
+        <div id="compute-host" class="panel" style="margin-bottom:16px;">
+          <div class="skeleton sk-block" style="width:30%"></div><div class="skeleton sk-block" style="width:80%"></div>
+        </div>
+        <div class="panel-title" style="margin-bottom:11px;"><h3 style="color:var(--text-dim);font-weight:500;">Guests</h3><span class="id-badge" id="guest-count">--</span></div>
+        <div class="grid-auto" id="guests-grid"></div>
+      </section>
 
-<footer>
-  <span>LAXSTACK PLATFORM · live telemetry</span>
-  <span id="last-sync">syncing…</span>
-</footer>
+      <!-- ================= CLOUD ================= -->
+      <section class="domain domain-cloud" id="cloud">
+        <div class="domain-head">
+          <span class="idx">03</span>
+          <h2>Cloud Infrastructure</h2>
+          <span class="tag">AWS</span>
+          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 1h</span>/api/infrastructure</span>
+        </div>
+        <div class="grid-2" id="cloud-grid">
+          <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
+          <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>LAXSTACK PLATFORM · live telemetry</span>
+      <div class="sync-times">
+        <span id="sync-local">local: syncing…</span>
+        <span id="sync-cloud">cloud: syncing…</span>
+      </div>
+    </footer>
+  </div>
+</div>
 
 <script>
 // APIs live on the main LAXSTACK CloudFront distribution.
@@ -1120,37 +529,22 @@ const API = {
   opnsense: 'https://laxstack.com/api/opnsense'
 };
 
+const LOCAL_REFRESH_MS = 180000;   // compute + network — unchanged
+const INFRA_REFRESH_MS = 3600000;  // cloud infra — now hourly
 const FETCH_TIMEOUT_MS = 10000;
 
-async function fetchJSON(url) {
+async function fetchJSON(url){
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-  try {
-    const res = await fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-      credentials: 'omit',
-      cache: 'no-store',
-      headers: {
-        'Accept': 'application/json'
-      },
-      signal: controller.signal
-    });
-
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+  const timeout = setTimeout(()=>controller.abort(), FETCH_TIMEOUT_MS);
+  try{
+    const res = await fetch(url, { method:'GET', mode:'cors', credentials:'omit', cache:'no-store', headers:{'Accept':'application/json'}, signal:controller.signal });
+    if(!res.ok) throw new Error('HTTP '+res.status);
     return await res.json();
-  } catch (e) {
-    if (e.name === 'AbortError') {
-      throw new Error('request timed out');
-    }
-    if (e instanceof TypeError) {
-      throw new Error('CORS or network error');
-    }
+  }catch(e){
+    if(e.name==='AbortError') throw new Error('request timed out');
+    if(e instanceof TypeError) throw new Error('CORS or network error');
     throw e;
-  } finally {
-    clearTimeout(timeout);
-  }
+  }finally{ clearTimeout(timeout); }
 }
 let lastNetMbps = 2;
 
@@ -1171,10 +565,10 @@ function fmtBps(bps){
   if(bps==null) return '0 bps';
   const mbps = bps/1e6;
   if(mbps>=1) return mbps.toFixed(2)+' Mbps';
-  const kbps = bps/1e3;
-  return kbps.toFixed(1)+' Kbps';
+  return (bps/1e3).toFixed(1)+' Kbps';
 }
 function fmtMoney(n){ return '$'+Number(n).toFixed(2); }
+function fmtClock(d){ return d.toLocaleTimeString('en-US',{hour12:false}); }
 function statusColor(status){
   if(!status) return 'var(--text-faint)';
   const s = String(status).toLowerCase();
@@ -1195,31 +589,87 @@ function icon(name){
   };
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${icons[name]||''}</svg>`;
 }
-function gaugeSVG(id, pct, color, size=96, stroke=9){
-  const r=(size-stroke)/2, c=2*Math.PI*r, off=c*(1-Math.min(pct,100)/100);
-  return `<div class="gauge-item">
-    <div class="gauge-wrap">
-      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-        <circle class="gauge-track" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${stroke}" fill="none"/>
-        <circle class="gauge-value" id="${id}" cx="${size/2}" cy="${size/2}" r="${r}" stroke="${color}" stroke-width="${stroke}" fill="none"
-          stroke-dasharray="${c}" stroke-dashoffset="${c}" stroke-linecap="round" transform="rotate(-90 ${size/2} ${size/2})"/>
-      </svg>
-      <div class="gauge-center"><span class="v">${pct.toFixed(0)}<span style="font-size:10px;">%</span></span></div>
-    </div>
-  </div>`;
-}
-function animateGauge(id, pct, color, size=96, stroke=9){
-  const r=(size-stroke)/2, c=2*Math.PI*r, off=c*(1-Math.min(pct,100)/100);
-  const el = document.getElementById(id);
-  if(el) requestAnimationFrame(()=>{ el.style.strokeDashoffset = off; });
-}
 function flash(el){ if(!el) return; el.classList.remove('panel-flash'); void el.offsetWidth; el.classList.add('panel-flash'); }
 function errBlock(msg){ return `<div class="err-state">${icon('alert')}<span>${msg}</span></div>`; }
 
-/* ---------- clock ---------- */
-function tickClock(){
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',{hour12:false});
+/* ---------- threshold-arc gauge (Grafana-style) ---------- */
+function polarToCartesian(cx,cy,r,angleDeg){
+  const rad = angleDeg*Math.PI/180;
+  return { x: cx+r*Math.cos(rad), y: cy+r*Math.sin(rad) };
 }
+function describeArc(cx,cy,r,startAngle,endAngle){
+  const start = polarToCartesian(cx,cy,r,startAngle);
+  const end = polarToCartesian(cx,cy,r,endAngle);
+  const largeArcFlag = (endAngle-startAngle) <= 180 ? 0 : 1;
+  return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${r} ${r} 0 ${largeArcFlag} 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
+}
+function thresholdColor(pct){
+  if(pct>=85) return 'var(--red)';
+  if(pct>=60) return 'var(--amber)';
+  return 'var(--green)';
+}
+function gaugeArc(id, pct, lbl, size=104, stroke=10, colorOverride){
+  const cx=size/2, cy=size/2, r=(size-stroke)/2-2;
+  const start=135, sweep=270;
+  const valEnd = start + sweep*Math.min(Math.max(pct,0),100)/100;
+  const color = colorOverride || thresholdColor(pct);
+  const track = describeArc(cx,cy,r,start,start+sweep);
+  const val = describeArc(cx,cy,r,start,valEnd);
+  return `<div class="gauge-item">
+    <div class="gauge-wrap" style="width:${size}px;height:${size}px;">
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <path d="${track}" fill="none" stroke="var(--border)" stroke-width="${stroke}" stroke-linecap="round"/>
+        <path id="${id}" d="${val}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"/>
+      </svg>
+      <div class="gauge-center"><span class="v" style="color:${color}">${pct.toFixed(0)}<span class="u">%</span></span></div>
+    </div>
+    <div class="gauge-lbl">${lbl}</div>
+  </div>`;
+}
+
+/* ---------- history + sparklines (Grafana time-series feel) ---------- */
+const hist = {};
+function pushHist(key, val, cap=24){
+  if(!hist[key]) hist[key]=[];
+  hist[key].push(val);
+  if(hist[key].length>cap) hist[key].shift();
+}
+function sparklineSVG(values, color, w=110, h=30){
+  if(!values || values.length<2){
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><line x1="0" y1="${h/2}" x2="${w}" y2="${h/2}" stroke="${color}" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/></svg>`;
+  }
+  const max=Math.max(...values), min=Math.min(...values), range=(max-min)||1;
+  const step=w/(values.length-1);
+  const pts=values.map((v,i)=>{
+    const x=i*step, y=h-((v-min)/range)*h*0.8-h*0.1;
+    return [x.toFixed(1), y.toFixed(1)];
+  });
+  const line=pts.map(p=>p.join(',')).join(' ');
+  const area=`0,${h} ${line} ${w},${h}`;
+  const last=pts[pts.length-1];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="iface-spark">
+    <polygon points="${area}" fill="${color}" opacity="0.08"/>
+    <polyline points="${line}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="2" fill="${color}"/>
+  </svg>`;
+}
+function multiSparklineSVG(series, w=100, h=6){
+  // series: [{values(0-100 scale), color}]
+  const cap = Math.max(...series.map(s=>s.values.length), 2);
+  const step = w/(cap-1);
+  const lines = series.map(s=>{
+    if(s.values.length<2) return '';
+    const pts = s.values.map((v,i)=>{
+      const x=i*step, y=h-((Math.min(v,100))/100)*h*0.9-h*0.05;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }).join('');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${lines}</svg>`;
+}
+
+/* ---------- clock ---------- */
+function tickClock(){ document.getElementById('clock').textContent = fmtClock(new Date()); }
 setInterval(tickClock,1000); tickClock();
 
 /* ---------- pulse strip canvas ---------- */
@@ -1233,33 +683,33 @@ function resizeCanvas(){
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 function drawPulse(){
-  const w = canvas.width, h = canvas.height;
+  const w=canvas.width, h=canvas.height;
   ctx.clearRect(0,0,w,h);
-  const amp = Math.min(lastNetMbps, 40) / 40 * (h*0.28) + h*0.04;
-  const mid = h*0.55;
+  const amp = Math.min(lastNetMbps,40)/40*(h*0.22)+h*0.03;
+  const mid = h*0.62;
   ctx.beginPath();
-  ctx.moveTo(0, mid);
+  ctx.moveTo(0,mid);
   for(let x=0;x<=w;x+=4){
-    const t = x*0.018 + wavePhase;
-    const y = mid - Math.sin(t)*amp*0.6 - Math.sin(t*2.3)*amp*0.25 - Math.sin(t*0.5)*amp*0.15;
+    const t=x*0.018+wavePhase;
+    const y=mid-Math.sin(t)*amp*0.6-Math.sin(t*2.3)*amp*0.25-Math.sin(t*0.5)*amp*0.15;
     ctx.lineTo(x,y);
   }
-  ctx.strokeStyle = 'rgba(0,217,255,0.55)';
-  ctx.lineWidth = 2*devicePixelRatio;
-  ctx.shadowBlur = 14; ctx.shadowColor='rgba(0,217,255,0.5)';
+  ctx.strokeStyle='rgba(51,210,240,0.5)';
+  ctx.lineWidth=2*devicePixelRatio;
+  ctx.shadowBlur=14; ctx.shadowColor='rgba(51,210,240,0.45)';
   ctx.stroke();
   ctx.shadowBlur=0;
-  const grad = ctx.createLinearGradient(0,0,0,h);
-  grad.addColorStop(0,'rgba(0,217,255,0.12)');
-  grad.addColorStop(1,'rgba(0,217,255,0)');
+  const grad=ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'rgba(51,210,240,0.1)');
+  grad.addColorStop(1,'rgba(51,210,240,0)');
   ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
-  ctx.fillStyle = grad; ctx.fill();
-  wavePhase += 0.045;
+  ctx.fillStyle=grad; ctx.fill();
+  wavePhase+=0.045;
   requestAnimationFrame(drawPulse);
 }
 requestAnimationFrame(drawPulse);
 
-/* ================= CLOUD ================= */
+/* ================= CLOUD (hourly) ================= */
 async function loadCloud(){
   try{
     const data = await fetchJSON(API.infra);
@@ -1267,7 +717,7 @@ async function loadCloud(){
     const totalMtd = (a?.cost?.mtd_net_unblended_cost_usd||0) + (b?.cost?.mtd_net_unblended_cost_usd||0);
     document.getElementById('kpi-cost').innerHTML = fmtMoney(totalMtd) + '<small>USD MTD</small>';
 
-    const accCard = (acc, accentVar, tiles) => {
+    const accCard = (acc, tiles) => {
       const cost = acc.cost || {};
       const mtd = cost.mtd_net_unblended_cost_usd || 0;
       const prev = cost.last_month_net_unblended_cost_usd || 0;
@@ -1279,12 +729,13 @@ async function loadCloud(){
           <span class="status-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></span>
           <h3>${acc.account}</h3>
           <span class="id-badge">${acc.account_id}</span>
+          <span class="kebab"><span></span><span></span><span></span></span>
         </div>
         <div class="stat-tiles">
           ${tiles.map(t=>`<div class="stat-tile"><div class="icon-row">${icon(t.icon)}</div><div class="num">${t.val}</div><div class="lbl">${t.lbl}</div></div>`).join('')}
         </div>
         <div class="cost-block">
-          <div class="cost-row"><span class="lbl">Month to date (${cost.mtd_period_start} → ${cost.mtd_period_end})</span><span class="amt" style="color:var(--${accentVar})">${fmtMoney(mtd)}</span></div>
+          <div class="cost-row"><span class="lbl">MTD (${cost.mtd_period_start} → ${cost.mtd_period_end})</span><span class="amt" style="color:var(--violet)">${fmtMoney(mtd)}</span></div>
           <div class="cost-row"><span class="lbl">Last month</span><span class="amt" style="color:var(--text-dim)">${fmtMoney(prev)}</span></div>
           <div class="cost-bars">
             <div class="cost-bar-track"><div class="cost-bar-fill" style="width:${(mtd/max*100)}%"></div></div>
@@ -1296,13 +747,13 @@ async function loadCloud(){
     };
 
     let html = '';
-    if(a) html += accCard(a, 'violet', [
+    if(a) html += accCard(a, [
       {icon:'globe', val:a.vpc_singapore ?? 0, lbl:'VPCs · SGP'},
       {icon:'server', val:a.ec2_singapore ?? 0, lbl:'EC2 · SGP'},
       {icon:'box', val:a.s3_buckets ?? 0, lbl:'S3 buckets'},
       {icon:'lambda', val:a.lambda_functions ?? 0, lbl:'Lambda fns'},
     ]);
-    if(b) html += accCard(b, 'violet', [
+    if(b) html += accCard(b, [
       {icon:'cloud', val:b.cloudfront_distributions ?? 0, lbl:'CloudFront'},
       {icon:'globe', val:b.route53_hosted_zones ?? 0, lbl:'Route 53 zones'},
       {icon:'cert', val:b.acm_certificates_us_east_1 ?? 0, lbl:'ACM certs'},
@@ -1312,13 +763,16 @@ async function loadCloud(){
     grid.innerHTML = html;
     flash(grid);
     setLed('cloud', true);
+    lastCloudSync = new Date();
+    document.getElementById('sync-cloud').textContent = 'cloud: ' + fmtClock(lastCloudSync) + ' (hourly)';
   }catch(e){
     document.getElementById('cloud-grid').innerHTML = `<div class="panel">${errBlock('Unable to reach /api/infrastructure — '+e.message)}</div>`;
     setLed('cloud', false);
+    document.getElementById('sync-cloud').textContent = 'cloud: poll failed';
   }
 }
 
-/* ================= COMPUTE ================= */
+/* ================= COMPUTE (3 min) ================= */
 async function loadCompute(){
   try{
     const data = await fetchJSON(API.proxmox);
@@ -1326,37 +780,53 @@ async function loadCompute(){
     const running = (vms?.running||0) + (cts?.running||0);
     document.getElementById('kpi-vms').innerHTML = running + '<small>/ ' + ((vms?.total||0)+(cts?.total||0)) + ' guests</small>';
 
+    pushHist('h-cpu', host.cpu_percent);
+    pushHist('h-mem', host.memory.percent);
+    pushHist('h-disk', host.rootfs.percent);
+
     const hostHtml = `
       <div class="panel-title">
         <span class="status-dot" style="background:${statusColor(host.status)};box-shadow:0 0 6px ${statusColor(host.status)};"></span>
         <h3>${host.name}</h3>
         <span class="id-badge">up ${fmtUptime(host.uptime)}</span>
+        <span class="kebab"><span></span><span></span><span></span></span>
       </div>
       <div class="gauge-row">
-        ${gaugeSVG('g-cpu', host.cpu_percent, 'var(--orange)')}
-        ${gaugeSVG('g-mem', host.memory.percent, 'var(--violet)')}
-        ${gaugeSVG('g-disk', host.rootfs.percent, 'var(--cyan)')}
-        ${gaugeSVG('g-temp', Math.min((host.temperature_c/90)*100,100), host.temperature_c>65?'var(--red)':'var(--green)')}
+        ${gaugeArc('g-cpu', host.cpu_percent, 'CPU')}
+        ${gaugeArc('g-mem', host.memory.percent, 'Memory')}
+        ${gaugeArc('g-disk', host.rootfs.percent, 'Disk')}
+        ${gaugeArc('g-temp', Math.min((host.temperature_c/90)*100,100), 'Temp')}
         <div class="vitals-secondary">
-          <div class="vital-line"><span class="vl-lbl">Load avg</span><span style="font-family:var(--mono);font-size:11px;flex:1;">${host.load_average.join(' · ')}</span></div>
+          <div class="vital-line"><span class="vl-lbl">Load avg</span><span style="font-family:var(--mono);font-size:10.5px;flex:1;">${host.load_average.join(' · ')}</span></div>
           <div class="vital-line"><span class="vl-lbl">Memory</span><div class="vl-track"><div class="vl-fill" style="width:${host.memory.percent}%;background:var(--violet)"></div></div><span class="vl-val">${fmtBytes(host.memory.used)}</span></div>
           <div class="vital-line"><span class="vl-lbl">Disk</span><div class="vl-track"><div class="vl-fill" style="width:${host.rootfs.percent}%;background:var(--cyan)"></div></div><span class="vl-val">${fmtBytes(host.rootfs.used)}</span></div>
-          <div class="vital-line"><span class="vl-lbl">Network</span><span style="font-family:var(--mono);font-size:11px;flex:1;color:var(--text-dim)">${fmtBps(host.network.total_bps)} · ${host.network.interface}</span></div>
-          <div class="vital-line"><span class="vl-lbl">Temp</span><span style="font-family:var(--mono);font-size:11px;flex:1;color:var(--text-dim)">${host.temperature_c.toFixed(1)}°C</span></div>
+          <div class="vital-line"><span class="vl-lbl">Network</span><span style="font-family:var(--mono);font-size:10.5px;flex:1;color:var(--text-dim)">${fmtBps(host.network.total_bps)} · ${host.network.interface}</span></div>
+          <div class="vital-line"><span class="vl-lbl">Temp</span><span style="font-family:var(--mono);font-size:10.5px;flex:1;color:var(--text-dim)">${host.temperature_c.toFixed(1)}°C</span></div>
         </div>
       </div>
-      <div style="display:flex;gap:6px;margin-top:14px;">
-        <div class="gauge-lbl">CPU</div><div class="gauge-lbl" style="margin-left:66px;">Memory</div><div class="gauge-lbl" style="margin-left:60px;">Disk</div><div class="gauge-lbl" style="margin-left:64px;">Temp</div>
+      <div class="threshold-legend">
+        <div class="tl-item"><span class="tl-dot" style="background:var(--green)"></span>0–60 normal</div>
+        <div class="tl-item"><span class="tl-dot" style="background:var(--amber)"></span>60–85 elevated</div>
+        <div class="tl-item"><span class="tl-dot" style="background:var(--red)"></span>85–100 critical</div>
+      </div>
+      <div class="trend-panel">
+        <div class="trend-head">
+          <div class="trend-legend">
+            <span><span class="ld" style="background:var(--orange)"></span>CPU</span>
+            <span><span class="ld" style="background:var(--violet)"></span>Memory</span>
+            <span><span class="ld" style="background:var(--cyan)"></span>Disk</span>
+          </div>
+          <span class="trend-note">last ${hist['h-cpu'] ? hist['h-cpu'].length : 0} polls</span>
+        </div>
+        <div style="width:100%;height:34px;">${multiSparklineSVG([
+          {values:hist['h-cpu']||[], color:'var(--orange)'},
+          {values:hist['h-mem']||[], color:'var(--violet)'},
+          {values:hist['h-disk']||[], color:'var(--cyan)'}
+        ], 900, 34).replace('width="900" height="34"','width="100%" height="100%"')}</div>
       </div>`;
     const hostEl = document.getElementById('compute-host');
     hostEl.innerHTML = hostHtml;
     flash(hostEl);
-    setTimeout(()=>{
-      animateGauge('g-cpu', host.cpu_percent, 'var(--orange)');
-      animateGauge('g-mem', host.memory.percent, 'var(--violet)');
-      animateGauge('g-disk', host.rootfs.percent, 'var(--cyan)');
-      animateGauge('g-temp', Math.min((host.temperature_c/90)*100,100), host.temperature_c>65?'var(--red)':'var(--green)');
-    }, 50);
 
     document.getElementById('guest-count').textContent = `${vms.total+cts.total} total · ${vms.running+cts.running} running`;
     const guests = [...p.guests].sort((x,y)=> (y.status==='running') - (x.status==='running'));
@@ -1374,14 +844,16 @@ async function loadCompute(){
         </div>
       </div>`).join('');
     setLed('compute', true);
+    return true;
   }catch(e){
     document.getElementById('compute-host').innerHTML = errBlock('Unable to reach /api/proxmox — '+e.message);
     document.getElementById('guests-grid').innerHTML = '';
     setLed('compute', false);
+    return false;
   }
 }
 
-/* ================= NETWORK ================= */
+/* ================= NETWORK (3 min) ================= */
 async function loadNetwork(){
   try{
     const data = await fetchJSON(API.opnsense);
@@ -1398,11 +870,11 @@ async function loadNetwork(){
         </div>`;
     }
 
-    const maxLine = Math.max(...n.interfaces.map(i=>parseFloat(i.line_rate)||1e10));
     document.getElementById('iface-grid').innerHTML = n.interfaces.map(i=>{
       const rxPct = Math.min((i.traffic.rx_bps/(parseFloat(i.line_rate)||1e10))*100*400, 100);
       const txPct = Math.min((i.traffic.tx_bps/(parseFloat(i.line_rate)||1e10))*100*400, 100);
       const up = i.link_state==='2';
+      pushHist('if-'+i.id, i.traffic.total_mbps||0);
       return `
       <div class="iface-card">
         <div class="iface-top">
@@ -1412,6 +884,7 @@ async function loadNetwork(){
         <div class="iface-throughput">
           <div class="t-item rx"><span class="t-val">${i.traffic.rx_mbps.toFixed(2)}</span><span class="t-lbl">Mbps ↓ IN</span></div>
           <div class="t-item tx"><span class="t-val">${i.traffic.tx_mbps.toFixed(2)}</span><span class="t-lbl">Mbps ↑ OUT</span></div>
+          ${sparklineSVG(hist['if-'+i.id]||[], 'var(--cyan)', 64, 26)}
         </div>
         <div class="iface-bar-track"><div class="iface-bar-rx" style="width:${rxPct}%"></div></div>
         <div class="iface-bar-track"><div class="iface-bar-tx" style="width:${txPct}%"></div></div>
@@ -1419,21 +892,28 @@ async function loadNetwork(){
       </div>`;
     }).join('');
 
-    document.getElementById('gw-list').innerHTML = n.gateways.map(g=>`
-      <div class="gw-row">
-        <span class="status-dot" style="background:${statusColor(g.status)};box-shadow:0 0 6px ${statusColor(g.status)};"></span>
-        <span class="gw-name">${g.name}</span>
-        <span class="gw-addr">${g.address}</span>
-        <span class="gw-metric">${g.delay_ms}</span>
-        <span class="gw-metric">${g.loss} loss</span>
-      </div>`).join('');
+    document.getElementById('gw-list').innerHTML = `
+      <table class="gw-table">
+        <thead><tr><th>Gateway</th><th>Address</th><th class="num">Latency</th><th class="num">Loss</th></tr></thead>
+        <tbody>
+          ${n.gateways.map(g=>`
+          <tr>
+            <td class="gw-name-cell"><span class="status-dot" style="background:${statusColor(g.status)};box-shadow:0 0 6px ${statusColor(g.status)};"></span>${g.name}</td>
+            <td class="gw-addr-cell">${g.address}</td>
+            <td class="num">${g.delay_ms}</td>
+            <td class="num">${g.loss}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
 
     setLed('network', true);
+    return true;
   }catch(e){
     document.getElementById('busiest-callout').innerHTML='';
     document.getElementById('iface-grid').innerHTML = `<div class="panel">${errBlock('Unable to reach /api/opnsense — '+e.message)}</div>`;
     document.getElementById('gw-list').innerHTML = '';
     setLed('network', false);
+    return false;
   }
 }
 
@@ -1457,55 +937,52 @@ function setLed(key, ok){
   }
 }
 
-/* ---------- operator-controlled refresh ---------- */
-const REFRESH_MS = 180000; // 3 minutes
-let refreshInProgress = false;
+/* ---------- polling: split cadence, shared manual refresh ---------- */
+let localTimer = null, infraTimer = null, lastCloudSync = null;
 
-async function syncAll(manual = false){
-  if(refreshInProgress) return;
-  refreshInProgress = true;
-
-  const prompt = document.getElementById('operator-prompt');
-  if(prompt) prompt.style.display = 'none';
-
+function setBusy(busy){
   const btn = document.getElementById('refresh-btn');
   const state = document.getElementById('refresh-state-text');
-  const stateWrap = document.querySelector('.refresh-state');
+  const stateWrap = document.getElementById('refresh-state-wrap');
+  if(btn){ btn.disabled = busy; btn.classList.toggle('spinning', busy); }
+  if(state) state.textContent = busy ? 'POLLING' : 'READY';
+  if(stateWrap) stateWrap.classList.toggle('busy', busy);
+}
 
-  if(btn){
-    btn.disabled = true;
-    btn.querySelector('.refresh-icon').textContent = '⟳';
-  }
-  if(state) state.textContent = 'POLLING';
-  if(stateWrap) stateWrap.classList.add('busy');
+async function refreshLocal(){
+  await Promise.all([loadCompute(), loadNetwork()]);
+  document.getElementById('sync-local').textContent = 'local: ' + fmtClock(new Date()) + ' (3m)';
+}
+async function refreshInfra(){
+  await loadCloud();
+}
 
-  document.getElementById('last-sync').textContent = 'polling telemetry…';
+function scheduleLocal(){
+  if(localTimer) clearInterval(localTimer);
+  localTimer = setInterval(refreshLocal, LOCAL_REFRESH_MS);
+}
+function scheduleInfra(){
+  if(infraTimer) clearInterval(infraTimer);
+  infraTimer = setInterval(refreshInfra, INFRA_REFRESH_MS);
+}
 
+/* Manual refresh always polls all three immediately, then both
+   auto-poll timers restart their own countdown from that moment. */
+async function syncAll(manual){
+  const prompt = document.getElementById('operator-prompt');
+  if(prompt) prompt.style.display = 'none';
+  setBusy(true);
   try{
-    await Promise.all([
-      loadCloud(),
-      loadCompute(),
-      loadNetwork()
-    ]);
-
-    document.getElementById('last-sync').textContent =
-      'last sync ' + new Date().toLocaleTimeString('en-US',{hour12:false});
-  }catch(e){
-    document.getElementById('last-sync').textContent = 'telemetry poll failed';
+    await Promise.all([refreshLocal(), refreshInfra()]);
   }finally{
-    refreshInProgress = false;
-    if(btn){
-      btn.disabled = false;
-      btn.querySelector('.refresh-icon').textContent = '↻';
-    }
-    if(state) state.textContent = 'READY';
-    if(stateWrap) stateWrap.classList.remove('busy');
+    setBusy(false);
+    scheduleLocal();
+    scheduleInfra();
   }
 }
 
-/* Initial load, then refresh automatically every 3 minutes. */
+/* Initial load hits all three once, then each domain settles into its own cadence. */
 syncAll(false);
-setInterval(() => syncAll(false), REFRESH_MS);
 </script>
 </body>
 </html>
