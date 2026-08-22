@@ -484,7 +484,7 @@ footer .sync-times{display:flex;gap:16px;}
           <span class="idx">01</span>
           <h2>Network</h2>
           <span class="tag">OPNsense</span>
-          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 3m</span>/api/opnsense</span>
+          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 3m</span><span id="route-opnsense">/api/opnsense</span></span>
         </div>
         <div id="busiest-callout"></div>
         <div class="grid-auto" id="iface-grid" style="margin-bottom:16px;">
@@ -502,7 +502,7 @@ footer .sync-times{display:flex;gap:16px;}
           <span class="idx">02</span>
           <h2>Compute</h2>
           <span class="tag">Proxmox</span>
-          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 3m</span>/api/proxmox</span>
+          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 3m</span><span id="route-proxmox">/api/proxmox</span></span>
         </div>
         <div id="compute-host" class="panel" style="margin-bottom:16px;">
           <div class="skeleton sk-block" style="width:30%"></div><div class="skeleton sk-block" style="width:80%"></div>
@@ -517,7 +517,7 @@ footer .sync-times{display:flex;gap:16px;}
           <span class="idx">03</span>
           <h2>Cloud Infrastructure</h2>
           <span class="tag">AWS</span>
-          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 1h · pause hidden</span>/api/infrastructure</span>
+          <span class="sub"><span class="refresh-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>auto 1h · pause hidden</span><span id="route-infrastructure">/api/infrastructure</span></span>
         </div>
         <div class="grid-2" id="cloud-grid">
           <div class="panel"><div class="skeleton sk-block" style="width:40%"></div><div class="skeleton sk-block" style="width:90%"></div><div class="skeleton sk-block" style="width:70%"></div></div>
@@ -575,23 +575,69 @@ async function fetchJSON(url){
   const headers = {'Accept':'application/json'};
   const token = getAccessToken();
   const protectedRoute = url.includes('/api/auth/');
-  if(protectedRoute && token) headers.Authorization = 'Bearer ' + token;
+
+  if(protectedRoute && token){
+    headers.Authorization = 'Bearer ' + token;
+  }
+
+  async function doFetch(authToken){
+    const h = {'Accept':'application/json'};
+    if(protectedRoute && authToken) h.Authorization = 'Bearer ' + authToken;
+    return fetch(url, {
+      method:'GET',
+      mode:'cors',
+      credentials:'omit',
+      cache:'no-store',
+      headers:h,
+      signal:controller.signal
+    });
+  }
 
   try{
-    const res = await fetch(url, {method:'GET',mode:'cors',credentials:'omit',cache:'no-store',headers,signal:controller.signal});
+    let res = await doFetch(token);
+
+    // API Gateway HTTP API JWT authorizers can validate either aud or
+    // client_id. Cognito access tokens normally carry client_id; if the
+    // authorizer is configured in a way that expects the ID token audience,
+    // retry once with the ID token before declaring the session invalid.
     if(res.status===401 && protectedRoute){
-      clearAuthSession();
-      updateAuthUI();
-      throw new Error('session expired — please sign in again');
+      const session = getAuthSession();
+      const idToken = session?.id_token;
+      if(idToken && idToken !== token){
+        res = await doFetch(idToken);
+      }
     }
-    if(!res.ok) throw new Error('HTTP '+res.status);
+
+    if(res.status===401 && protectedRoute){
+      let detail = '';
+      try{
+        const body = await res.clone().json();
+        detail = body?.message || body?.error || '';
+      }catch(_){}
+      throw new Error('HTTP 401 Unauthorized' + (detail ? ': '+detail : ''));
+    }
+
+    if(!res.ok){
+      let detail = '';
+      try{
+        const body = await res.clone().json();
+        detail = body?.message || body?.error || body?.error_description || '';
+      }catch(_){}
+      throw new Error('HTTP '+res.status+(detail ? ' — '+detail : ''));
+    }
+
     return await res.json();
   }catch(e){
     if(e.name==='AbortError') throw new Error('request timed out');
-    if(e instanceof TypeError) throw new Error('CORS or network error');
+    if(e instanceof TypeError){
+      throw new Error('CORS or network error — check API Gateway CORS for Authorization header');
+    }
     throw e;
-  }finally{clearTimeout(timeout);}
+  }finally{
+    clearTimeout(timeout);
+  }
 }
+
 let lastNetMbps = 2;
 
 /* ---------- helpers ---------- */
@@ -814,7 +860,7 @@ async function loadCloud(){
     lastCloudSync = new Date();
     document.getElementById('sync-cloud').textContent = 'cloud: ' + fmtClock(lastCloudSync) + ' (hourly)';
   }catch(e){
-    document.getElementById('cloud-grid').innerHTML = `<div class="panel">${errBlock('Unable to reach /api/infrastructure — '+e.message)}</div>`;
+    document.getElementById('cloud-grid').innerHTML = `<div class="panel">${errBlock('Unable to reach '+(isAuthenticated()?'/api/auth/infrastructure':'/api/infrastructure')+' — '+e.message)}</div>`;
     setLed('cloud', false);
     document.getElementById('sync-cloud').textContent = 'cloud: poll failed';
   }
@@ -895,7 +941,7 @@ async function loadCompute(){
     setLed('compute', true);
     return true;
   }catch(e){
-    document.getElementById('compute-host').innerHTML = errBlock('Unable to reach /api/proxmox — '+e.message);
+    document.getElementById('compute-host').innerHTML = errBlock('Unable to reach '+(isAuthenticated()?'/api/auth/proxmox':'/api/proxmox')+' — '+e.message);
     document.getElementById('guests-grid').innerHTML = '';
     setLed('compute', false);
     return false;
@@ -959,7 +1005,7 @@ async function loadNetwork(){
     return true;
   }catch(e){
     document.getElementById('busiest-callout').innerHTML='';
-    document.getElementById('iface-grid').innerHTML = `<div class="panel">${errBlock('Unable to reach /api/opnsense — '+e.message)}</div>`;
+    document.getElementById('iface-grid').innerHTML = `<div class="panel">${errBlock('Unable to reach '+(isAuthenticated()?'/api/auth/opnsense':'/api/opnsense')+' — '+e.message)}</div>`;
     document.getElementById('gw-list').innerHTML = '';
     setLed('network', false);
     return false;
@@ -1132,6 +1178,20 @@ function handleAuthAction(){
   if(isAuthenticated())signOut();
   else beginSignIn().catch(e=>{console.error(e);alert(e.message||'Unable to start sign-in.')});
 }
+function updateApiRouteLabels(){
+  const signed=isAuthenticated();
+  const prefix=signed?'/api/auth':'/api';
+  const routes={
+    'route-opnsense':prefix+'/opnsense',
+    'route-proxmox':prefix+'/proxmox',
+    'route-infrastructure':prefix+'/infrastructure'
+  };
+  Object.entries(routes).forEach(([id,value])=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=value;
+  });
+}
+
 function updateAuthUI(){
   const signed=isAuthenticated(),btn=document.getElementById('auth-btn'),state=document.getElementById('auth-state');
   const user=document.getElementById('auth-user'),email=document.getElementById('auth-email');
@@ -1139,6 +1199,7 @@ function updateAuthUI(){
   if(state)state.textContent=signed?'AUTHENTICATED':'PUBLIC';
   if(user)user.style.display=signed?'flex':'none';
   if(email)email.textContent=signed?getSignedInEmail():'';
+  updateApiRouteLabels();
   updateManualRefreshUI();
 }
 function updateManualRefreshUI(){
