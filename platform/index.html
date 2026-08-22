@@ -445,8 +445,8 @@ footer .sync-times{display:flex;gap:16px;}
         </div>
         <div class="pulse-divider"></div>
         <div class="pulse-kpi violet">
-          <div class="val" id="kpi-cost">—<small>USD MTD</small></div>
-          <div class="lbl">Cloud spend</div>
+          <div class="val" id="kpi-uptime">—<small>host uptime</small></div>
+          <div class="lbl">Proxmox uptime</div>
         </div>
       </div>
     </div>
@@ -456,7 +456,7 @@ footer .sync-times{display:flex;gap:16px;}
         <div class="operator-prompt-icon">◉</div>
         <div>
           <div class="operator-prompt-title">TELEMETRY STANDBY</div>
-          <div class="operator-prompt-text">Network and compute poll every <b>3 minutes</b>. Cloud spend polls every <b>1 hour</b>. Use <b>Refresh telemetry</b> for an immediate poll of all three.</div>
+          <div class="operator-prompt-text">Network and compute poll every <b>3 minutes</b>. Cloud infrastructure polls every <b>1 hour</b>. Use <b>Refresh telemetry</b> for an immediate poll of all three.</div>
         </div>
       </div>
 
@@ -556,7 +556,11 @@ function fmtBytes(b){
 }
 function fmtUptime(s){
   if(!s) return '—';
-  const d=Math.floor(s/86400), h=Math.floor((s%86400)/3600), m=Math.floor((s%3600)/60);
+  const w=Math.floor(s/604800);
+  const d=Math.floor((s%604800)/86400);
+  const h=Math.floor((s%86400)/3600);
+  const m=Math.floor((s%3600)/60);
+  if(w>0) return w+'w '+d+'d';
   if(d>0) return d+'d '+h+'h';
   if(h>0) return h+'h '+m+'m';
   return m+'m';
@@ -714,8 +718,6 @@ async function loadCloud(){
   try{
     const data = await fetchJSON(API.infra);
     const a = data.account_a, b = data.account_b;
-    const totalMtd = (a?.cost?.mtd_net_unblended_cost_usd||0) + (b?.cost?.mtd_net_unblended_cost_usd||0);
-    document.getElementById('kpi-cost').innerHTML = fmtMoney(totalMtd) + '<small>USD MTD</small>';
 
     const accCard = (acc, tiles) => {
       const cost = acc.cost || {};
@@ -779,6 +781,7 @@ async function loadCompute(){
     const p = data.proxmox, host = p.host, vms = p.virtual_machines, cts = p.containers;
     const running = (vms?.running||0) + (cts?.running||0);
     document.getElementById('kpi-vms').innerHTML = running + '<small>/ ' + ((vms?.total||0)+(cts?.total||0)) + ' guests</small>';
+    document.getElementById('kpi-uptime').innerHTML = fmtUptime(host.uptime) + '<small>host uptime</small>';
 
     pushHist('h-cpu', host.cpu_percent);
     pushHist('h-mem', host.memory.percent);
