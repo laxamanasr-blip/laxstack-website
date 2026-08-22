@@ -428,7 +428,7 @@ body.authenticated .auth-dashboard{display:block;}
 .noc-hero-top{position:relative;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .noc-eyebrow{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--violet);}
 .noc-eyebrow .auth-live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:ledpulse 1.6s ease-in-out infinite;}
-.noc-title{margin-top:7px;font-family:var(--display);font-size:25px;font-weight:700;letter-spacing:.1px;}
+.noc-title{margin-top:7px;font-family:var(--display);font-size:27px;font-weight:700;letter-spacing:.1px;}
 .noc-title span{color:var(--violet);}
 .noc-meta-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px;}
 .auth-meta{
@@ -438,7 +438,7 @@ body.authenticated .auth-dashboard{display:block;}
 .auth-meta strong{color:var(--text-dim);font-weight:600;}
 .auth-meta.green{border-color:var(--green-dim);color:var(--green);background:rgba(79,214,140,.035);}
 
-.noc-topology-wrap{position:relative;z-index:2;height:172px;margin:6px -4px 0;}
+.noc-topology-wrap{position:relative;z-index:2;height:212px;margin:6px -4px 0;}
 .noc-topology-wrap svg{width:100%;height:100%;overflow:visible;display:block;}
 .topo-link{fill:none;stroke:var(--border-bright);stroke-width:1.5;transition:stroke .35s ease;}
 .topo-link.up{stroke:var(--cyan);}
@@ -451,8 +451,8 @@ body.authenticated .auth-dashboard{display:block;}
 .topo-node-ring.warn{stroke:var(--amber);filter:drop-shadow(0 0 6px rgba(255,178,56,.5));}
 .topo-node-ring.bad{stroke:var(--red);filter:drop-shadow(0 0 6px rgba(242,73,92,.5));}
 .topo-node-icon{stroke:var(--text-dim);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
-.topo-label{font-family:var(--mono);font-size:10px;font-weight:600;fill:var(--text);}
-.topo-metric{font-family:var(--mono);font-size:9.5px;fill:var(--text-faint);}
+.topo-label{font-family:var(--mono);font-size:11px;font-weight:600;fill:var(--text);}
+.topo-metric{font-family:var(--mono);font-size:10.5px;fill:var(--text-faint);}
 .topo-metric.ok{fill:var(--green);}
 .topo-metric.warn{fill:var(--amber);}
 .topo-metric.bad{fill:var(--red);}
@@ -464,8 +464,8 @@ body.authenticated .auth-dashboard{display:block;}
 }
 .noc-ticker-item{flex:1;min-width:130px;display:flex;flex-direction:column;gap:3px;padding:0 20px;position:relative;}
 .noc-ticker-item + .noc-ticker-item{border-left:1px solid var(--border);}
-.noc-ticker .nt-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:var(--text-faint);}
-.noc-ticker .nt-val{font-family:var(--mono);font-size:27px;font-weight:700;letter-spacing:-.5px;display:flex;align-items:baseline;gap:6px;}
+.noc-ticker .nt-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--text-faint);}
+.noc-ticker .nt-val{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.5px;display:flex;align-items:baseline;gap:6px;}
 .noc-ticker .nt-val small{font-size:11px;font-weight:500;color:var(--text-dim);}
 .noc-ticker-item.cyan .nt-val{color:var(--cyan);}
 .noc-ticker-item.orange .nt-val{color:var(--orange);}
@@ -505,64 +505,71 @@ body.authenticated .auth-dashboard{display:block;}
   .noc-topology-wrap{display:none;}
 }
 
-.auth-section{margin-top:28px;}
-.auth-section-head{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
-.auth-section-head .num{font-family:var(--mono);font-size:9px;color:var(--text-faint);}
-.auth-section-head h2{font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:.2px;}
-.auth-section-head .tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.7px;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid var(--border-bright);color:var(--text-faint);}
-.auth-section-head .section-note{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text-faint);}
+.auth-section{margin-top:32px;}
+.auth-section-head{display:flex;align-items:center;gap:11px;margin-bottom:13px;}
+.auth-section-head .num{font-family:var(--mono);font-size:10px;color:var(--text-faint);}
+.auth-section-head h2{font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:.2px;}
+.auth-section-head .tag{font-family:var(--mono);font-size:9px;letter-spacing:.7px;text-transform:uppercase;padding:4px 8px;border-radius:4px;border:1px solid var(--border-bright);color:var(--text-faint);}
+.brand-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 6px;border-radius:5px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.4px;border:1px solid;}
+.brand-chip .brand-mark{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-chip .brand-mark svg{width:11px;height:11px;}
+.brand-chip.opnsense{color:#ff8a3d;border-color:rgba(255,138,61,.35);background:rgba(255,138,61,.08);}
+.brand-chip.opnsense .brand-mark{background:rgba(255,138,61,.18);}
+.brand-chip.proxmox{color:#ff7a1a;border-color:rgba(255,122,26,.35);background:rgba(255,122,26,.08);}
+.brand-chip.proxmox .brand-mark{background:rgba(255,122,26,.18);}
+.auth-section-head .section-note{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-faint);}
 
-.auth-grid-2{display:grid;grid-template-columns:1.35fr .65fr;gap:12px;}
-.auth-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.auth-grid-2{display:grid;grid-template-columns:1.35fr .65fr;gap:14px;}
+.auth-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .auth-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.012);
   background:linear-gradient(160deg,rgba(255,255,255,.018),transparent 42%),var(--panel);
-  border:1px solid var(--border);border-radius:9px;padding:15px 16px;min-width:0;
+  border:1px solid var(--border);border-radius:10px;padding:18px 19px;min-width:0;
 }
 .auth-card:hover{border-color:var(--border-bright);}
-.auth-card-title{display:flex;align-items:center;gap:7px;margin-bottom:12px;}
-.auth-card-title h3{font-family:var(--display);font-size:12.5px;font-weight:600;}
-.auth-card-title .minor{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--text-faint);}
-.auth-status{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);}
+.auth-card-title{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.auth-card-title h3{font-family:var(--display);font-size:14.5px;font-weight:600;}
+.auth-card-title .minor{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);}
+.auth-status{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);}
 
-.auth-metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.auth-metric{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:10px;}
-.auth-metric .m-label{font-size:9px;color:var(--text-faint);}
-.auth-metric .m-value{font-family:var(--mono);font-size:15px;font-weight:700;margin-top:4px;}
+.auth-metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.auth-metric{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.auth-metric .m-label{font-size:10px;color:var(--text-faint);}
+.auth-metric .m-value{font-family:var(--mono);font-size:17px;font-weight:700;margin-top:5px;}
 
 .auth-table{width:100%;border-collapse:collapse;}
-.auth-table th{text-align:left;font-family:var(--mono);font-size:8.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding:0 7px 8px;border-bottom:1px solid var(--border);}
+.auth-table th{text-align:left;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding:0 8px 9px;border-bottom:1px solid var(--border);}
 .auth-table th.r,.auth-table td.r{text-align:right;}
-.auth-table td{padding:8px 7px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9.5px;color:var(--text-dim);}
+.auth-table td{padding:10px 8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-dim);}
 .auth-table tr:last-child td{border-bottom:none;}
 .auth-table .name{color:var(--text);font-weight:600;}
 .auth-table .ok{color:var(--green);}
 .auth-table .warn{color:var(--amber);}
 .auth-table .bad{color:var(--red);}
 
-.auth-bar-row{display:flex;align-items:center;gap:8px;margin:9px 0;}
-.auth-bar-label{font-family:var(--mono);font-size:9px;color:var(--text-dim);width:58px;}
-.auth-bar-track{flex:1;height:7px;border-radius:4px;background:var(--border);overflow:hidden;}
+.auth-bar-row{display:flex;align-items:center;gap:9px;margin:10px 0;}
+.auth-bar-label{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:62px;}
+.auth-bar-track{flex:1;height:8px;border-radius:4px;background:var(--border);overflow:hidden;}
 .auth-bar-fill{height:100%;border-radius:4px;}
-.auth-bar-value{font-family:var(--mono);font-size:9px;color:var(--text-faint);width:44px;text-align:right;}
+.auth-bar-value{font-family:var(--mono);font-size:10px;color:var(--text-faint);width:48px;text-align:right;}
 
-.auth-guest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;}
+.auth-guest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
 .auth-guest{
-  background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:11px 12px;
+  background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:13px 14px;
 }
-.auth-guest-top{display:flex;align-items:center;gap:7px;}
-.auth-guest-top .dot{width:6px;height:6px;border-radius:50%;}
-.auth-guest-name{font-family:var(--mono);font-size:10.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.auth-guest-type{font-family:var(--mono);font-size:7.5px;color:var(--text-faint);border:1px solid var(--border-bright);padding:2px 5px;border-radius:3px;}
-.auth-guest-meta{display:flex;justify-content:space-between;margin-top:7px;font-family:var(--mono);font-size:8.5px;color:var(--text-faint);}
-.auth-guest-bars{margin-top:8px;}
+.auth-guest-top{display:flex;align-items:center;gap:8px;}
+.auth-guest-top .dot{width:7px;height:7px;border-radius:50%;}
+.auth-guest-name{font-family:var(--mono);font-size:11.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.auth-guest-type{font-family:var(--mono);font-size:8px;color:var(--text-faint);border:1px solid var(--border-bright);padding:2px 6px;border-radius:3px;}
+.auth-guest-meta{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);}
+.auth-guest-bars{margin-top:9px;}
 
-.auth-iface-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px;}
-.auth-iface-tile{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:11px 12px;transition:border-color .15s ease;}
+.auth-iface-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px;}
+.auth-iface-tile{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:13px 14px;transition:border-color .15s ease;}
 .auth-iface-tile:hover{border-color:var(--border-bright);}
-.auth-iface-top{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
-.auth-iface-top .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.auth-iface-name{font-family:var(--mono);font-size:10.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.auth-iface-dev{font-family:var(--mono);font-size:8px;color:var(--text-faint);flex-shrink:0;}
+.auth-iface-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.auth-iface-top .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.auth-iface-name{font-family:var(--mono);font-size:11.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.auth-iface-dev{font-family:var(--mono);font-size:9px;color:var(--text-faint);flex-shrink:0;}
 
 .auth-alert{
   display:flex;align-items:center;gap:11px;border:1px solid var(--green-dim);background:rgba(79,214,140,.035);
@@ -668,45 +675,45 @@ body.authenticated .auth-dashboard{display:block;}
           <div class="noc-meta-row">
             <span class="auth-meta green">● AUTHENTICATED</span>
             <span class="auth-meta"><strong>SESSION</strong> Cognito / PKCE</span>
-            <span class="auth-meta"><strong>POLLING</strong> Net+Compute 3m · Cloud 1h</span>
+            <span class="auth-meta"><strong>NEXT SYNC</strong> net/compute <span id="next-local-countdown">—</span> · cloud <span id="next-infra-countdown">—</span></span>
           </div>
         </div>
 
         <div class="noc-topology-wrap">
-          <svg viewBox="0 0 1000 180" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-            <path id="topo-path-wan-net" class="topo-link" d="M80,90 Q205,72 330,55"/>
-            <path id="topo-path-wan-cloud" class="topo-link violet" d="M80,90 Q205,108 330,130"/>
-            <path id="topo-path-net-compute" class="topo-link" d="M358,55 L622,55"/>
-            <path id="topo-path-compute-guests" class="topo-link" d="M678,55 L896,55"/>
+          <svg viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <path id="topo-path-wan-net" class="topo-link" d="M80,110 Q205,85 330,60"/>
+            <path id="topo-path-wan-cloud" class="topo-link violet" d="M80,110 Q205,140 330,175"/>
+            <path id="topo-path-net-compute" class="topo-link" d="M358,60 L622,60"/>
+            <path id="topo-path-compute-guests" class="topo-link" d="M678,60 L896,60"/>
 
             <circle class="topo-pulse" r="3"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#topo-path-wan-net"/></animateMotion></circle>
             <circle class="topo-pulse violet" r="3"><animateMotion dur="2.9s" repeatCount="indefinite"><mpath href="#topo-path-wan-cloud"/></animateMotion></circle>
             <circle class="topo-pulse" r="3"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#topo-path-net-compute"/></animateMotion></circle>
             <circle class="topo-pulse" r="3"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#topo-path-compute-guests"/></animateMotion></circle>
 
-            <g transform="translate(80,90)">
+            <g transform="translate(80,110)">
               <circle class="topo-node-ring ok" id="topo-node-wan" r="24"/>
               <g class="topo-node-icon" transform="translate(-9,-9)"><circle cx="9" cy="9" r="8"/><path d="M1 9h16M9 1a12 12 0 0 1 0 16 12 12 0 0 1 0-16z"/></g>
               <text class="topo-label" x="0" y="42" text-anchor="middle">WAN</text>
             </g>
-            <g transform="translate(330,55)">
+            <g transform="translate(330,60)">
               <circle class="topo-node-ring" id="topo-node-net" r="24"/>
               <g class="topo-node-icon" transform="translate(-9,-9)"><path d="M9 1l8 3v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V4l8-3z"/></g>
               <text class="topo-label" x="0" y="42" text-anchor="middle">OPNsense</text>
               <text class="topo-metric" id="topo-metric-net" x="0" y="55" text-anchor="middle">— Mbps</text>
             </g>
-            <g transform="translate(330,130)">
+            <g transform="translate(330,175)">
               <circle class="topo-node-ring" id="topo-node-cloud" r="24"/>
               <g class="topo-node-icon" transform="translate(-10,-8)"><path d="M4.5 15a4.5 4.5 0 0 1-.4-9 5.5 5.5 0 0 1 10.7-1.8A4 4 0 0 1 15.5 12H4.5z"/></g>
               <text class="topo-label" x="0" y="42" text-anchor="middle">AWS</text>
             </g>
-            <g transform="translate(650,55)">
+            <g transform="translate(650,60)">
               <circle class="topo-node-ring" id="topo-node-compute" r="24"/>
               <g class="topo-node-icon" transform="translate(-9,-9)"><path d="M1 2h16v7H1zM1 11h16v7H1z"/><circle cx="4" cy="5.5" r=".6" fill="currentColor" stroke="none"/><circle cx="4" cy="14.5" r=".6" fill="currentColor" stroke="none"/></g>
               <text class="topo-label" x="0" y="42" text-anchor="middle">Proxmox</text>
               <text class="topo-metric" id="topo-metric-compute" x="0" y="55" text-anchor="middle">—% cpu</text>
             </g>
-            <g transform="translate(920,55)">
+            <g transform="translate(920,60)">
               <circle class="topo-node-ring" id="topo-node-guests" r="24"/>
               <g class="topo-node-icon" transform="translate(-9,-9)"><path d="M9 1l8 4-8 4-8-4 8-4zM1 9v8l8 4 8-4V9"/></g>
               <text class="topo-label" x="0" y="42" text-anchor="middle">Guests</text>
@@ -731,7 +738,7 @@ body.authenticated .auth-dashboard{display:block;}
       <div class="noc-lower-grid">
         <div class="noc-main-col">
           <section class="auth-section" style="margin-top:0;">
-            <div class="auth-section-head"><span class="num">01</span><h2>Network Operations</h2><span class="tag">OPNsense</span><span class="section-note" id="auth-network-sync">syncing…</span></div>
+            <div class="auth-section-head"><span class="num">01</span><h2>Network Operations</h2><span class="brand-chip opnsense"><span class="brand-mark"><svg viewBox="0 0 18 18"><path d="M9 1l8 3v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V4l8-3z" fill="currentColor"/></svg></span>OPNsense</span><span class="section-note" id="auth-network-sync">syncing…</span></div>
             <div class="auth-grid-2">
               <div class="auth-card">
                 <div class="auth-card-title"><span class="auth-status" id="auth-net-status"></span><h3>Interface telemetry</h3><span class="minor" id="auth-net-count">—</span></div>
@@ -752,7 +759,7 @@ body.authenticated .auth-dashboard{display:block;}
           </section>
 
           <section class="auth-section">
-            <div class="auth-section-head"><span class="num">02</span><h2>Compute Operations</h2><span class="tag">Proxmox</span><span class="section-note" id="auth-compute-sync">syncing…</span></div>
+            <div class="auth-section-head"><span class="num">02</span><h2>Compute Operations</h2><span class="brand-chip proxmox"><span class="brand-mark"><svg viewBox="0 0 18 18"><path d="M1 2h16v7H1zM1 11h16v7H1z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="4" cy="5.5" r="1" fill="currentColor"/><circle cx="4" cy="14.5" r="1" fill="currentColor"/></svg></span>Proxmox</span><span class="section-note" id="auth-compute-sync">syncing…</span></div>
             <div class="auth-grid-2">
               <div class="auth-card">
                 <div class="auth-card-title"><span class="auth-status" id="auth-compute-status"></span><h3 id="auth-host-name">Host</h3><span class="minor" id="auth-host-uptime">—</span></div>
@@ -1089,7 +1096,7 @@ function multiSparklineSVG(series, w=100, h=6){
 
 /* ---------- clock ---------- */
 function tickClock(){ document.getElementById('clock').textContent = fmtClock(new Date()); }
-setInterval(tickClock,1000); tickClock();
+setInterval(()=>{tickClock();tickCountdowns();},1000); tickClock();
 
 /* ---------- pulse strip canvas ---------- */
 const canvas = document.getElementById('pulse-canvas');
@@ -1765,6 +1772,7 @@ function consumeAnonymousRefresh(){
 
 /* ---------- polling: authenticated users only ---------- */
 let localTimer=null,infraTimer=null,lastCloudSync=null;
+let nextLocalAt=null,nextInfraAt=null;
 let pollingInProgress=false;
 function setBusy(busy){
   const btn=document.getElementById('refresh-btn'),state=document.getElementById('refresh-state-text'),wrap=document.getElementById('refresh-state-wrap');
@@ -1783,13 +1791,28 @@ async function refreshLocal(){
 async function refreshInfra(){await loadCloud()}
 function scheduleLocal(){
   if(localTimer)clearInterval(localTimer);localTimer=null;
-  if(document.hidden||!isAuthenticated())return;
+  if(document.hidden||!isAuthenticated()){nextLocalAt=null;return}
+  nextLocalAt=Date.now()+LOCAL_REFRESH_MS;
   localTimer=setInterval(()=>{if(!document.hidden&&!pollingInProgress&&isAuthenticated())refreshLocal().catch(console.error)},LOCAL_REFRESH_MS);
 }
 function scheduleInfra(){
   if(infraTimer)clearInterval(infraTimer);infraTimer=null;
-  if(document.hidden||!isAuthenticated())return;
+  if(document.hidden||!isAuthenticated()){nextInfraAt=null;return}
+  nextInfraAt=Date.now()+INFRA_REFRESH_MS;
   infraTimer=setInterval(()=>{if(!document.hidden&&!pollingInProgress&&isAuthenticated())refreshInfra().catch(console.error)},INFRA_REFRESH_MS);
+}
+function fmtCountdown(target){
+  if(!isAuthenticated())return '—';
+  if(document.hidden)return 'paused';
+  if(!target)return '—';
+  const ms=target-Date.now();
+  if(ms<=0)return 'now';
+  const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+  return m+':'+String(s).padStart(2,'0');
+}
+function tickCountdowns(){
+  authSetText('next-local-countdown', fmtCountdown(nextLocalAt));
+  authSetText('next-infra-countdown', fmtCountdown(nextInfraAt));
 }
 async function syncAll(manual){
   if(manual&&!consumeAnonymousRefresh()){updateManualRefreshUI();return}
