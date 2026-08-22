@@ -1216,15 +1216,18 @@ function renderAuthNetwork(data){
   document.getElementById('auth-ifaces').innerHTML=`<div class="auth-iface-grid">${(n.interfaces||[]).map(i=>{
     const up=i.link_state==='2';
     const rx=i.traffic?.rx_mbps||0, tx=i.traffic?.tx_mbps||0;
-    const line=parseFloat(i.line_rate)||10000;
+    const rxBps=i.traffic?.rx_bps||0, txBps=i.traffic?.tx_bps||0;
+    const line=parseFloat(i.line_rate)||1e10;
+    const rxPct=Math.min((rxBps/line)*100*400,100);
+    const txPct=Math.min((txBps/line)*100*400,100);
     return `<div class="auth-iface-tile">
       <div class="auth-iface-top">
         <span class="dot" style="background:${up?'var(--green)':'var(--red)'};box-shadow:0 0 6px ${up?'var(--green)':'var(--red)'}"></span>
         <span class="auth-iface-name">${i.name}</span>
         <span class="auth-iface-dev">${i.device}</span>
       </div>
-      ${authBar('RX',rx/line*100*400,'var(--cyan)',rx.toFixed(2)+' Mbps')}
-      ${authBar('TX',tx/line*100*400,'var(--violet)',tx.toFixed(2)+' Mbps')}
+      ${authBar('RX',rxPct,'var(--cyan)',rx.toFixed(2)+' Mbps')}
+      ${authBar('TX',txPct,'var(--violet)',tx.toFixed(2)+' Mbps')}
     </div>`;
   }).join('') || '<div class="auth-empty">No interfaces returned.</div>'}</div>`;
 
