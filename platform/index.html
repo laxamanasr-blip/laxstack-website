@@ -401,6 +401,129 @@ footer .sync-times{display:flex;gap:16px;}
 .auth-state{font-family:var(--mono);font-size:9px;letter-spacing:.5px;color:var(--text-faint)}
 .manual-limit{display:none;font-family:var(--mono);font-size:9px;color:var(--amber);margin-left:2px}
 
+
+/* ===== AUTHENTICATED OPERATIONS DASHBOARD ===== */
+.auth-dashboard{display:none;max-width:1480px;margin:0 auto;padding:24px 24px 70px;}
+body.authenticated .pulse-strip,body.authenticated main{display:none;}
+body.authenticated .auth-dashboard{display:block;}
+
+.auth-hero{
+  position:relative;overflow:hidden;min-height:178px;border:1px solid var(--border);
+  border-radius:12px;background:
+    radial-gradient(ellipse 600px 220px at 12% 25%,rgba(157,140,255,.13),transparent 70%),
+    radial-gradient(ellipse 500px 180px at 85% 70%,rgba(51,210,240,.07),transparent 70%),
+    linear-gradient(145deg,#171922,#111217);
+  padding:25px 28px;box-shadow:0 18px 55px rgba(0,0,0,.18);
+}
+.auth-hero:after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:28px 28px;mask-image:linear-gradient(90deg,black,transparent 85%);
+}
+.auth-hero-content{position:relative;z-index:2;}
+.auth-eyebrow{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;letter-spacing:2px;color:var(--violet);margin-bottom:9px;}
+.auth-eyebrow .auth-live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green);animation:ledpulse 1.6s ease-in-out infinite;}
+.auth-title{font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:.1px;}
+.auth-title span{color:var(--violet);}
+.auth-subtitle{margin-top:8px;color:var(--text-dim);font-size:11.5px;}
+.auth-meta-row{display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.auth-meta{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--border);
+  background:rgba(0,0,0,.18);border-radius:6px;font-family:var(--mono);font-size:9px;color:var(--text-faint);
+}
+.auth-meta strong{color:var(--text-dim);font-weight:600;}
+.auth-meta.green{border-color:var(--green-dim);color:var(--green);background:rgba(79,214,140,.04);}
+
+.auth-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;}
+.auth-kpi{
+  border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:15px 16px;
+  position:relative;overflow:hidden;
+}
+.auth-kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--cyan);}
+.auth-kpi:nth-child(2):before{background:var(--orange);}
+.auth-kpi:nth-child(3):before{background:var(--violet);}
+.auth-kpi:nth-child(4):before{background:var(--green);}
+.auth-kpi .ak-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;}
+.auth-kpi .ak-value{font-family:var(--mono);font-size:23px;font-weight:700;margin-top:7px;}
+.auth-kpi .ak-detail{font-size:9.5px;color:var(--text-faint);margin-top:3px;}
+
+.auth-section{margin-top:24px;}
+.auth-section-head{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+.auth-section-head .num{font-family:var(--mono);font-size:9px;color:var(--text-faint);}
+.auth-section-head h2{font-family:var(--display);font-size:16px;font-weight:600;}
+.auth-section-head .tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.7px;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid var(--border-bright);color:var(--text-faint);}
+.auth-section-head .section-note{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text-faint);}
+
+.auth-grid-2{display:grid;grid-template-columns:1.35fr .65fr;gap:12px;}
+.auth-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.auth-card{
+  background:linear-gradient(160deg,rgba(255,255,255,.018),transparent 42%),var(--panel);
+  border:1px solid var(--border);border-radius:9px;padding:15px 16px;min-width:0;
+}
+.auth-card:hover{border-color:var(--border-bright);}
+.auth-card-title{display:flex;align-items:center;gap:7px;margin-bottom:12px;}
+.auth-card-title h3{font-family:var(--display);font-size:12.5px;font-weight:600;}
+.auth-card-title .minor{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--text-faint);}
+.auth-status{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);}
+
+.auth-metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.auth-metric{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:10px;}
+.auth-metric .m-label{font-size:9px;color:var(--text-faint);}
+.auth-metric .m-value{font-family:var(--mono);font-size:15px;font-weight:700;margin-top:4px;}
+
+.auth-table{width:100%;border-collapse:collapse;}
+.auth-table th{text-align:left;font-family:var(--mono);font-size:8.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding:0 7px 8px;border-bottom:1px solid var(--border);}
+.auth-table th.r,.auth-table td.r{text-align:right;}
+.auth-table td{padding:8px 7px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9.5px;color:var(--text-dim);}
+.auth-table tr:last-child td{border-bottom:none;}
+.auth-table .name{color:var(--text);font-weight:600;}
+.auth-table .ok{color:var(--green);}
+.auth-table .warn{color:var(--amber);}
+.auth-table .bad{color:var(--red);}
+
+.auth-bar-row{display:flex;align-items:center;gap:8px;margin:9px 0;}
+.auth-bar-label{font-family:var(--mono);font-size:9px;color:var(--text-dim);width:58px;}
+.auth-bar-track{flex:1;height:7px;border-radius:4px;background:var(--border);overflow:hidden;}
+.auth-bar-fill{height:100%;border-radius:4px;}
+.auth-bar-value{font-family:var(--mono);font-size:9px;color:var(--text-faint);width:44px;text-align:right;}
+
+.auth-guest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;}
+.auth-guest{
+  background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:11px 12px;
+}
+.auth-guest-top{display:flex;align-items:center;gap:7px;}
+.auth-guest-top .dot{width:6px;height:6px;border-radius:50%;}
+.auth-guest-name{font-family:var(--mono);font-size:10.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.auth-guest-type{font-family:var(--mono);font-size:7.5px;color:var(--text-faint);border:1px solid var(--border-bright);padding:2px 5px;border-radius:3px;}
+.auth-guest-meta{display:flex;justify-content:space-between;margin-top:7px;font-family:var(--mono);font-size:8.5px;color:var(--text-faint);}
+.auth-guest-bars{margin-top:8px;}
+
+.auth-alert{
+  display:flex;align-items:center;gap:11px;border:1px solid var(--green-dim);background:rgba(79,214,140,.035);
+  border-radius:8px;padding:11px 13px;margin-top:12px;
+}
+.auth-alert .big-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green);}
+.auth-alert b{color:var(--text);font-family:var(--mono);font-size:10px;}
+.auth-alert span{font-size:10px;color:var(--text-dim);}
+
+.auth-empty{color:var(--text-faint);font-family:var(--mono);font-size:10px;padding:8px 0;}
+.auth-dashboard-footer{margin-top:25px;padding-top:15px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:9px;color:var(--text-faint);}
+
+@media(max-width:1050px){
+  .auth-overview{grid-template-columns:repeat(2,1fr);}
+  .auth-grid-2{grid-template-columns:1fr;}
+}
+@media(max-width:760px){
+  .auth-dashboard{padding:16px 14px 50px;}
+  .auth-title{font-size:24px;}
+  .auth-overview,.auth-grid-3{grid-template-columns:1fr 1fr;}
+  .auth-metric-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:500px){
+  .auth-overview,.auth-grid-3,.auth-metric-grid{grid-template-columns:1fr;}
+}
+
 </style>
 </head>
 <body>
@@ -468,6 +591,80 @@ footer .sync-times{display:flex;gap:16px;}
         </div>
       </div>
     </div>
+
+
+    <!-- ================= AUTHENTICATED OPERATIONS DASHBOARD ================= -->
+    <section id="auth-dashboard" class="auth-dashboard">
+      <div class="auth-hero">
+        <div class="auth-hero-content">
+          <div class="auth-eyebrow"><span class="auth-live"></span>PRIVATE PLATFORM OPERATIONS</div>
+          <div class="auth-title">Welcome, <span id="auth-welcome-name">Operator</span></div>
+          <div class="auth-subtitle">Authenticated operations view · expanded telemetry · live infrastructure posture</div>
+          <div class="auth-meta-row">
+            <span class="auth-meta green">● AUTHENTICATED</span>
+            <span class="auth-meta"><strong>SESSION</strong> Cognito / PKCE</span>
+            <span class="auth-meta"><strong>POLLING</strong> Network + Compute 3m · Cloud 1h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-overview">
+        <div class="auth-kpi"><div class="ak-label">Platform health</div><div class="ak-value" id="auth-kpi-health">—</div><div class="ak-detail" id="auth-kpi-health-detail">Waiting for telemetry</div></div>
+        <div class="auth-kpi"><div class="ak-label">Compute guests</div><div class="ak-value" id="auth-kpi-guests">—</div><div class="ak-detail" id="auth-kpi-guests-detail">—</div></div>
+        <div class="auth-kpi"><div class="ak-label">Network throughput</div><div class="ak-value" id="auth-kpi-network">—</div><div class="ak-detail" id="auth-kpi-network-detail">—</div></div>
+        <div class="auth-kpi"><div class="ak-label">Proxmox uptime</div><div class="ak-value" id="auth-kpi-uptime">—</div><div class="ak-detail" id="auth-kpi-uptime-detail">Host</div></div>
+      </div>
+
+      <div class="auth-alert">
+        <span class="big-dot"></span>
+        <div><b id="auth-posture">Operational telemetry is healthy.</b> <span id="auth-posture-detail">Authenticated dashboard is receiving protected telemetry.</span></div>
+      </div>
+
+      <section class="auth-section">
+        <div class="auth-section-head"><span class="num">01</span><h2>Network Operations</h2><span class="tag">OPNsense</span><span class="section-note" id="auth-network-sync">syncing…</span></div>
+        <div class="auth-grid-2">
+          <div class="auth-card">
+            <div class="auth-card-title"><span class="auth-status" id="auth-net-status"></span><h3>Interface telemetry</h3><span class="minor" id="auth-net-count">—</span></div>
+            <div id="auth-ifaces"><div class="auth-empty">Waiting for protected telemetry…</div></div>
+          </div>
+          <div class="auth-card">
+            <div class="auth-card-title"><span class="auth-status"></span><h3>Gateways</h3><span class="minor">reachability</span></div>
+            <div id="auth-gateways"><div class="auth-empty">Waiting…</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="auth-section">
+        <div class="auth-section-head"><span class="num">02</span><h2>Compute Operations</h2><span class="tag">Proxmox</span><span class="section-note" id="auth-compute-sync">syncing…</span></div>
+        <div class="auth-grid-2">
+          <div class="auth-card">
+            <div class="auth-card-title"><span class="auth-status" id="auth-compute-status"></span><h3 id="auth-host-name">Host</h3><span class="minor" id="auth-host-uptime">—</span></div>
+            <div class="auth-metric-grid" id="auth-host-metrics"></div>
+            <div style="margin-top:12px" id="auth-host-bars"></div>
+          </div>
+          <div class="auth-card">
+            <div class="auth-card-title"><span class="auth-status"></span><h3>Capacity posture</h3><span class="minor">current</span></div>
+            <div id="auth-capacity"></div>
+          </div>
+        </div>
+        <div class="auth-card" style="margin-top:12px;">
+          <div class="auth-card-title"><span class="auth-status"></span><h3>Guest inventory</h3><span class="minor" id="auth-guest-count">—</span></div>
+          <div class="auth-guest-grid" id="auth-guests"><div class="auth-empty">Waiting…</div></div>
+        </div>
+      </section>
+
+      <section class="auth-section">
+        <div class="auth-section-head"><span class="num">03</span><h2>Cloud Infrastructure</h2><span class="tag">AWS</span><span class="section-note" id="auth-cloud-sync">syncing…</span></div>
+        <div class="auth-grid-3" id="auth-cloud-grid">
+          <div class="auth-card"><div class="auth-empty">Waiting for protected AWS telemetry…</div></div>
+        </div>
+      </section>
+
+      <div class="auth-dashboard-footer">
+        <span>LAXSTACK PRIVATE OPERATIONS · protected telemetry</span>
+        <span id="auth-footer-session">authenticated session active</span>
+      </div>
+    </section>
 
     <main>
       <div id="operator-prompt" class="operator-prompt">
@@ -805,10 +1002,125 @@ function drawPulse(){
 }
 requestAnimationFrame(drawPulse);
 
+
+/* ================= AUTHENTICATED DASHBOARD RENDERERS ================= */
+function authSetText(id,value){const e=document.getElementById(id);if(e)e.textContent=value}
+function authPct(v){return Math.max(0,Math.min(100,Number(v)||0))}
+function authBar(label,pct,color,value){
+  return `<div class="auth-bar-row"><span class="auth-bar-label">${label}</span><div class="auth-bar-track"><div class="auth-bar-fill" style="width:${authPct(pct)}%;background:${color}"></div></div><span class="auth-bar-value">${value}</span></div>`;
+}
+function authHealthClass(status){
+  const s=String(status||'').toLowerCase();
+  return ['online','running','up'].includes(s)?'ok':(['stopped','offline','down'].includes(s)?'bad':'warn');
+}
+function renderAuthNetwork(data){
+  const n=data.opnsense;
+  if(!n)return;
+  const total=(n.interfaces||[]).reduce((s,i)=>s+(i.traffic?.total_mbps||0),0)||(n.busiest_interface?.total_mbps||0);
+  authSetText('auth-kpi-network',total.toFixed(2)+' Mbps');
+  authSetText('auth-kpi-network-detail',`${(n.interfaces||[]).length} interfaces · ${n.gateways?.length||0} gateways`);
+  authSetText('auth-net-count',`${(n.interfaces||[]).length} interfaces`);
+  authSetText('auth-network-sync','updated '+fmtClock(new Date()));
+
+  document.getElementById('auth-ifaces').innerHTML=(n.interfaces||[]).map(i=>{
+    const up=i.link_state==='2';
+    const rx=i.traffic?.rx_mbps||0, tx=i.traffic?.tx_mbps||0;
+    const line=parseFloat(i.line_rate)||10000;
+    return `<div style="margin-bottom:13px;">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:${up?'var(--green)':'var(--red)'};box-shadow:0 0 6px ${up?'var(--green)':'var(--red)'}"></span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text)">${i.name}</span>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:8px;color:var(--text-faint)">${i.device}</span>
+      </div>
+      ${authBar('RX',rx/line*100*400,'var(--cyan)',rx.toFixed(2)+' Mbps')}
+      ${authBar('TX',tx/line*100*400,'var(--violet)',tx.toFixed(2)+' Mbps')}
+    </div>`;
+  }).join('') || '<div class="auth-empty">No interfaces returned.</div>';
+
+  document.getElementById('auth-gateways').innerHTML=`
+    <table class="auth-table"><thead><tr><th>Gateway</th><th>Address</th><th class="r">Latency</th><th class="r">Loss</th></tr></thead><tbody>
+    ${(n.gateways||[]).map(g=>`<tr>
+      <td class="name"><span class="${authHealthClass(g.status)}">●</span> ${g.name}</td>
+      <td>${g.address}</td><td class="r">${g.delay_ms} ms</td><td class="r">${g.loss}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+function renderAuthCompute(data){
+  const p=data.proxmox,host=p?.host;
+  if(!host)return;
+  const vms=p.virtual_machines||{},cts=p.containers||{},guests=p.guests||[];
+  const total=(vms.total||0)+(cts.total||0),running=(vms.running||0)+(cts.running||0);
+  authSetText('auth-kpi-guests',`${running}/${total}`);
+  authSetText('auth-kpi-guests-detail',`${vms.running||0} VMs · ${cts.running||0} containers running`);
+  authSetText('auth-kpi-uptime',fmtUptime(host.uptime));
+  authSetText('auth-kpi-uptime-detail',host.name||'Proxmox host');
+  authSetText('auth-host-name',host.name||'Proxmox host');
+  authSetText('auth-host-uptime','up '+fmtUptime(host.uptime));
+  authSetText('auth-compute-sync','updated '+fmtClock(new Date()));
+  const temp=Number(host.temperature_c)||0;
+  document.getElementById('auth-host-metrics').innerHTML=[
+    ['CPU',(Number(host.cpu_percent)||0).toFixed(1)+'%'],
+    ['Memory',(Number(host.memory?.percent)||0).toFixed(0)+'%'],
+    ['Disk',(Number(host.rootfs?.percent)||0).toFixed(0)+'%']
+  ].map(x=>`<div class="auth-metric"><div class="m-label">${x[0]}</div><div class="m-value">${x[1]}</div></div>`).join('');
+  document.getElementById('auth-host-bars').innerHTML=
+    authBar('CPU',host.cpu_percent,'var(--orange)',(Number(host.cpu_percent)||0).toFixed(1)+'%')+
+    authBar('MEM',host.memory?.percent,'var(--violet)',(Number(host.memory?.percent)||0).toFixed(0)+'%')+
+    authBar('DISK',host.rootfs?.percent,'var(--cyan)',(Number(host.rootfs?.percent)||0).toFixed(0)+'%')+
+    authBar('TEMP',Math.min(temp/90*100,100),'var(--amber)',temp.toFixed(1)+'°C');
+
+  const pressure=Math.max(Number(host.cpu_percent)||0,Number(host.memory?.percent)||0,Number(host.rootfs?.percent)||0);
+  authSetText('auth-capacity',pressure>=85?'Capacity pressure is critical.':pressure>=60?'Capacity is elevated but within operating range.':'Capacity posture is healthy.');
+  const cap=document.getElementById('auth-capacity');
+  cap.innerHTML+=authBar('CPU',host.cpu_percent,'var(--orange)',(Number(host.cpu_percent)||0).toFixed(1)+'%')+
+                  authBar('MEM',host.memory?.percent,'var(--violet)',(Number(host.memory?.percent)||0).toFixed(0)+'%')+
+                  authBar('DISK',host.rootfs?.percent,'var(--cyan)',(Number(host.rootfs?.percent)||0).toFixed(0)+'%');
+
+  authSetText('auth-guest-count',`${total} total · ${running} running`);
+  document.getElementById('auth-guests').innerHTML=guests.map(g=>{
+    const runningGuest=g.status==='running';
+    return `<div class="auth-guest">
+      <div class="auth-guest-top"><span class="dot" style="background:${runningGuest?'var(--green)':'var(--red)'};box-shadow:0 0 6px ${runningGuest?'var(--green)':'var(--red)'}"></span>
+      <span class="auth-guest-name">${g.name}</span><span class="auth-guest-type">${String(g.type||'guest').toUpperCase()}</span></div>
+      <div class="auth-guest-meta"><span>vmid ${g.vmid}</span><span>${runningGuest?fmtUptime(g.uptime):'stopped'}</span></div>
+      <div class="auth-guest-bars">
+        ${authBar('CPU',g.cpu_percent,'var(--orange)',(Number(g.cpu_percent)||0).toFixed(1)+'%')}
+        ${authBar('MEM',g.memory?.percent,'var(--violet)',(Number(g.memory?.percent)||0).toFixed(0)+'%')}
+      </div>
+    </div>`;
+  }).join('') || '<div class="auth-empty">No guests returned.</div>';
+}
+function renderAuthCloud(data){
+  const a=data.account_a,b=data.account_b;
+  const cards=[];
+  const cloudCard=(acc,title,items)=>{
+    if(!acc)return;
+    const cost=acc.cost||{},mtd=Number(cost.mtd_net_unblended_cost_usd)||0,prev=Number(cost.last_month_net_unblended_cost_usd)||0;
+    cards.push(`<div class="auth-card">
+      <div class="auth-card-title"><span class="auth-status"></span><h3>${title}</h3><span class="minor">${acc.account_id||''}</span></div>
+      <div class="auth-metric-grid">${items.map(x=>`<div class="auth-metric"><div class="m-label">${x[1]}</div><div class="m-value">${x[0]}</div></div>`).join('')}</div>
+      <div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--text-faint);"><span>MTD cost</span><strong style="color:var(--violet);font-size:12px;">${fmtMoney(mtd)}</strong></div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;font-family:var(--mono);font-size:9px;color:var(--text-faint);"><span>Last month</span><span>${fmtMoney(prev)}</span></div>
+      </div>
+    </div>`);
+  };
+  cloudCard(a,'AWS account A',[
+    [a.vpc_singapore??0,'VPCs · SGP'],[a.ec2_singapore??0,'EC2 · SGP'],
+    [a.s3_buckets??0,'S3 buckets'],[a.lambda_functions??0,'Lambda functions']
+  ]);
+  cloudCard(b,'AWS account B',[
+    [b.cloudfront_distributions??0,'CloudFront'],[b.route53_hosted_zones??0,'Route 53 zones'],
+    [b.acm_certificates_us_east_1??0,'ACM certificates'],['us-e1','ACM region']
+  ]);
+  document.getElementById('auth-cloud-grid').innerHTML=cards.join('')||'<div class="auth-card"><div class="auth-empty">No AWS accounts returned.</div></div>';
+  authSetText('auth-cloud-sync','updated '+fmtClock(new Date())+' · next poll 1h');
+}
+
 /* ================= CLOUD (hourly) ================= */
 async function loadCloud(){
   try{
     const data = await fetchJSON(isAuthenticated() ? API.authInfra : API.infra);
+    if(isAuthenticated()) renderAuthCloud(data);
     const a = data.account_a, b = data.account_b;
 
     const accCard = (acc, tiles) => {
@@ -870,6 +1182,7 @@ async function loadCloud(){
 async function loadCompute(){
   try{
     const data = await fetchJSON(isAuthenticated() ? API.authProxmox : API.proxmox);
+    if(isAuthenticated()) renderAuthCompute(data);
     const p = data.proxmox, host = p.host, vms = p.virtual_machines, cts = p.containers;
     const running = (vms?.running||0) + (cts?.running||0);
     document.getElementById('kpi-vms').innerHTML = running + '<small>/ ' + ((vms?.total||0)+(cts?.total||0)) + ' guests</small>';
@@ -952,6 +1265,7 @@ async function loadCompute(){
 async function loadNetwork(){
   try{
     const data = await fetchJSON(isAuthenticated() ? API.authOpnsense : API.opnsense);
+    if(isAuthenticated()) renderAuthNetwork(data);
     const n = data.opnsense;
     const totalMbps = n.interfaces.reduce((s,i)=>s+(i.traffic.total_mbps||0),0) || (n.busiest_interface?.total_mbps||0);
     lastNetMbps = Math.max(totalMbps, n.busiest_interface?.total_mbps||0, 0.5);
@@ -1016,6 +1330,19 @@ async function loadNetwork(){
 const ledState = { cloud:null, compute:null, network:null };
 function setLed(key, ok){
   ledState[key] = ok;
+  if(isAuthenticated()){
+    const valsNow=Object.values(ledState).filter(v=>v!==null);
+    const health=valsNow.length===3 && valsNow.every(Boolean) ? 'OPERATIONAL' : (valsNow.some(Boolean) ? 'DEGRADED' : 'UNREACHABLE');
+    authSetText('auth-kpi-health',health);
+    authSetText('auth-kpi-health-detail',health==='OPERATIONAL'?'All telemetry sources online':'Review protected telemetry');
+    const posture=document.getElementById('auth-posture');
+    const detail=document.getElementById('auth-posture-detail');
+    if(posture){
+      posture.textContent=health==='OPERATIONAL'?'Operational telemetry is healthy.':health==='DEGRADED'?'Some telemetry sources need attention.':'Protected telemetry is unreachable.';
+      posture.style.color=health==='OPERATIONAL'?'var(--green)':health==='DEGRADED'?'var(--amber)':'var(--red)';
+    }
+    if(detail)detail.textContent='Authenticated dashboard · '+new Date().toLocaleTimeString('en-US',{hour12:false});
+  }
   const vals = Object.values(ledState);
   const led = document.getElementById('overall-led');
   const text = document.getElementById('overall-text');
@@ -1065,7 +1392,7 @@ function saveAuthSession(tokens){
 function getAuthSession(){
   try{return JSON.parse(sessionStorage.getItem(AUTH_STORAGE_KEY)||'null')}catch(_){return null}
 }
-function clearAuthSession(){sessionStorage.removeItem(AUTH_STORAGE_KEY)}
+function clearAuthSession(){sessionStorage.removeItem(AUTH_STORAGE_KEY);document.body.classList.remove('authenticated')}
 function savePkceTransaction(tx){
   const value=JSON.stringify(tx);
   // sessionStorage is the primary store. localStorage is a short-lived
@@ -1195,10 +1522,14 @@ function updateApiRouteLabels(){
 function updateAuthUI(){
   const signed=isAuthenticated(),btn=document.getElementById('auth-btn'),state=document.getElementById('auth-state');
   const user=document.getElementById('auth-user'),email=document.getElementById('auth-email');
+  const welcome=document.getElementById('auth-welcome-name');
+  document.body.classList.toggle('authenticated',signed);
   if(btn){btn.textContent=signed?'Sign out':'Sign in';btn.classList.toggle('signout',signed)}
   if(state)state.textContent=signed?'AUTHENTICATED':'PUBLIC';
   if(user)user.style.display=signed?'flex':'none';
-  if(email)email.textContent=signed?getSignedInEmail():'';
+  const signedEmail=signed?getSignedInEmail():'';
+  if(email)email.textContent=signed?signedEmail:'';
+  if(welcome)welcome.textContent=signed?signedEmail:'Operator';
   updateApiRouteLabels();
   updateManualRefreshUI();
 }
