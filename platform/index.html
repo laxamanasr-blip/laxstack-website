@@ -437,6 +437,12 @@ footer .sync-times{display:flex;gap:16px;}
 .auth-btn{display:flex;align-items:center;gap:7px;cursor:pointer;border:1px solid var(--violet-dim);background:rgba(157,140,255,.07);color:var(--violet);border-radius:6px;padding:7px 12px;font-family:var(--mono);font-size:10.5px;font-weight:600;transition:all .15s ease}
 .auth-btn:hover{background:rgba(157,140,255,.14);border-color:var(--violet)}
 .auth-btn.signout{border-color:var(--border);background:var(--panel);color:var(--text-dim)}
+.auth-btn.cta{background:var(--violet);border-color:var(--violet);color:#0c0710;font-weight:700;animation:ctapulse 2.4s ease-in-out infinite;}
+.auth-btn.cta:hover{background:#b3a3ff;border-color:#b3a3ff;}
+@keyframes ctapulse{0%,100%{box-shadow:0 0 0 0 rgba(157,140,255,.45);}50%{box-shadow:0 0 0 6px rgba(157,140,255,0);}}
+.auth-nudge{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;color:var(--text-faint);letter-spacing:.2px;white-space:nowrap;}
+.auth-nudge b{color:var(--violet);font-weight:600;}
+@media(max-width:1080px){.auth-nudge{display:none;}}
 .auth-user{display:none;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:6px 9px;border:1px solid var(--border);border-radius:6px;background:var(--panel);max-width:210px}
 .auth-user .auth-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
 .auth-user .auth-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -673,8 +679,9 @@ body.authenticated .auth-dashboard{display:block;}
         <div class="status-pill"><span class="led" id="overall-led"></span><span id="overall-text">Awaiting telemetry</span></div>
         <div class="auth-area">
           <div class="auth-user" id="auth-user"><span class="auth-dot"></span><span class="auth-email" id="auth-email"></span></div>
+          <span class="auth-nudge" id="auth-nudge">Sign in to unlock <b>full telemetry</b></span>
           <span class="auth-state" id="auth-state">PUBLIC</span>
-          <button class="auth-btn" id="auth-btn" onclick="handleAuthAction()">Sign in</button>
+          <button class="auth-btn cta" id="auth-btn" onclick="handleAuthAction()" title="Sign in to unlock interface & gateway detail, compute gauges, the live ops feed, and auto-refresh.">Sign in</button>
         </div>
         <div class="clock" id="clock">--:--:--</div>
       </div>
@@ -1727,11 +1734,12 @@ function updateApiRouteLabels(){
 function updateAuthUI(){
   const signed=isAuthenticated(),btn=document.getElementById('auth-btn'),state=document.getElementById('auth-state');
   const user=document.getElementById('auth-user'),email=document.getElementById('auth-email');
-  const welcome=document.getElementById('auth-welcome-name');
+  const welcome=document.getElementById('auth-welcome-name'),nudge=document.getElementById('auth-nudge');
   document.body.classList.toggle('authenticated',signed);
-  if(btn){btn.textContent=signed?'Sign out':'Sign in';btn.classList.toggle('signout',signed)}
+  if(btn){btn.textContent=signed?'Sign out':'Sign in';btn.classList.toggle('signout',signed);btn.classList.toggle('cta',!signed)}
   if(state)state.textContent=signed?'AUTHENTICATED':'PUBLIC';
   if(user)user.style.display=signed?'flex':'none';
+  if(nudge)nudge.style.display=signed?'none':'flex';
   const signedEmail=signed?getSignedInEmail():'';
   if(email)email.textContent=signed?signedEmail:'';
   if(welcome)welcome.textContent=signed?signedEmail:'Operator';
