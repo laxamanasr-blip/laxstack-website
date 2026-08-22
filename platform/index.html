@@ -473,8 +473,8 @@ footer .sync-times{display:flex;gap:16px;}
       <div id="operator-prompt" class="operator-prompt">
         <div class="operator-prompt-icon">◉</div>
         <div>
-          <div class="operator-prompt-title">TELEMETRY STANDBY</div>
-          <div class="operator-prompt-text">Sign in to enable <b>automatic telemetry polling</b>. Anonymous viewers can manually refresh up to <b>3 times</b>. Signed-in sessions poll network and compute every <b>3 minutes</b> and cloud infrastructure every <b>1 hour</b>.</div>
+          <div class="operator-prompt-title">TELEMETRY READY</div>
+          <div class="operator-prompt-text">Live telemetry loaded. Anonymous viewers can manually refresh up to <b>3 times</b>. Sign in to enable <b>automatic telemetry polling</b>: network and compute every <b>3 minutes</b>, cloud infrastructure every <b>1 hour</b>.</div>
         </div>
       </div>
 
@@ -557,7 +557,7 @@ const COGNITO = {
   domain: 'https://ap-southeast-17tz3ek9ea.auth.ap-southeast-1.amazoncognito.com',
   clientId: '4f3c2i69riu0r2j2ea16cdev23',
   redirectUri: 'https://platform.laxstack.com/',
-  scope: 'openid email phone'
+  scope: 'openid email'
 };
 
 const AUTH_STORAGE_KEY = 'laxstack_cognito_session';
@@ -1135,6 +1135,33 @@ async function syncAll(manual){
     pollingInProgress=false;setBusy(false);scheduleLocal();scheduleInfra();updateManualRefreshUI();
   }
 }
+
+// Anonymous first-load telemetry is intentionally allowed once without
+// consuming one of the 3 manual refreshes. After that initial load, an
+// anonymous viewer must use the Refresh button, and each manual refresh
+// consumes one of the 3 available refreshes.
+async function initialAnonymousLoad(){
+  if(isAuthenticated()) return;
+  if(pollingInProgress)return;
+  pollingInProgress=true;setBusy(true);
+  const prompt=document.getElementById('operator-prompt');
+  if(prompt)prompt.style.display='none';
+  try{
+    await Promise.all([refreshLocal(),refreshInfra()]);
+  }finally{
+    pollingInProgress=false;
+    setBusy(false);
+    stopTelemetryTimers();
+    updateManualRefreshUI();
+    const limit=document.getElementById('manual-limit');
+    if(limit && !isAuthenticated()){
+      const used=Number(sessionStorage.getItem('laxstack_anon_refreshes')||'0');
+      const left=Math.max(ANON_MANUAL_LIMIT-used,0);
+      limit.style.display='inline';
+      limit.textContent=left+' manual refresh'+(left===1?'':'es')+' left';
+    }
+  }
+}
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){stopTelemetryTimers();setBusy(false);return}
   if(isAuthenticated())syncAll(false);else updateManualRefreshUI();
@@ -1145,8 +1172,13 @@ document.addEventListener('visibilitychange',()=>{
   try{
     const completed=await handleAuthCallback();
     updateAuthUI();
-    if(completed||isAuthenticated())await syncAll(false);
-    else updateManualRefreshUI();
+    if(completed||isAuthenticated()){
+      await syncAll(false);
+    }else{
+      // Anonymous visitors still get one initial telemetry load, but it does
+      // not consume any of their 3 manual refreshes.
+      await initialAnonymousLoad();
+    }
   }catch(e){
     console.error(e);clearAuthSession();updateAuthUI();
     const prompt=document.getElementById('operator-prompt');
