@@ -556,6 +556,14 @@ body.authenticated .auth-dashboard{display:block;}
 .auth-guest-meta{display:flex;justify-content:space-between;margin-top:7px;font-family:var(--mono);font-size:8.5px;color:var(--text-faint);}
 .auth-guest-bars{margin-top:8px;}
 
+.auth-iface-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px;}
+.auth-iface-tile{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:11px 12px;transition:border-color .15s ease;}
+.auth-iface-tile:hover{border-color:var(--border-bright);}
+.auth-iface-top{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.auth-iface-top .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.auth-iface-name{font-family:var(--mono);font-size:10.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.auth-iface-dev{font-family:var(--mono);font-size:8px;color:var(--text-faint);flex-shrink:0;}
+
 .auth-alert{
   display:flex;align-items:center;gap:11px;border:1px solid var(--green-dim);background:rgba(79,214,140,.035);
   border-radius:8px;padding:11px 13px;margin-top:12px;
@@ -712,7 +720,6 @@ body.authenticated .auth-dashboard{display:block;}
           <div class="noc-ticker-item cyan"><span class="nt-lbl">Network throughput</span><span class="nt-val" id="auth-kpi-network">—</span><span class="nt-detail" id="auth-kpi-network-detail">—</span></div>
           <div class="noc-ticker-item orange"><span class="nt-lbl">Compute guests</span><span class="nt-val" id="auth-kpi-guests">—</span><span class="nt-detail" id="auth-kpi-guests-detail">—</span></div>
           <div class="noc-ticker-item violet"><span class="nt-lbl">Proxmox uptime</span><span class="nt-val" id="auth-kpi-uptime">—</span><span class="nt-detail" id="auth-kpi-uptime-detail">Host</span></div>
-          <div class="noc-ticker-item violet"><span class="nt-lbl">Cloud MTD cost</span><span class="nt-val" id="auth-kpi-cost">—</span><span class="nt-detail" id="auth-kpi-cost-detail">2 accounts</span></div>
         </div>
       </div>
 
@@ -1199,20 +1206,20 @@ function renderAuthNetwork(data){
   const trendEl=document.getElementById('auth-net-trend');
   if(trendEl) trendEl.innerHTML = sparklineSVG(hist['auth-net-total']||[], 'var(--cyan)', 900, 32).replace('width="900" height="32"','width="100%" height="100%"');
 
-  document.getElementById('auth-ifaces').innerHTML=(n.interfaces||[]).map(i=>{
+  document.getElementById('auth-ifaces').innerHTML=`<div class="auth-iface-grid">${(n.interfaces||[]).map(i=>{
     const up=i.link_state==='2';
     const rx=i.traffic?.rx_mbps||0, tx=i.traffic?.tx_mbps||0;
     const line=parseFloat(i.line_rate)||10000;
-    return `<div style="margin-bottom:13px;">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
-        <span style="width:6px;height:6px;border-radius:50%;background:${up?'var(--green)':'var(--red)'};box-shadow:0 0 6px ${up?'var(--green)':'var(--red)'}"></span>
-        <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text)">${i.name}</span>
-        <span style="margin-left:auto;font-family:var(--mono);font-size:8px;color:var(--text-faint)">${i.device}</span>
+    return `<div class="auth-iface-tile">
+      <div class="auth-iface-top">
+        <span class="dot" style="background:${up?'var(--green)':'var(--red)'};box-shadow:0 0 6px ${up?'var(--green)':'var(--red)'}"></span>
+        <span class="auth-iface-name">${i.name}</span>
+        <span class="auth-iface-dev">${i.device}</span>
       </div>
       ${authBar('RX',rx/line*100*400,'var(--cyan)',rx.toFixed(2)+' Mbps')}
       ${authBar('TX',tx/line*100*400,'var(--violet)',tx.toFixed(2)+' Mbps')}
     </div>`;
-  }).join('') || '<div class="auth-empty">No interfaces returned.</div>';
+  }).join('') || '<div class="auth-empty">No interfaces returned.</div>'}</div>`;
 
   document.getElementById('auth-gateways').innerHTML=`
     <table class="auth-table"><thead><tr><th>Gateway</th><th>Address</th><th class="r">Latency</th><th class="r">Loss</th></tr></thead><tbody>
@@ -1313,14 +1320,9 @@ function renderAuthCloud(data){
   const cards=[];
   const cloudCard=(acc,title,items)=>{
     if(!acc)return;
-    const cost=acc.cost||{},mtd=Number(cost.mtd_net_unblended_cost_usd)||0,prev=Number(cost.last_month_net_unblended_cost_usd)||0;
     cards.push(`<div class="auth-card">
       <div class="auth-card-title"><span class="auth-status"></span><h3>${title}</h3><span class="minor">${acc.account_id||''}</span></div>
       <div class="auth-metric-grid">${items.map(x=>`<div class="auth-metric"><div class="m-label">${x[1]}</div><div class="m-value">${x[0]}</div></div>`).join('')}</div>
-      <div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--border);">
-        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--text-faint);"><span>MTD cost</span><strong style="color:var(--violet);font-size:12px;">${fmtMoney(mtd)}</strong></div>
-        <div style="display:flex;justify-content:space-between;margin-top:5px;font-family:var(--mono);font-size:9px;color:var(--text-faint);"><span>Last month</span><span>${fmtMoney(prev)}</span></div>
-      </div>
     </div>`);
   };
   cloudCard(a,'AWS account A',[
@@ -1334,10 +1336,8 @@ function renderAuthCloud(data){
   document.getElementById('auth-cloud-grid').innerHTML=cards.join('')||'<div class="auth-card"><div class="auth-empty">No AWS accounts returned.</div></div>';
   authSetText('auth-cloud-sync','updated '+fmtClock(new Date())+' · next poll 1h');
 
-  const mtdA=Number(a?.cost?.mtd_net_unblended_cost_usd)||0, mtdB=Number(b?.cost?.mtd_net_unblended_cost_usd)||0;
-  authSetText('auth-kpi-cost', fmtMoney(mtdA+mtdB));
-  authSetText('auth-kpi-cost-detail', fmtMoney(mtdA)+' + '+fmtMoney(mtdB));
-  pushAuthEvent(`Cloud cost sync — MTD ${fmtMoney(mtdA+mtdB)} across 2 accounts`,'info');
+  const accCount=(a?1:0)+(b?1:0);
+  pushAuthEvent(`Cloud telemetry synced — ${accCount} account${accCount===1?'':'s'} checked`,'info');
   renderTopology();
 }
 
@@ -1349,11 +1349,6 @@ async function loadCloud(){
     const a = data.account_a, b = data.account_b;
 
     const accCard = (acc, tiles) => {
-      const cost = acc.cost || {};
-      const mtd = cost.mtd_net_unblended_cost_usd || 0;
-      const prev = cost.last_month_net_unblended_cost_usd || 0;
-      const max = Math.max(mtd, prev, 0.01);
-      const delta = prev>0 ? ((mtd-prev)/prev*100) : 0;
       return `
       <div class="panel">
         <div class="panel-title">
@@ -1364,15 +1359,6 @@ async function loadCloud(){
         </div>
         <div class="stat-tiles">
           ${tiles.map(t=>`<div class="stat-tile"><div class="icon-row">${icon(t.icon)}</div><div class="num">${t.val}</div><div class="lbl">${t.lbl}</div></div>`).join('')}
-        </div>
-        <div class="cost-block">
-          <div class="cost-row"><span class="lbl">MTD (${cost.mtd_period_start} → ${cost.mtd_period_end})</span><span class="amt" style="color:var(--violet)">${fmtMoney(mtd)}</span></div>
-          <div class="cost-row"><span class="lbl">Last month</span><span class="amt" style="color:var(--text-dim)">${fmtMoney(prev)}</span></div>
-          <div class="cost-bars">
-            <div class="cost-bar-track"><div class="cost-bar-fill" style="width:${(mtd/max*100)}%"></div></div>
-            <div class="cost-bar-track"><div class="cost-bar-fill prev" style="width:${(prev/max*100)}%"></div></div>
-          </div>
-          ${prev>0 ? `<div class="cost-delta ${delta<=0?'down':'up'}">${delta<=0?'▼':'▲'} ${Math.abs(delta).toFixed(0)}% vs last month</div>` : ''}
         </div>
       </div>`;
     };
