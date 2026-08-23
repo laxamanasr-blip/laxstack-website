@@ -947,6 +947,7 @@ const AUTH_STORAGE_KEY = 'laxstack_cognito_session';
 const PKCE_STORAGE_KEY = 'laxstack_cognito_pkce';
 const PKCE_FALLBACK_KEY = 'laxstack_cognito_pkce_fallback';
 const ANON_MANUAL_LIMIT = 3;
+const ANON_INITIAL_LOAD_KEY = 'laxstack_anon_initial_loaded';
 
 const LOCAL_REFRESH_MS = 180000;   // compute + network — unchanged
 // Cloud infra has no interval — it's manual/on-demand only (sign-in load
@@ -1849,18 +1850,33 @@ async function syncAll(manual, includeCloud=true){
   }
 }
 
-// Anonymous first-load telemetry is intentionally allowed once without
-// consuming one of the 3 manual refreshes. After that initial load, an
-// anonymous viewer must use the Refresh button, and each manual refresh
-// consumes one of the 3 available refreshes.
+// Anonymous visitors get one initial telemetry load without consuming a refresh.
+// After that, every explicit refresh click OR full-page reload consumes one of
+// the 3 anonymous refreshes. This prevents a tab reload from bypassing the limit.
 async function initialAnonymousLoad(){
   if(isAuthenticated()) return;
   if(pollingInProgress)return;
+
+  const initialLoaded=sessionStorage.getItem(ANON_INITIAL_LOAD_KEY)==='1';
+
+  // The first visit gets a free initial load. Subsequent page loads count as
+  // refreshes so pressing F5 / Ctrl+R cannot silently poll the public APIs.
+  if(initialLoaded && !consumeAnonymousRefresh()){
+    updateManualRefreshUI();
+    const limit=document.getElementById('manual-limit');
+    if(limit){
+      limit.style.display='inline';
+      limit.textContent='0 manual refreshes left';
+    }
+    return;
+  }
+
   pollingInProgress=true;setBusy(true);
   const prompt=document.getElementById('operator-prompt');
   if(prompt)prompt.style.display='none';
   try{
     await Promise.all([refreshLocal(),refreshInfra()]);
+    sessionStorage.setItem(ANON_INITIAL_LOAD_KEY,'1');
   }finally{
     pollingInProgress=false;
     setBusy(false);
