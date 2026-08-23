@@ -453,10 +453,11 @@ footer .sync-times{display:flex;gap:16px;}
 
 /* ===== AUTHENTICATED OPERATIONS DASHBOARD (NOC) ===== */
 .auth-dashboard{display:none;max-width:1560px;margin:0 auto;padding:20px 24px 70px;}
+/* The NOC dashboard is the single public/authenticated dashboard. */
+.auth-dashboard{display:block;}
+main{display:none;}
+.pulse-strip{display:none;}
 body.authenticated .auth-dashboard{border-top:1px solid rgba(157,140,255,.08);}
-body.authenticated main{display:none;}
-body.authenticated .pulse-strip{display:none;}
-body.authenticated .auth-dashboard{display:block;}
 
 /* ---- signature element: live topology + ticker ---- */
 .noc-hero{
@@ -720,14 +721,14 @@ body.authenticated .auth-dashboard{display:block;}
       <div class="noc-hero">
         <div class="noc-hero-top">
           <div>
-            <div class="noc-eyebrow"><span class="auth-live"></span>PRIVATE OPERATIONS FLOOR</div>
-            <div class="noc-title">Welcome back, <span id="auth-welcome-name">Operator</span></div>
+            <div class="noc-eyebrow"><span class="auth-live"></span><span id="noc-eyebrow-text">PUBLIC OPERATIONS VIEW</span></div>
+            <div class="noc-title"><span id="noc-title-prefix">LaxStack</span><span id="noc-title-sep"> · </span><span id="auth-welcome-name">Platform Operations</span></div>
           </div>
           <div class="noc-meta-row">
-            <span class="auth-meta green">● AUTHENTICATED</span>
-            <span class="auth-meta"><strong>SESSION</strong> Cognito / PKCE</span>
-            <span class="auth-meta"><strong>NEXT SYNC</strong> net/compute <span id="next-local-countdown">—</span></span>
-            <span class="auth-meta"><strong>CLOUD</strong> manual refresh only</span>
+            <span class="auth-meta green" id="noc-access-badge">● PUBLIC TELEMETRY</span>
+            <span class="auth-meta" id="noc-session-meta"><strong>ACCESS</strong> Public API</span>
+            <span class="auth-meta"><strong>NEXT SYNC</strong> <span id="noc-sync-mode">manual refresh</span> <span id="next-local-countdown">—</span></span>
+            <span class="auth-meta"><strong>CLOUD</strong> <span id="noc-cloud-mode">manual refresh</span></span>
           </div>
         </div>
 
@@ -784,7 +785,7 @@ body.authenticated .auth-dashboard{display:block;}
 
       <div class="auth-alert" style="margin-top:14px;">
         <span class="big-dot"></span>
-        <div><b id="auth-posture">Operational telemetry is healthy.</b> <span id="auth-posture-detail">Authenticated dashboard is receiving protected telemetry.</span></div>
+        <div><b id="auth-posture">Telemetry is ready.</b> <span id="auth-posture-detail">Public dashboard telemetry is available.</span></div>
       </div>
 
       <div class="noc-lower-grid">
@@ -794,7 +795,7 @@ body.authenticated .auth-dashboard{display:block;}
             <div class="auth-grid-2">
               <div class="auth-card">
                 <div class="auth-card-title"><span class="auth-status" id="auth-net-status"></span><h3>Interface telemetry</h3><span class="minor" id="auth-net-count">—</span></div>
-                <div id="auth-ifaces"><div class="auth-empty">Waiting for protected telemetry…</div></div>
+                <div id="auth-ifaces"><div class="auth-empty">Waiting for telemetry…</div></div>
               </div>
               <div class="auth-card">
                 <div class="auth-card-title"><span class="auth-status"></span><h3>Gateways</h3><span class="minor">reachability</span></div>
@@ -832,13 +833,13 @@ body.authenticated .auth-dashboard{display:block;}
           <section class="auth-section">
             <div class="auth-section-head"><span class="num">03</span><h2>Cloud Infrastructure</h2><span class="tag">AWS</span><span class="section-note" id="auth-cloud-sync">syncing…</span></div>
             <div class="auth-grid-3" id="auth-cloud-grid">
-              <div class="auth-card"><div class="auth-empty">Waiting for protected AWS telemetry…</div></div>
+              <div class="auth-card"><div class="auth-empty">Waiting for AWS telemetry…</div></div>
             </div>
           </section>
 
           <div class="auth-dashboard-footer">
-            <span>LAXSTACK PRIVATE OPERATIONS · protected telemetry</span>
-            <span id="auth-footer-session">authenticated session active</span>
+            <span id="auth-footer-label">LAXSTACK PUBLIC OPERATIONS · telemetry</span>
+            <span id="auth-footer-session">public telemetry mode · 3 manual refreshes</span>
           </div>
         </div>
 
@@ -1255,6 +1256,7 @@ function renderTopology(){
 function renderAuthNetwork(data){
   const n=data.opnsense;
   if(!n)return;
+  const publicMode=!isAuthenticated();
   const total=(n.interfaces||[]).reduce((s,i)=>s+(i.traffic?.total_mbps||0),0)||(n.busiest_interface?.total_mbps||0);
   authSetText('auth-kpi-network',total.toFixed(2)+' Mbps');
   authSetText('auth-kpi-network-detail',`${(n.interfaces||[]).length} interfaces · ${n.gateways?.length||0} gateways`);
@@ -1294,7 +1296,7 @@ function renderAuthNetwork(data){
     <table class="auth-table"><thead><tr><th>Gateway</th><th>Address</th><th class="r">Latency</th><th class="r">Loss</th></tr></thead><tbody>
     ${(n.gateways||[]).map(g=>`<tr>
       <td class="name"><span class="${authHealthClass(g.status)}">●</span> ${g.name}</td>
-      <td>${g.address}</td><td class="r">${g.delay_ms} ms</td><td class="r">${g.loss}</td>
+      <td>${publicMode?'private':g.address}</td><td class="r">${g.delay_ms} ms</td><td class="r">${g.loss}</td>
     </tr>`).join('')}</tbody></table>`;
 
   (n.gateways||[]).forEach(g=>{
@@ -1315,6 +1317,7 @@ function renderAuthNetwork(data){
 function renderAuthCompute(data){
   const p=data.proxmox,host=p?.host;
   if(!host)return;
+  const publicMode=!isAuthenticated();
   const vms=p.virtual_machines||{},cts=p.containers||{},guests=p.guests||[];
   const total=(vms.total||0)+(cts.total||0),running=(vms.running||0)+(cts.running||0);
   authSetText('auth-kpi-guests',`${running}/${total}`);
@@ -1386,6 +1389,7 @@ function renderAuthCompute(data){
 }
 function renderAuthCloud(data){
   const a=data.account_a,b=data.account_b;
+  const publicMode=!isAuthenticated();
   const cards=[];
   const cloudCard=(acc,title,items)=>{
     if(!acc)return;
@@ -1394,7 +1398,7 @@ function renderAuthCloud(data){
       <div class="auth-metric-grid">${items.map(x=>`<div class="auth-metric"><div class="m-label">${x[1]}</div><div class="m-value">${x[0]}</div></div>`).join('')}</div>
     </div>`);
   };
-  cloudCard(a,'AWS account A',[
+  cloudCard(a,publicMode?'AWS account A':'AWS account A',[
     [a.vpc_singapore??0,'VPCs · SGP'],[a.ec2_singapore??0,'EC2 · SGP'],
     [a.s3_buckets??0,'S3 buckets'],[a.lambda_functions??0,'Lambda functions']
   ]);
@@ -1403,7 +1407,7 @@ function renderAuthCloud(data){
     [b.acm_certificates_us_east_1??0,'ACM certificates'],['us-e1','ACM region']
   ]);
   document.getElementById('auth-cloud-grid').innerHTML=cards.join('')||'<div class="auth-card"><div class="auth-empty">No AWS accounts returned.</div></div>';
-  authSetText('auth-cloud-sync','updated '+fmtClock(new Date())+' · manual refresh only');
+  authSetText('auth-cloud-sync','updated '+fmtClock(new Date())+(publicMode?' · manual refresh':' · manual refresh only'));
 
   const accCount=(a?1:0)+(b?1:0);
   pushAuthEvent(`Cloud telemetry synced — ${accCount} account${accCount===1?'':'s'} checked`,'info');
@@ -1414,7 +1418,7 @@ function renderAuthCloud(data){
 async function loadCloud(){
   try{
     const data = await fetchJSON(isAuthenticated() ? API.authInfra : API.infra);
-    if(isAuthenticated()) renderAuthCloud(data);
+    renderAuthCloud(data);
     const a = data.account_a, b = data.account_b;
 
     const accCard = (acc, tiles) => {
@@ -1462,7 +1466,7 @@ async function loadCloud(){
 async function loadCompute(){
   try{
     const data = await fetchJSON(isAuthenticated() ? API.authProxmox : API.proxmox);
-    if(isAuthenticated()) renderAuthCompute(data);
+    renderAuthCompute(data);
     const p = data.proxmox, host = p.host, vms = p.virtual_machines, cts = p.containers;
     const running = (vms?.running||0) + (cts?.running||0);
     const totalGuests = (vms?.total||0)+(cts?.total||0);
@@ -1498,7 +1502,7 @@ async function loadCompute(){
 async function loadNetwork(){
   try{
     const data = await fetchJSON(isAuthenticated() ? API.authOpnsense : API.opnsense);
-    if(isAuthenticated()) renderAuthNetwork(data);
+    renderAuthNetwork(data);
     const n = data.opnsense;
     const upIfaces=(n.interfaces||[]).filter(i=>i.link_state==='2');
     document.getElementById('kpi-net').innerHTML = upIfaces.length + '<small>up</small>';
@@ -1543,18 +1547,19 @@ async function loadNetwork(){
 const ledState = { cloud:null, compute:null, network:null };
 function setLed(key, ok){
   ledState[key] = ok;
-  if(isAuthenticated()){
+  {
     const valsNow=Object.values(ledState).filter(v=>v!==null);
     const health=valsNow.length===3 && valsNow.every(Boolean) ? 'OPERATIONAL' : (valsNow.some(Boolean) ? 'DEGRADED' : 'UNREACHABLE');
+    const publicMode=!isAuthenticated();
     authSetText('auth-kpi-health',health);
-    authSetText('auth-kpi-health-detail',health==='OPERATIONAL'?'All telemetry sources online':'Review protected telemetry');
+    authSetText('auth-kpi-health-detail',health==='OPERATIONAL'?'All telemetry sources online':publicMode?'Some public telemetry sources need attention':'Review protected telemetry');
     const posture=document.getElementById('auth-posture');
     const detail=document.getElementById('auth-posture-detail');
     if(posture){
-      posture.textContent=health==='OPERATIONAL'?'Operational telemetry is healthy.':health==='DEGRADED'?'Some telemetry sources need attention.':'Protected telemetry is unreachable.';
+      posture.textContent=health==='OPERATIONAL'?(publicMode?'Public telemetry is healthy.':'Operational telemetry is healthy.'):health==='DEGRADED'?'Some telemetry sources need attention.':(publicMode?'Public telemetry is unreachable.':'Protected telemetry is unreachable.');
       posture.style.color=health==='OPERATIONAL'?'var(--green)':health==='DEGRADED'?'var(--amber)':'var(--red)';
     }
-    if(detail)detail.textContent='Authenticated dashboard · '+new Date().toLocaleTimeString('en-US',{hour12:false});
+    if(detail)detail.textContent=(publicMode?'Public dashboard':'Authenticated dashboard')+' · '+new Date().toLocaleTimeString('en-US',{hour12:false});
     renderTopology();
   }
   const vals = Object.values(ledState);
@@ -1737,14 +1742,32 @@ function updateAuthUI(){
   const signed=isAuthenticated(),btn=document.getElementById('auth-btn');
   const user=document.getElementById('auth-user'),email=document.getElementById('auth-email');
   const welcome=document.getElementById('auth-welcome-name'),nudge=document.getElementById('auth-nudge'),cta=document.getElementById('auth-cta');
+
   document.body.classList.toggle('authenticated',signed);
-  if(btn){btn.textContent=signed?'Sign out':'Sign in';btn.classList.toggle('signout',signed);btn.classList.toggle('cta',!signed)}
+
+  if(btn){
+    btn.textContent=signed?'Sign out':'Sign in';
+    btn.classList.toggle('signout',signed);
+    btn.classList.toggle('cta',!signed);
+    btn.title=signed?'Sign out of the protected LaxStack operations view':'Sign in to enable automatic telemetry polling';
+  }
   if(cta)cta.classList.toggle('pending',!signed);
   if(nudge)nudge.style.display=signed?'none':'inline';
   if(user)user.style.display=signed?'flex':'none';
+
   const signedEmail=signed?getSignedInEmail():'';
   if(email)email.textContent=signed?signedEmail:'';
-  if(welcome)welcome.textContent=signed?signedEmail:'Operator';
+  if(welcome)welcome.textContent=signed?signedEmail:'Platform Operations';
+
+  authSetText('noc-eyebrow-text',signed?'PRIVATE OPERATIONS FLOOR':'PUBLIC OPERATIONS VIEW');
+  authSetText('noc-access-badge',signed?'● AUTHENTICATED':'● PUBLIC TELEMETRY');
+  authSetText('noc-session-meta',signed?'Cognito / PKCE':'Public API');
+  authSetText('noc-sync-mode',signed?'net/compute':'manual');
+  authSetText('noc-cloud-mode','manual refresh');
+  authSetText('auth-footer-label',signed?'LAXSTACK PRIVATE OPERATIONS · protected telemetry':'LAXSTACK PUBLIC OPERATIONS · telemetry');
+  authSetText('auth-footer-session',signed?'authenticated session active':'public telemetry mode · 3 manual refreshes');
+  authSetText('auth-posture-detail',signed?'Authenticated dashboard is receiving protected telemetry.':'Public dashboard telemetry is available.');
+
   updateApiRouteLabels();
   updateManualRefreshUI();
 }
