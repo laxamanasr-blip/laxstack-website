@@ -46,6 +46,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
+html,body{overflow-x:hidden;max-width:100%;}
 body{
   background:var(--bg);
   color:var(--text);
@@ -53,7 +54,9 @@ body{
   font-size:13px;
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
 }
+a,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 ::selection{background:var(--cyan-dim);color:var(--text);}
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
@@ -439,6 +442,13 @@ footer .sync-times{display:flex;gap:16px;}
   .hero-title{font-size:19px;}
   .pulse-strip{height:210px;}
   .pulse-kpis{flex-wrap:wrap;justify-content:flex-start;padding:0 18px 18px;}
+
+  /* command bar: let it wrap instead of clipping/overflowing on narrow screens */
+  .cmdbar{height:auto;min-height:52px;flex-wrap:wrap;row-gap:8px;padding:10px 14px;}
+  .cmdbar-right{flex-wrap:wrap;row-gap:8px;justify-content:flex-end;}
+  .time-pill{display:none;}
+  .refresh-btn,.auth-btn{padding:9px 13px;}
+  .clock{min-width:56px;}
 }
 
 /* ===== Cognito authentication ===== */
@@ -649,9 +659,31 @@ body.authenticated .auth-dashboard{border-top:1px solid rgba(157,140,255,.08);}
   .noc-title{font-size:20px;}
   .auth-grid-3{grid-template-columns:1fr 1fr;}
   .auth-metric-grid{grid-template-columns:1fr 1fr;}
+
+  .noc-hero{padding:16px 16px 0;}
+  .noc-ticker{margin:8px -16px 0;padding:14px 16px 16px;}
+  .noc-ticker-item{padding:8px 8px;}
+  .auth-card{padding:14px 15px;}
+  .auth-section-head{flex-wrap:wrap;row-gap:6px;}
+  .auth-card-title{flex-wrap:wrap;row-gap:6px;}
+  .gauge-row{gap:10px;}
+
+  /* gateway table: scroll horizontally instead of squeezing columns unreadable */
+  #auth-gateways{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .auth-table{min-width:420px;}
 }
 @media(max-width:500px){
   .auth-grid-3,.auth-metric-grid{grid-template-columns:1fr;}
+}
+@media(max-width:430px){
+  .noc-title{font-size:17px;}
+  .noc-eyebrow{font-size:8.5px;letter-spacing:1.4px;}
+  .noc-ticker-item{flex:1 1 100%;}
+  .noc-ticker-item + .noc-ticker-item{border-top:1px solid var(--border);padding-top:10px;}
+  .noc-ticker .nt-val{font-size:24px;}
+  .auth-meta{font-size:7.5px;padding:4px 7px;}
+  .crumb-org{font-size:12.5px;}
+  .clock{font-size:10.5px;}
 }
 
 </style>
