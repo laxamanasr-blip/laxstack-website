@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5HG3GBNTC1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5HG3GBNTC1');
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LaxStack Platform — Private Infrastructure Operations Dashboard | Sid Laxamana</title>
+<!-- Favicon -->
+<link href="/favicon.ico" rel="icon" sizes="any"/>
+<link href="/favicon.ico" rel="shortcut icon"/>
+<link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d10;
+  --panel:#12161a;
+  --panel-2:#161b20;
+  --line:#232a30;
+  --line-soft:#1b2126;
+  --line-strong:#2f3a3f;
+  --text:#e6ecf1;
+  --muted:#8b96a3;
+  --muted-dim:#5d6773;
+  --cyan:#33d2f0;
+  --cyan-dim:#0d5566;
+  --violet:#9d8cff;
+  --violet-dim:#4a3f8a;
+  --red:#ff6b6b;
+  --red-dim:#7a1f1f;
+  --green:#4ade80;
+  --green-dim:#1f4a34;
+  --amber:#ffb020;
+  --amber-dim:#8a611c;
+  --display:'Space Grotesk',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:36px 36px;
+  pointer-events:none;
+  z-index:0;
+}
+a{color:inherit}
+img{max-width:100%;display:block}
+code{font-family:var(--mono);background:var(--panel-2);padding:1px 6px;border-radius:3px;font-size:.88em}
+::selection{background:var(--cyan);color:#04141a}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px 1px rgba(74,222,128,.7);
+  display:inline-block;
+  animation:blink 2.4s ease-in-out infinite;
+  flex-shrink:0;
+}
+.led.cyan{background:var(--cyan);box-shadow:0 0 6px 1px rgba(51,210,240,.7)}
+.led.violet{background:var(--violet);box-shadow:0 0 6px 1px rgba(157,140,255,.7)}
+.led.amber{background:var(--amber);box-shadow:0 0 6px 1px rgba(255,176,32,.7)}
+.led.red{background:var(--red);box-shadow:0 0 6px 1px rgba(239,68,68,.7)}
+@keyframes blink{0%,60%{opacity:1}62%,68%{opacity:.25}70%,100%{opacity:1}}
+@media (prefers-reduced-motion: reduce){
+  .led{animation:none}
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
+}
+
+/* ---------- Nav ---------- */
+nav{
+  position:sticky;top:0;z-index:99;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 8%;
+  background:rgba(10,13,16,.92);
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font-family:var(--mono);font-weight:600;font-size:.95rem;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+  text-decoration:none;
+}
+.logo .path{color:var(--muted-dim)}
+.logo .user{color:var(--cyan)}
+.logo .back{color:var(--muted);margin-right:2px}
+nav .links{display:flex;gap:22px;font-family:var(--mono);font-size:.8rem;align-items:center}
+nav .links a{color:var(--muted);text-decoration:none}
+nav .links a:hover{color:var(--cyan)}
+nav .links .repo-btn{
+  border:1px solid var(--line);padding:7px 14px;border-radius:4px;color:var(--text);
+  transition:.2s;
+}
+nav .links .repo-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ---------- Hero ---------- */
+header{padding:56px 8% 50px;position:relative;z-index:1;overflow:hidden}
+.crumb{
+  font-family:var(--mono);font-size:.8rem;color:var(--cyan);
+  background:var(--panel);border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:4px;margin-bottom:26px;
+}
+.crumb .prompt{color:var(--muted-dim)}
+.project-label{
+  display:inline-block;letter-spacing:.25rem;color:var(--muted-dim);
+  font:700 .78rem var(--mono);margin-bottom:.8rem;
+}
+h1{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(1.9rem,4vw,2.9rem);
+  line-height:1.25;margin-bottom:16px;letter-spacing:-.01em;
+  max-width:920px;
+}
+h2.section-title,h3{font-family:var(--display)}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:760px;margin-bottom:26px}
+
+.badge-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px}
+.badge{
+  font-family:var(--mono);font-size:.76rem;display:flex;align-items:center;gap:7px;
+  border:1px solid var(--line);padding:6px 12px;border-radius:20px;color:var(--muted);
+  background:var(--panel);
+}
+.badge.status{color:var(--green);border-color:var(--green-dim)}
+
+.btn-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 20px;border-radius:4px;
+  font-family:var(--mono);font-size:.85rem;font-weight:600;
+  text-decoration:none;transition:.2s ease;border:1px solid transparent;
+  position:relative;overflow:hidden;
+}
+.btn::after{content:"";position:absolute;left:-120%;top:0;width:70%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:.6s}
+.btn:hover::after{left:140%}
+.btn.primary{background:var(--cyan);color:#04141a}
+.btn.primary:hover{background:#6ee1f7;transform:translateY(-2px)}
+.btn.secondary{border-color:var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px)}
+.btn .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ---------- Sections ---------- */
+section{padding:60px 8%;position:relative;z-index:1;border-top:1px solid transparent}
+section::before{
+  content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-strong) 20%,var(--cyan) 50%,var(--violet) 80%,transparent);
+  opacity:.45;
+}
+.section-tag{font-family:var(--mono);color:var(--muted-dim);font-size:.78rem;letter-spacing:.04em;margin-bottom:10px}
+.section-tag::before{content:"$ ";color:var(--cyan)}
+.section-title{font-size:1.6rem;font-weight:700;margin-bottom:16px}
+.section-sub{color:var(--muted);max-width:760px;margin-bottom:34px;font-size:.98rem}
+.prose{color:var(--muted);max-width:760px;font-size:.98rem}
+.prose p{margin-bottom:16px}
+.prose strong{color:var(--text)}
+
+/* ---------- Hop diagram (signature element) ---------- */
+.hoppanel{
+  background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  padding:20px 20px 8px;max-width:1020px;
+  cursor:zoom-in;transition:border-color .2s ease,transform .2s ease;
+}
+.hoppanel:hover{border-color:var(--cyan-dim);transform:translateY(-3px)}
+.hoppanel .hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:.72rem;color:var(--muted-dim);
+  padding-bottom:10px;border-bottom:1px solid var(--line-soft);margin-bottom:6px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.hoppanel .zoom-hint{font-family:var(--mono);font-size:.68rem;color:var(--muted-dim);display:flex;align-items:center;gap:5px}
+.hoppanel svg{width:100%;height:auto;display:block}
+.hop-caption{font-family:var(--mono);font-size:.7rem;color:var(--muted-dim);text-align:center;padding:10px 0 4px}
+
+/* ---------- Decision strip ---------- */
+.decision-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:1020px;margin-bottom:30px}
+.decision-chip{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:14px 16px;
+  font-family:var(--mono);font-size:.8rem;color:var(--muted);
+}
+.decision-chip b{color:var(--cyan);display:block;margin-bottom:4px;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase}
+
+/* ---------- Modules ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.module{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:22px;transition:.2s}
+.module:hover{border-color:var(--cyan-dim);transform:translateY(-4px)}
+.module h3{font-size:.98rem;color:var(--cyan);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.module p{color:var(--muted);font-size:.9rem}
+.module .trade{margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:.82rem;color:var(--muted-dim)}
+.module .trade b{color:var(--amber);font-family:var(--mono);font-size:.7rem;letter-spacing:.03em;text-transform:uppercase;display:block;margin-bottom:4px}
+
+/* ---------- Evidence screenshot ---------- */
+.evidence{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden;max-width:900px}
+.evidence a{display:block;cursor:zoom-in;position:relative}
+.evidence a::after{
+  content:"click to enlarge";position:absolute;right:10px;bottom:10px;
+  background:rgba(0,0,0,.7);color:#fff;padding:5px 9px;border-radius:4px;
+  font-family:var(--mono);font-size:.68rem;opacity:0;transition:.2s;
+}
+.evidence a:hover::after{opacity:1}
+.evidence img{width:100%;display:block;border-bottom:1px solid var(--line-soft)}
+.ev-note{padding:14px 18px}
+.ev-note .ev-row{display:flex;gap:10px;font-size:.82rem;color:var(--muted);padding:4px 0}
+.ev-note .ev-row b{color:var(--cyan);font-family:var(--mono);font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;flex-shrink:0;width:80px}
+
+/* ---------- Console gallery (smaller evidence grid) ---------- */
+.console-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:20px}
+.console-grid .evidence{max-width:none}
+.console-grid .ev-note .ev-row b{width:auto}
+
+/* ---------- Stack chips ---------- */
+.sfp-grid{display:flex;flex-wrap:wrap;gap:10px}
+.sfp{
+  font-family:var(--mono);font-size:.8rem;color:var(--text);
+  border:1px solid var(--line);background:var(--panel);
+  padding:9px 14px 9px 30px;border-radius:4px;position:relative;
+}
+.sfp::before{
+  content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 5px rgba(51,210,240,.7);
+}
+
+/* ---------- Access comparison ---------- */
+.correlate-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;max-width:1020px}
+.correlate-col{background:var(--panel-2);padding:24px}
+.correlate-col h4{font-family:var(--mono);font-size:.85rem;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.correlate-col ul{list-style:none}
+.correlate-col li{color:var(--muted);font-size:.88rem;padding:7px 0;border-top:1px solid var(--line-soft)}
+.correlate-col li:first-of-type{border-top:none}
+.correlate-col li b{color:var(--text);font-weight:600}
+
+/* ---------- Follow the Debug timeline ---------- */
+.timeline{position:relative;padding-left:44px;max-width:820px}
+.timeline::before{content:"";position:absolute;left:15px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--cyan),var(--green))}
+.stage{position:relative;margin-bottom:34px}
+.stage:last-child{margin-bottom:0}
+.stage-num{
+  position:absolute;left:-44px;top:0;width:32px;height:32px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.8rem;color:var(--cyan);font-weight:700;
+}
+.stage.resolved .stage-num{border-color:var(--green);color:var(--green)}
+.stage-body{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px}
+.stage-body h3{font-size:1rem;margin-bottom:8px}
+.stage-body p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
+.stage-body p:last-child{margin-bottom:0}
+.stage-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.stage-tags span{
+  font-family:var(--mono);font-size:.68rem;color:var(--muted-dim);
+  border:1px solid var(--line-soft);padding:3px 9px;border-radius:20px;
+}
+
+/* ---------- Maturity ladder (roadmap) ---------- */
+.ladder{max-width:900px;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.phase{display:flex;gap:18px;padding:18px 22px;border-top:1px solid var(--line-soft);align-items:flex-start}
+.phase:first-child{border-top:none}
+.phase .ph-num{font-family:var(--mono);font-size:.74rem;color:var(--muted-dim);width:64px;flex-shrink:0;padding-top:3px}
+.phase.current .ph-num{color:var(--green)}
+.phase-body{flex:1}
+.phase-body h4{font-size:.94rem;margin-bottom:4px;display:inline-block;font-weight:600}
+.phase.current .phase-body h4{color:var(--green)}
+.phase-body p{color:var(--muted);font-size:.85rem;margin-top:4px}
+.phase-tag{display:inline-block;font-family:var(--mono);font-size:.63rem;padding:2px 9px;border-radius:20px;margin-left:10px;vertical-align:middle;letter-spacing:.03em;text-transform:uppercase}
+.phase.current .phase-tag{background:rgba(74,222,128,.12);color:var(--green);border:1px solid var(--green-dim)}
+.phase:not(.current) .phase-tag{background:rgba(139,150,163,.08);color:var(--muted-dim);border:1px solid var(--line)}
+
+/* ---------- Lessons ---------- */
+.lessons{display:grid;grid-template-columns:1fr 1fr;gap:6px 40px;max-width:1000px}
+.lesson-line{font-family:var(--mono);font-size:.86rem;color:var(--muted);padding:6px 0}
+.lesson-line .hash{color:var(--muted-dim);margin-right:8px}
+
+footer{
+  text-align:center;padding:44px;color:var(--muted-dim);
+  border-top:1px solid var(--line);font-family:var(--mono);font-size:.78rem;
+  position:relative;z-index:1;
+}
+footer a{color:var(--cyan);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* ---------- diagram click-to-enlarge ---------- */
+.diagram-lightbox{
+  position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.86);backdrop-filter:blur(8px);padding:40px;
+  opacity:0;transition:opacity .25s ease;
+}
+.diagram-lightbox.open{opacity:1}
+.diagram-lightbox .dl-inner{position:relative;max-width:min(96vw,1400px);width:100%}
+.diagram-lightbox .dl-inner .hoppanel{cursor:default;max-width:none;width:100%;transform:none;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.diagram-lightbox .dl-inner .hoppanel:hover{transform:none}
+.diagram-lightbox .dl-inner .hoppanel svg{width:100%;height:auto}
+.dl-close{
+  position:absolute;top:-42px;right:0;width:32px;height:32px;border-radius:6px;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;
+}
+
+/* ---------- screenshot lightbox ---------- */
+.gallery-lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.9);backdrop-filter:blur(6px);z-index:99999}
+.gallery-lightbox.open{display:flex}
+.gallery-lightbox img{max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.gallery-close{
+  position:fixed;top:24px;right:24px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;
+  background:#12161a;border:2px solid #33d2f0;border-radius:50%;color:#ffffff;font-size:32px;font-weight:bold;
+  cursor:pointer;z-index:100000;box-shadow:0 0 20px rgba(51,210,240,.35);transition:.2s ease;user-select:none;
+}
+.gallery-close:hover{background:#33d2f0;color:#04141a;transform:scale(1.08)}
+
+/* ---------- scroll effects ---------- */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;z-index:300;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));
+  box-shadow:0 0 10px rgba(51,210,240,.5);
+  transition:width .1s linear;
+}
+.aurora{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.aurora span{position:absolute;border-radius:50%;filter:blur(90px);opacity:.13;will-change:transform}
+.aurora span:nth-child(1){width:580px;height:580px;background:var(--cyan);top:-170px;left:-140px;animation:drift1 30s ease-in-out infinite}
+.aurora span:nth-child(2){width:480px;height:480px;background:var(--violet);top:10%;right:-170px;animation:drift2 34s ease-in-out infinite}
+.aurora span:nth-child(3){width:420px;height:420px;background:var(--green);bottom:-150px;left:36%;animation:drift3 32s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(75px,95px)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-85px,75px)}}
+@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(65px,-75px)}}
+nav{transition:box-shadow .3s ease,background .3s ease}
+nav.scrolled{box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+.to-top{
+  position:fixed;right:26px;bottom:26px;z-index:250;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line-strong);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .3s ease,transform .3s ease,border-color .2s,box-shadow .2s;
+}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.to-top:hover{border-color:var(--cyan);box-shadow:0 8px 20px rgba(51,210,240,.25)}
+.to-top svg{width:18px;height:18px}
+header::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(380px circle at var(--mx,50%) var(--my,10%),rgba(51,210,240,.12),transparent 70%);
+}
+header > *{position:relative;z-index:1}
+
+@media(max-width:900px){
+  nav{flex-direction:column;gap:12px;padding:16px 6%}
+  nav .links{flex-wrap:wrap;justify-content:center;gap:16px}
+  header{padding:48px 6% 36px}
+  section{padding:48px 6%}
+  .correlate-grid{grid-template-columns:1fr}
+  .lessons{grid-template-columns:1fr}
+  .timeline{padding-left:36px}
+  .stage-num{left:-36px;width:28px;height:28px;font-size:.72rem}
+}
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr}
+  nav .links{gap:10px;font-size:.74rem}
+  h1{font-size:clamp(1.6rem,7vw,2.2rem)}
+  .phase{flex-direction:column;gap:4px}
+  .phase .ph-num{width:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav>
+  <a class="logo" href="/"><span class="back">&larr;</span><span class="user">sid</span><span class="path">@laxstack:~/projects$</span></a>
+  <div class="links">
+    <a href="#why">why</a>
+    <a href="#architecture">architecture</a>
+    <a href="#access">access model</a>
+    <a href="#monitoring">alerting</a>
+    <a href="#debugging">debugging</a>
+    <a href="#roadmap">roadmap</a>
+    <a class="repo-btn" href="https://platform.laxstack.com/" target="_blank" rel="noopener">Open Live Platform ↗</a>
+  </div>
+</nav>
+
+<header>
+  <span class="project-label">PROJECT 004 &middot; INFRASTRUCTURE OPERATIONS</span>
+  <div class="crumb"><span class="prompt">&gt;</span> cat laxstack-platform.md</div>
+  <h1>Turning My Home Infrastructure Into a Private <span style="color:var(--cyan)">Network Operations Center.</span></h1>
+  <p class="hero-sub">
+    A live dashboard for the OPNsense firewall, Proxmox hypervisor, and AWS accounts I run day to day &mdash;
+    with a public telemetry snapshot for anyone who visits, and a fully authenticated operations view behind
+    Amazon Cognito for me. Serverless end to end: API Gateway, Lambda, DynamoDB, SNS, and an EventBridge-driven
+    alerting pipeline that watches gateway health independently of the dashboard itself.
+  </p>
+
+  <div class="badge-row">
+    <span class="badge status"><span class="led"></span>live &mdash; dual-tier access</span>
+    <span class="badge">cognito oauth2 + pkce</span>
+    <span class="badge">serverless: lambda + api gateway</span>
+    <span class="badge">event-driven gateway alerting</span>
+  </div>
+
+  <div class="btn-row">
+    <a class="btn primary" target="_blank" rel="noopener" href="https://platform.laxstack.com/"><span class="dot"></span>Open Live Platform</a>
+    <a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
+  </div>
+</header>
+
+<section id="why">
+  <div class="section-tag">cat why-build-this.md</div>
+  <h2 class="section-title">Why Build This?</h2>
+  <div class="prose">
+    <p>
+      My homelab already runs real infrastructure &mdash; an <strong>OPNsense</strong> firewall handling multiple
+      WAN uplinks and gateways, a <strong>Proxmox</strong> cluster hosting a mix of VMs and containers, and two
+      <strong>AWS</strong> accounts for cloud-connected experiments. Checking on all three meant three different
+      logins and three different mental models. There was no single place to just look and know the state of
+      things.
+    </p>
+    <p>
+      The engineering goal wasn't just a status page &mdash; it was to design something with real access
+      boundaries: a version that's genuinely useful to a visitor with zero credentials, and a meaningfully
+      deeper version that only unlocks after proving who I am. That split shaped almost every other decision
+      in the project, from how the backend is authorized down to what the frontend is allowed to poll.
+    </p>
+    <p>
+      It was also a deliberate excuse to build a complete, production-shaped serverless product &mdash;
+      OAuth2/PKCE, a JWT-authorized API layer, and independent backend alerting &mdash; rather than another
+      isolated lab exercise.
+    </p>
+  </div>
+
+  <div class="grid" style="margin-top:34px">
+    <div class="module">
+      <h3><span class="led cyan"></span>One Pane of Glass</h3>
+      <p>OPNsense, Proxmox, and two AWS accounts, unified into a single dashboard instead of three separate logins.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led violet"></span>Real Access Boundaries</h3>
+      <p>Not a toggle &mdash; a genuinely different product depending on whether you're signed in, enforced at the API layer, not just the UI.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Production Shape</h3>
+      <p>OAuth2/PKCE, a JWT-authorized API, and autonomous backend alerting &mdash; the same shape as a real product, not a lab toy.</p>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="section-tag">cat design-decisions.md</div>
+  <h2 class="section-title">System Architecture</h2>
+  <p class="section-sub">Four decisions shaped the backend before a single line of frontend code was written.</p>
+
+  <div class="decision-strip">
+    <div class="decision-chip"><b>01</b>Serverless-first: API Gateway + Lambda, nothing to patch</div>
+    <div class="decision-chip"><b>02</b>Cognito in front of every protected route, never the browser alone</div>
+    <div class="decision-chip"><b>03</b>VPC Endpoints instead of a NAT Gateway for AWS service calls</div>
+    <div class="decision-chip"><b>04</b>Private VPC connectivity to on-prem OPNsense &amp; Proxmox APIs</div>
+  </div>
+
+  <div class="evidence">
+    <a href="images/architecture.png" class="lightbox-link" aria-label="View larger: LaxStack Hybrid Infrastructure Platform architecture diagram">
+      <img src="images/architecture.png" alt="Architecture diagram showing users hitting CloudFront and API Gateway, Cognito handling authentication, four Lambda functions (gateway-monitor, infrastructure, opnsense, proxmox), an EventBridge Scheduler triggering gateway-monitor every 3 minutes, DynamoDB for state, SNS for email alerts, VPC Endpoints for private AWS access, and a private VPC connection out to the on-prem OPNsense firewall and Proxmox host.">
+    </a>
+    <div class="ev-note">
+      <div class="ev-row"><b>what</b><span>Four purpose-built Lambda functions behind a single API Gateway: one per infrastructure domain, plus a fifth EventBridge-triggered function dedicated to gateway monitoring.</span></div>
+      <div class="ev-row"><b>why</b><span>Splitting by domain keeps each function's IAM policy narrow &mdash; the OPNsense Lambda has no reason to touch AWS APIs, and the AWS infrastructure Lambda has no reason to reach into the VPC.</span></div>
+      <div class="ev-row"><b>stage</b><span>Architecture &middot; full request &amp; alerting path</span></div>
+    </div>
+  </div>
+
+  <p class="section-sub" style="margin-top:34px">The console side, behind the diagram:</p>
+  <div class="console-grid">
+    <div class="evidence">
+      <a href="images/cloudfront.png" class="lightbox-link" aria-label="View larger: CloudFront distribution behaviors routing API and static paths">
+        <img src="images/cloudfront.png" alt="CloudFront distribution behaviors panel showing /api/infrastructure, /api/proxmox, /api/opnsense, and /api/auth/* all routed to an API Gateway origin, with the default path routed to the S3 static origin.">
+      </a>
+      <div class="ev-note">
+        <div class="ev-row"><b>what</b><span>One CloudFront distribution serving both the static frontend and every API route &mdash; same origin, no CORS to manage.</span></div>
+      </div>
+    </div>
+    <div class="evidence">
+      <a href="images/api-gw.png" class="lightbox-link" aria-label="View larger: API Gateway routes showing public and JWT-protected paths">
+        <img src="images/api-gw.png" alt="API Gateway routes panel showing a public GET /api/opnsense route alongside JWT-protected GET routes under /api/auth/proxmox, /api/auth/infrastructure, and /api/auth/opnsense.">
+      </a>
+      <div class="ev-note">
+        <div class="ev-row"><b>what</b><span>Public routes live outside <code>/auth</code>; every protected route sits behind a JWT authorizer validating Cognito-issued tokens.</span></div>
+      </div>
+    </div>
+    <div class="evidence">
+      <a href="images/cognito.png" class="lightbox-link" aria-label="View larger: Amazon Cognito user pool overview">
+        <img src="images/cognito.png" alt="Amazon Cognito user pool overview panel showing the user pool ID, OpenID Connect configuration URL, and token signing key URL used by the JWT authorizer.">
+      </a>
+      <div class="ev-note">
+        <div class="ev-row"><b>what</b><span>The Cognito user pool issuing tokens via OAuth 2.0 Authorization Code + PKCE &mdash; no client secret, public client, browser-safe by design.</span></div>
+      </div>
+    </div>
+    <div class="evidence">
+      <a href="images/lambda_functions.png" class="lightbox-link" aria-label="View larger: four AWS Lambda functions">
+        <img src="images/lambda_functions.png" alt="AWS Lambda functions list showing four Python 3.14 functions: one for Proxmox, one for AWS infrastructure, one for OPNsense, and one for gateway monitoring.">
+      </a>
+      <div class="ev-note">
+        <div class="ev-row"><b>what</b><span>Four independent Python 3.14 functions &mdash; each one owns exactly one integration, nothing shared, nothing tangled.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="access">
+  <div class="section-tag">show access-model</div>
+  <h2 class="section-title">A Dashboard With Two Real Tiers</h2>
+  <p class="section-sub">The difference isn't cosmetic &mdash; it's enforced by what the API layer will actually authorize.</p>
+
+  <div class="correlate-grid">
+    <div class="correlate-col">
+      <h4><span class="led"></span>Anonymous Visitor</h4>
+      <ul>
+        <li>Public telemetry loads <b>immediately</b>, no login required</li>
+        <li><b>No</b> automatic polling &mdash; a snapshot, not a live feed</li>
+        <li><b>3 manual refreshes</b> per session, then hard-capped</li>
+        <li>Calls only the unauthenticated <code>/api/*</code> routes</li>
+      </ul>
+    </div>
+    <div class="correlate-col">
+      <h4><span class="led violet"></span>Authenticated Operator</h4>
+      <ul>
+        <li>Signs in via <b>Amazon Cognito</b> (OAuth2 + PKCE)</li>
+        <li>Network &amp; compute <b>auto-poll every 3 minutes</b></li>
+        <li>Cloud infrastructure refresh is deliberately <b>manual-only</b></li>
+        <li>Full NOC view: live topology, gauges, trend history, event feed</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="evidence" style="margin-top:24px">
+    <a href="images/front-end.png" class="lightbox-link" aria-label="View larger: the authenticated LaxStack Platform dashboard">
+      <img src="images/front-end.png" alt="The authenticated LaxStack Platform dashboard: a live topology diagram connecting WAN, OPNsense, Proxmox, Guests, and AWS; a ticker showing platform health, network throughput, compute guests, and Proxmox uptime; network interface tiles; a gateways table; Proxmox capacity gauges; a guest inventory grid; AWS account cards; and a live ops feed logging real telemetry changes.">
+    </a>
+    <div class="ev-note">
+      <div class="ev-row"><b>what</b><span>The authenticated view: a live topology diagram, radial capacity gauges, per-interface tiles, and a Live Ops Feed that logs real state changes &mdash; gateway flaps, guests starting or stopping, capacity crossing into critical &mdash; built entirely by diffing consecutive polls client-side.</span></div>
+      <div class="ev-row"><b>why</b><span>Nothing here is fabricated for effect: every number, every feed entry, and every node color on the topology traces back to an actual API response.</span></div>
+      <div class="ev-row"><b>stage</b><span>Frontend &middot; authenticated operations view</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="monitoring">
+  <div class="section-tag">show running-config | section alerting</div>
+  <h2 class="section-title">Gateway Monitoring Runs Whether Anyone's Watching or Not</h2>
+  <p class="section-sub">A dashboard only helps if someone's looking at it. This part doesn't need anyone to be.</p>
+
+  <div class="prose">
+    <p>
+      Separate from the interactive dashboard, a dedicated Lambda checks OPNsense gateway health on its own
+      schedule &mdash; independent of whether the site has a single visitor or none. State is written to
+      DynamoDB specifically so the function can tell the difference between <strong>"still down"</strong> and
+      <strong>"just went down,"</strong> which is what keeps it from paging me every three minutes for the same
+      outage.
+    </p>
+  </div>
+
+  <div class="hoppanel" id="hopPanelMonitor" style="margin-top:22px">
+    <div class="hdr"><span>path &mdash; autonomous gateway alerting</span><span class="zoom-hint">click to expand<span class="led cyan" style="margin-left:6px"></span></span></div>
+    <svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the gateway monitoring workflow: EventBridge Scheduler triggers the gateway monitor Lambda every 3 minutes, which calls the OPNsense gateway status API, compares the result against state stored in DynamoDB, and sends an SNS alert or recovery email to the administrator only on a state change">
+      <defs>
+        <filter id="glowMonitor" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M30,150 L145,110 L260,150 L375,110 L490,150 L590,90" fill="none" stroke="#242c2f" stroke-width="2" stroke-dasharray="4 5"/>
+      <circle r="4.5" fill="#33d2f0" filter="url(#glowMonitor)">
+        <animateMotion dur="5.5s" repeatCount="indefinite" path="M30,150 L145,110 L260,150 L375,110 L490,150 L590,90"/>
+      </circle>
+      <g font-family="JetBrains Mono, monospace" font-size="9" fill="#8b96a3">
+        <circle cx="30" cy="150" r="6" fill="#ffb020" filter="url(#glowMonitor)"/>
+        <text x="30" y="170" text-anchor="middle">EVENTBRIDGE</text>
+        <text x="30" y="181" font-size="7.5" fill="#5d6773" text-anchor="middle">every 3 min</text>
+
+        <circle cx="145" cy="110" r="6" fill="#33d2f0" filter="url(#glowMonitor)"/>
+        <text x="145" y="95" text-anchor="middle">MONITOR LAMBDA</text>
+
+        <circle cx="260" cy="150" r="6" fill="#33d2f0" filter="url(#glowMonitor)"/>
+        <text x="260" y="170" text-anchor="middle">OPNSENSE API</text>
+
+        <circle cx="375" cy="110" r="6" fill="#9d8cff" filter="url(#glowMonitor)"/>
+        <text x="375" y="95" text-anchor="middle">DYNAMODB</text>
+        <text x="375" y="83" font-size="7.5" fill="#5d6773" text-anchor="middle">state compare</text>
+
+        <circle cx="490" cy="150" r="6" fill="#ff6b6b" filter="url(#glowMonitor)"/>
+        <text x="490" y="170" text-anchor="middle">SNS</text>
+        <text x="490" y="181" font-size="7.5" fill="#5d6773" text-anchor="middle">on change only</text>
+
+        <circle cx="590" cy="90" r="6" fill="#4ade80" filter="url(#glowMonitor)"/>
+        <text x="590" y="76" text-anchor="middle">EMAIL</text>
+      </g>
+    </svg>
+    <div class="hop-caption">6 hops &middot; runs on a schedule, alerts only on state change, recovers itself</div>
+  </div>
+
+  <div class="grid" style="margin-top:26px">
+    <div class="module">
+      <h3><span class="led amber"></span>State-Based Alerting</h3>
+      <p>DynamoDB remembers the last known status per gateway, so a genuine outage sends exactly one alert &mdash; not one every polling cycle.</p>
+    </div>
+    <div class="module">
+      <h3><span class="led"></span>Recovery Notifications</h3>
+      <p>The same comparison that triggers an outage alert also triggers a recovery email the moment a gateway comes back.</p>
+      <div class="trade"><b>trade-off</b>Email-only today &mdash; Slack/Teams delivery is on the roadmap below.</div>
+    </div>
+  </div>
+</section>
+
+<section id="debugging">
+  <div class="section-tag">tail -f debug.log</div>
+  <h2 class="section-title">Follow the Debug: An OAuth Failure That Wasn't What It Looked Like</h2>
+  <p class="section-sub">Documented because the fastest-looking fix was the wrong one twice in a row.</p>
+
+  <div class="timeline">
+    <div class="stage">
+      <div class="stage-num">1</div>
+      <div class="stage-body">
+        <h3>The Symptom</h3>
+        <p>Every real sign-in attempt landed on Cognito's own <code>/error?error=invalid_request</code> page &mdash; even though AWS's own "View login page" button in the console worked perfectly. Same user pool, same app client, wildly different outcomes.</p>
+        <div class="stage-tags"><span>Cognito Managed Login</span><span>OAuth2 + PKCE</span></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-num">2</div>
+      <div class="stage-body">
+        <h3>Isolating the Request</h3>
+        <p>Rather than guess, I built a battery of curl tests hitting <code>/oauth2/authorize</code> and <code>/login</code> directly &mdash; adding <code>scope</code>, then <code>state</code>, then the PKCE <code>code_challenge</code> one at a time &mdash; to find the exact parameter that flipped a working request into a rejected one.</p>
+        <div class="stage-tags"><span>curl</span><span>systematic elimination</span></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-num">3</div>
+      <div class="stage-body">
+        <h3>A Red Herring, Twice</h3>
+        <p>Every single isolated test came back clean &mdash; the app client config, the PKCE shape, and the Managed Login branding were all correct by AWS's own documented rules. A theory about a stale browser cookie from an earlier broken branding style also tested out and got ruled out in an incognito window. The request that failed in the browser kept succeeding by hand.</p>
+        <div class="stage-tags"><span>ruled out config</span><span>ruled out stale session</span></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-num">4</div>
+      <div class="stage-body">
+        <h3>The Real Evidence</h3>
+        <p>The only way forward was to stop guessing and capture the browser's actual outgoing request via a HAR export. It revealed a client ID one character off from the real one &mdash; a zero where the real app client used the letter <em>o</em> &mdash; hardcoded into the frontend and invisible at a glance in a 26-character string.</p>
+        <div class="stage-tags"><span>HAR capture</span><span>ground truth beats theory</span></div>
+      </div>
+    </div>
+    <div class="stage resolved">
+      <div class="stage-num">5</div>
+      <div class="stage-body">
+        <h3>The Fix</h3>
+        <p>One character corrected in the frontend's Cognito config, and the full PKCE flow completed end to end on the very next attempt.</p>
+        <div class="stage-tags"><span>resolved</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="section-tag">show inventory</div>
+  <h2 class="section-title">Technology Stack</h2>
+  <div class="sfp-grid">
+    <span class="sfp">Amazon Cognito</span><span class="sfp">API Gateway</span><span class="sfp">AWS Lambda (Python)</span>
+    <span class="sfp">Amazon DynamoDB</span><span class="sfp">Amazon SNS</span><span class="sfp">EventBridge Scheduler</span>
+    <span class="sfp">Amazon CloudFront</span><span class="sfp">VPC Endpoints</span><span class="sfp">OAuth 2.0 / PKCE</span>
+    <span class="sfp">OPNsense</span><span class="sfp">Proxmox VE</span><span class="sfp">Vanilla JS / HTML / CSS</span>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="section-tag">show running-config | section future</div>
+  <h2 class="section-title">Roadmap</h2>
+  <p class="section-sub">Framed as maturity phases rather than a flat feature backlog.</p>
+
+  <div class="ladder">
+    <div class="phase current">
+      <div class="ph-num">PHASE 0</div>
+      <div class="phase-body">
+        <h4>MVP <span class="phase-tag">current</span></h4>
+        <p>Dual-tier dashboard live, Cognito PKCE auth working end to end, autonomous gateway alerting via EventBridge and SNS.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 1</div>
+      <div class="phase-body">
+        <h4>Infrastructure as Code <span class="phase-tag">next</span></h4>
+        <p>Move Lambda, API Gateway, and Cognito configuration into Terraform instead of manual console setup.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 2</div>
+      <div class="phase-body">
+        <h4>Persistent Historical Metrics <span class="phase-tag">planned</span></h4>
+        <p>Trend data currently lives only in the browser for the session &mdash; move it into DynamoDB or CloudWatch for real history.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 3</div>
+      <div class="phase-body">
+        <h4>Slack / Teams Alert Delivery <span class="phase-tag">planned</span></h4>
+        <p>Extend gateway alerting beyond email into chat, where I'm actually more likely to see it in real time.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 4</div>
+      <div class="phase-body">
+        <h4>Broader Authenticated Routes <span class="phase-tag">planned</span></h4>
+        <p>Extend the same Cognito-protected pattern to additional on-prem systems as the homelab grows.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lessons">
+  <div class="section-tag">show notes</div>
+  <h2 class="section-title">Lessons Learned</h2>
+  <div class="lessons">
+    <div class="lesson-line"><span class="hash">#</span>Isolating one OAuth parameter at a time beats guessing</div>
+    <div class="lesson-line"><span class="hash">#</span>Reading a HAR file when curl keeps disagreeing with the browser</div>
+    <div class="lesson-line"><span class="hash">#</span>Designing a product that's useful before login, better after</div>
+    <div class="lesson-line"><span class="hash">#</span>Enforcing access tiers at the API layer, not just the UI</div>
+    <div class="lesson-line"><span class="hash">#</span>State-based alerting to avoid paging myself every 3 minutes</div>
+    <div class="lesson-line"><span class="hash">#</span>VPC Endpoints instead of a NAT Gateway for private AWS access</div>
+    <div class="lesson-line"><span class="hash">#</span>Client-side event feeds built from real deltas, not fabricated data</div>
+    <div class="lesson-line"><span class="hash">#</span>Matching a docs page's visual identity to the product it documents</div>
+  </div>
+</section>
+
+<footer>
+  end &middot; <a href="/">&larr; back to portfolio</a> &middot; <a href="https://platform.laxstack.com/" target="_blank">open live platform</a> &middot; &copy; 2026 Sid Laxamana
+</footer>
+
+<div class="diagram-lightbox" id="diagramLightbox">
+  <div class="dl-inner">
+    <div class="dl-close" id="dlClose">&times;</div>
+    <div id="dlContent"></div>
+  </div>
+</div>
+
+<div class="gallery-lightbox" id="galleryLightbox">
+  <span class="gallery-close" id="galleryClose">&times;</span>
+  <img id="galleryImage" src="" alt="">
+</div>
+
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+// ---- click-to-enlarge on the pipeline diagram ----
+const diagramLightbox=document.getElementById('diagramLightbox');
+const dlContent=document.getElementById('dlContent');
+const dlClose=document.getElementById('dlClose');
+function makeIdsUnique(svgEl, suffix){
+  svgEl.querySelectorAll('[id]').forEach(el=>{
+    const oldId=el.id, newId=oldId+suffix;
+    el.id=newId;
+    svgEl.querySelectorAll('*').forEach(node=>{
+      ['filter','fill','stroke'].forEach(attr=>{
+        const val=node.getAttribute(attr);
+        if(val && val.indexOf('#'+oldId)!==-1){
+          node.setAttribute(attr, val.split('#'+oldId).join('#'+newId));
+        }
+      });
+    });
+  });
+}
+function closeDiagramLightbox(){
+  diagramLightbox.classList.remove('open');
+  setTimeout(()=>{ diagramLightbox.style.display='none'; dlContent.innerHTML=''; }, 250);
+}
+document.querySelectorAll('.hoppanel[id]').forEach(panel=>{
+  panel.addEventListener('click', ()=>{
+    dlContent.innerHTML='';
+    const clone=panel.cloneNode(true);
+    clone.removeAttribute('id');
+    const svgClone=clone.querySelector('svg');
+    if(svgClone) makeIdsUnique(svgClone, '-lb-'+Math.random().toString(36).slice(2,7));
+    dlContent.appendChild(clone);
+    diagramLightbox.style.display='flex';
+    requestAnimationFrame(()=>diagramLightbox.classList.add('open'));
+  });
+});
+dlClose.addEventListener('click', closeDiagramLightbox);
+diagramLightbox.addEventListener('click', e=>{
+  if(e.target===diagramLightbox) closeDiagramLightbox();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && diagramLightbox.style.display==='flex') closeDiagramLightbox();
+});
+
+// ---- screenshot lightbox ----
+(function(){
+  const lb=document.getElementById('galleryLightbox');
+  const img=lb.querySelector('#galleryImage');
+  const close=document.getElementById('galleryClose');
+
+  document.querySelectorAll('.lightbox-link').forEach(link=>{
+    link.addEventListener('click', e=>{
+      e.preventDefault();
+      img.src=link.getAttribute('href');
+      img.alt=link.querySelector('img')?link.querySelector('img').alt:'';
+      lb.classList.add('open');
+    });
+  });
+  function hide(){ lb.classList.remove('open'); img.src=''; }
+  close.addEventListener('click', hide);
+  lb.addEventListener('click', e=>{ if(e.target===lb) hide(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') hide(); });
+})();
+
+// ---- nav scroll state + progress bar + back-to-top ----
+const navEl=document.querySelector('nav');
+const progressEl=document.getElementById('scrollProgress');
+const toTopBtn=document.getElementById('toTop');
+function onScroll(){
+  const y=window.scrollY||document.documentElement.scrollTop;
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=max>0?(y/max)*100:0;
+  progressEl.style.width=pct+'%';
+  navEl.classList.toggle('scrolled', y>10);
+  toTopBtn.classList.toggle('show', y>500);
+}
+document.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+toTopBtn.addEventListener('click', ()=>window.scrollTo({top:0, behavior:'smooth'}));
+
+// ---- header mouse-spotlight ----
+const headerEl=document.querySelector('header');
+if(headerEl){
+  headerEl.addEventListener('mousemove', e=>{
+    const r=headerEl.getBoundingClientRect();
+    headerEl.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+    headerEl.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+  });
+}
+
+// ---- reveal on scroll ----
+const revealTargets=document.querySelectorAll(
+  '.module, .hoppanel, .evidence, .correlate-col, .lessons, .sfp-grid, .stage, .phase, .decision-strip'
+);
+revealTargets.forEach(el=>el.classList.add('reveal'));
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    }
+  });
+}, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+revealTargets.forEach(el=>io.observe(el));
+
+document.querySelectorAll('.grid, .console-grid').forEach(grid=>{
+  [...grid.children].forEach((child,i)=>{
+    child.style.transitionDelay=Math.min(i*70,280)+'ms';
+  });
+});
+</script>
+
+</body>
+</html>
