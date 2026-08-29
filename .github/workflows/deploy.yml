@@ -23,7 +23,7 @@ jobs:
       - name: Configure AWS Credentials (Free Account)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::784038766514:role/Github-website-Deploy
+          role-to-assume: arn:aws:iam::${{ vars.FREE_ACCOUNT_ID }}:role/Github-website-Deploy
           aws-region: ap-southeast-2
 
       # Sync website to S3
@@ -40,7 +40,7 @@ jobs:
       - name: Configure AWS Credentials (Paid Account)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::461837196158:role/Cloudfront-Invalidation
+          role-to-assume: arn:aws:iam::${{ vars.PAID_ACCOUNT_ID }}:role/Cloudfront-Invalidation
           aws-region: us-east-1
           role-chaining: true
           role-skip-session-tagging: true
