@@ -417,6 +417,7 @@ header > *{position:relative;z-index:1}
 
   <div class="btn-row">
     <a class="btn primary" target="_blank" rel="noopener" href="https://platform.laxstack.com/"><span class="dot"></span>Open Live Platform</a>
+    <a class="btn secondary" target="_blank" rel="noopener" href="https://github.com/laxamanasr-blip/platform.laxstack-api-lambda"><span class="dot"></span>View Backend Repo</a>
     <a class="btn secondary" href="/"><span class="dot"></span>Back to Portfolio</a>
   </div>
 </header>
@@ -623,6 +624,30 @@ header > *{position:relative;z-index:1}
       <p>The same comparison that triggers an outage alert also triggers a recovery email the moment a gateway comes back.</p>
       <div class="trade"><b>trade-off</b>Email-only today &mdash; Slack/Teams delivery is on the roadmap below.</div>
     </div>
+    <div class="module">
+      <h3><span class="led red"></span>Host-Level Reachability</h3>
+      <p>A second failure mode entirely: the monitor Lambda itself can't reach the OPNsense API. That's tracked as consecutive failures, not a single blip, before it ever emails me.</p>
+    </div>
+  </div>
+
+  <p class="section-sub" style="margin-top:30px">Both alert types firing for real, not staged for this write-up:</p>
+  <div class="console-grid">
+    <div class="evidence">
+      <a href="images/gateway-alerts.png" class="lightbox-link" aria-label="View larger: real SNS email alerting that the GLOBE_DHCP gateway is down">
+        <img src="images/gateway-alerts.png" alt="Email from AWS Notifications titled LaxStack Alert - Gateway DOWN: GLOBE_DHCP, showing the gateway address, 100% packet loss, and the previous state of up before this alert fired.">
+      </a>
+      <div class="ev-note">
+        <div class="ev-row"><b>what</b><span>A real alert fired the moment <code>GLOBE_DHCP</code> flipped from up to down &mdash; packet loss, latency, and the previous state all included.</span></div>
+      </div>
+    </div>
+    <div class="evidence">
+      <a href="images/opnsense-alerts.png" class="lightbox-link" aria-label="View larger: real SNS email alerting that OPNsense itself is unreachable">
+        <img src="images/opnsense-alerts.png" alt="Email from AWS Notifications titled LaxStack Alert - OPNsense Unreachable, showing 2 consecutive failures and a raw URLError: urlopen error timed out from the monitor Lambda trying to reach the OPNsense API.">
+      </a>
+      <div class="ev-note">
+        <div class="ev-row"><b>what</b><span>The other failure mode: OPNsense's API stopped responding entirely. Note the raw <code>URLError</code> included &mdash; and that it waited for 2 consecutive failures, not one, before alerting.</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -746,7 +771,7 @@ header > *{position:relative;z-index:1}
 </section>
 
 <footer>
-  end &middot; <a href="/">&larr; back to portfolio</a> &middot; <a href="https://platform.laxstack.com/" target="_blank">open live platform</a> &middot; &copy; 2026 Sid Laxamana
+  end &middot; <a href="/">&larr; back to portfolio</a> &middot; <a href="https://platform.laxstack.com/" target="_blank">open live platform</a> &middot; <a href="https://github.com/laxamanasr-blip/platform.laxstack-api-lambda" target="_blank">view backend repo</a> &middot; &copy; 2026 Sid Laxamana
 </footer>
 
 <div class="diagram-lightbox" id="diagramLightbox">
